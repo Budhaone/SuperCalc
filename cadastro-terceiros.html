@@ -36,7 +36,7 @@
         .form-group { margin-bottom: 10px; }
         label { display: block; font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; color: #333; }
         
-        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fff; }
+        input[type="text"], input[type="number"], input[type="month"], select, textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fff; }
         
         .toggle-group { display: flex; background: #e2e8f0; border-radius: 8px; padding: 2px; gap: 2px; width: 100%; margin-top: 4px; }
         .toggle-btn { flex: 1; border: none; background: transparent; padding: 8px 4px; font-size: 0.78rem; font-weight: bold; color: #64748b; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-align: center; }
@@ -58,18 +58,19 @@
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+        @media (max-width: 600px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
         .btn-salvar { width: 100%; background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); margin-top: 8px; }
     </style>
 </head>
 <body>
 
-    <button class="btn-voltar" onclick="window.location.href='catalogo.html'">← Voltar para a Prateleira</button>
+    <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira de Imóveis</button>
 
     <div class="header-title">
         <h2>🏠 Captação & Cadastro de Terceiros</h2>
-        <p>Cadastre imóveis avulsos de proprietários com inteligência financeira de comissão.</p>
+        <p>Cadastre imóveis avulsos de proprietários com inteligência financeira de comissão (Gross-Up 6%).</p>
     </div>
 
     <form id="formCadastroTerceiros" onsubmit="salvarImovelTerceiro(event)">
@@ -82,7 +83,7 @@
                 <input type="checkbox" id="chkExclusividade">
             </div>
             <p style="font-size: 0.75rem; color: #64748b; margin: 6px 0 0 0;">
-                Imóveis exclusivos recebem o selo dourado no topo da prateleira de vendas e prioridade para oferta dos corretores.
+                Imóveis exclusivos recebem o selo de destaque na prateleira de vendas e prioridade de simulação.
             </p>
         </div>
 
@@ -90,14 +91,14 @@
         <div class="card">
             <h3>2. Ficha Técnica do Imóvel</h3>
             <div class="form-group">
-                <label for="txtTitulo">Nome / Identificação do Imóvel ou Condomínio:</label>
-                <input type="text" id="txtTitulo" required placeholder="Ex: Edifício Chateau Jardin / Casa de RUA Jd. Guedala">
+                <label for="txtTitulo">Nome / Identificação do Empreendimento ou Condomínio:</label>
+                <input type="text" id="txtTitulo" required placeholder="Ex: Edifício Chateau Jardin">
             </div>
 
             <div class="grid-2">
                 <div class="form-group">
                     <label for="txtBairro">Bairro / Localização:</label>
-                    <input type="text" id="txtBairro" required placeholder="Ex: Butantã">
+                    <input type="text" id="txtBairro" required placeholder="Ex: Jd. Guedala">
                 </div>
                 <div class="form-group">
                     <label for="txtUnidade">Unidade / Número:</label>
@@ -105,16 +106,21 @@
                 </div>
             </div>
 
-            <div class="grid-3">
+            <div class="grid-4">
                 <div class="form-group">
-                    <label for="selDorms">Dormitórios (Tipologia):</label>
+                    <label for="selDorms">Dormitórios:</label>
                     <select id="selDorms">
                         <option value="0">Estúdio / Loft (0d)</option>
                         <option value="1">1 Dormitório</option>
                         <option value="2" selected>2 Dormitórios</option>
                         <option value="3">3 Dormitórios</option>
-                        <option value="4+">4+ Dormitórios</option>
+                        <option value="4">4+ Dormitórios</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selSuites">Suítes:</label>
+                    <input type="number" id="selSuites" value="1" min="0">
                 </div>
 
                 <div class="form-group">
@@ -123,13 +129,24 @@
                         <option value="0">Sem vaga (0v)</option>
                         <option value="1" selected>1 Vaga</option>
                         <option value="2">2 Vagas</option>
-                        <option value="3+">3+ Vagas</option>
+                        <option value="3">3+ Vagas</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="numM2">Área Privativa (m²):</label>
                     <input type="number" id="numM2" required placeholder="Ex: 82" min="1">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="numPavimento">Pavimento / Andar:</label>
+                    <input type="number" id="numPavimento" value="4" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="dataEntrega">Previsão Entrega (Ano-Mês):</label>
+                    <input type="month" id="dataEntrega" value="2027-12">
                 </div>
             </div>
         </div>
@@ -148,7 +165,7 @@
 
             <div class="grid-2">
                 <div class="form-group">
-                    <label id="lblValorDigitado">Valor Líquido Pretendido (R$):</label>
+                    <label id="lblValorDigitado">Valor Líquido Pretendido pelo Proprietário (R$):</label>
                     <input type="number" id="numValorDigitado" required value="640000" step="1000" oninput="calcularValoresComissao()">
                 </div>
 
@@ -168,13 +185,13 @@
                     <strong id="txtResultadoComissao">R$ 0,00</strong>
                 </div>
                 <div class="result-row total">
-                    <span>(=) VALOR TOTAL PARA ANÚNCIO / TABELA:</span>
+                    <span>(=) VALOR TOTAL DE ANÚNCIO / TABELA:</span>
                     <strong id="txtResultadoTotal">R$ 0,00</strong>
                 </div>
             </div>
         </div>
 
-        <!-- 4. DADOS DO PROPRIETÁRIO (CONTATO PRIVADO) -->
+        <!-- 4. DADOS DO PROPRIETÁRIO -->
         <div class="card">
             <h3>4. Dados do Proprietário (Uso Interno / Privado)</h3>
             <div class="grid-2">
@@ -189,11 +206,11 @@
             </div>
         </div>
 
-        <button type="submit" class="btn-salvar">💾 Cadastrar Imóvel na Prateleira</button>
+        <button type="submit" class="btn-salvar">💾 Salvar no Inventário Privado & Ir para Prateleira</button>
     </form>
 
     <script>
-        let modoComissao = 'LIQUIDO'; // LIQUIDO ou BRUTO
+        let modoComissao = 'LIQUIDO';
 
         window.onload = function() {
             calcularValoresComissao();
@@ -225,12 +242,10 @@
             let valorTotalTabela = 0;
 
             if (modoComissao === 'LIQUIDO') {
-                // Gross-Up: Valor Total = Valor Líquido / (1 - (pct / 100))
                 valorLiquido = valInput;
                 valorTotalTabela = valorLiquido / (1 - (pctComissao / 100));
                 valorComissao = valorTotalTabela - valorLiquido;
             } else {
-                // Bruto desmembrado: Comissão = Valor Bruto * pct%
                 valorTotalTabela = valInput;
                 valorComissao = valorTotalTabela * (pctComissao / 100);
                 valorLiquido = valorTotalTabela - valorComissao;
@@ -250,32 +265,32 @@
             const calculos = calcularValoresComissao();
             
             const novoImovel = {
-                id: 'TERC_' + Date.now(),
+                id: 'PRIV_' + Date.now(),
+                origem: 'PRIVADO',
+                construtora: 'Avulso / Terceiros',
                 empreendimento: document.getElementById("txtTitulo").value.trim(),
                 bairro: document.getElementById("txtBairro").value.trim(),
                 unidade: document.getElementById("txtUnidade").value.trim(),
-                dorms: document.getElementById("selDorms").value,
-                vagas: document.getElementById("selVagas").value,
-                m2: document.getElementById("numM2").value,
+                pavimento: parseInt(document.getElementById("numPavimento").value) || 0,
+                dorms: parseInt(document.getElementById("selDorms").value) || 0,
+                suites: parseInt(document.getElementById("selSuites").value) || 0,
+                vagas: parseInt(document.getElementById("selVagas").value) || 0,
+                deposito: false,
+                m2: parseFloat(document.getElementById("numM2").value) || 0,
                 precoTabela: calculos.valorTotalTabela,
                 valorLiquidoProprietario: calculos.valorLiquido,
                 valorComissao: calculos.valorComissao,
                 pctComissao: calculos.pctComissao,
                 ehExclusivo: document.getElementById("chkExclusividade").checked,
-                proprietarioNome: document.getElementById("txtNomeProprietario").value.trim(),
-                proprietarioFone: document.getElementById("txtFoneProprietario").value.trim(),
-                origem: 'TERCEIROS',
-                construtora: 'Imóvel Avulso / Terceiros',
-                entregaObra: 'Pronto (Usado)'
+                entregaObra: document.getElementById("dataEntrega").value || '2027-12'
             };
 
-            // Salva na memória temporária local do navegador (depois irá para o Supabase)
-            let terceirosSalvos = JSON.parse(localStorage.getItem("IMOVEIS_TERCEIROS") || "[]");
-            terceirosSalvos.unshift(novoImovel);
-            localStorage.setItem("IMOVEIS_TERCEIROS", JSON.stringify(terceirosSalvos));
+            const existentes = JSON.parse(localStorage.getItem("IMOVEIS_PRIVADOS") || "[]");
+            existentes.unshift(novoImovel);
+            localStorage.setItem("IMOVEIS_PRIVADOS", JSON.stringify(existentes));
 
-            alert(`Imóvel "${novoImovel.empreendimento}" cadastrado com sucesso!`);
-            window.location.href = 'catalogo.html';
+            alert(`Imóvel "${novoImovel.empreendimento}" (Unidade ${novoImovel.unidade}) cadastrado no Inventário Privado!`);
+            window.location.href = 'index.html';
         }
     </script>
 </body>
