@@ -1,0 +1,463 @@
+<!CATALOGO.html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperCalc - Prateleira de Oportunidades</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .badge-global { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        .badge-privado { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans p-3 md:p-6 text-slate-800">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+
+        <!-- CABEÇALHO DO CATÁLOGO -->
+        <header class="bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b-4 border-yellow-400">
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight">PRATELEIRA DE IMÓVEIS</h1>
+                <p class="text-xs text-yellow-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2 text-xs font-bold">
+                    <span class="px-3 py-1.5 rounded-lg badge-global" id="badgeCountGlobal">🏷️ 0 Globais</span>
+                    <span class="px-3 py-1.5 rounded-lg badge-privado" id="badgeCountPrivado">🔒 0 Privados</span>
+                </div>
+                <button onclick="abrirModalCadastro()" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center gap-1 shadow-md">
+                    ➕ Cadastrar Imóvel Privado / Terceiros
+                </button>
+            </div>
+        </header>
+
+        <!-- BARRA DE FILTROS COMBINADOS (MOBILE FIRST) -->
+        <section class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados de Busca</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- 1. Construtora / Origem -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Incorporadora / Origem</label>
+                    <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODAS">Todas as Construtoras</option>
+                        <option value="Diálogo Engenharia">Diálogo Engenharia</option>
+                        <option value="Cambur Construções">Cambur Construções</option>
+                        <option value="PRIVADO">🔒 Inventário Privado (Terceiros)</option>
+                    </select>
+                </div>
+
+                <!-- 2. Empreendimento -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Empreendimento / Edifício</label>
+                    <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODOS">Todos os Empreendimentos</option>
+                    </select>
+                </div>
+
+                <!-- 3. Bairro -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Bairro / Região</label>
+                    <select id="filtroBairro" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODOS">Todos os Bairros</option>
+                        <option value="Vila Buarque">Vila Buarque</option>
+                        <option value="Butantã">Butantã</option>
+                        <option value="Perdizes">Perdizes</option>
+                        <option value="Pinheiros">Pinheiros</option>
+                    </select>
+                </div>
+
+                <!-- 4. Dormitórios / Suítes -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Dormitórios Mínimos</label>
+                    <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="0">Qualquer quantidade</option>
+                        <option value="1">1+ Dormitório</option>
+                        <option value="2">2+ Dormitórios</option>
+                        <option value="3">3+ Dormitórios</option>
+                    </select>
+                </div>
+
+                <!-- 5. Vagas de Garagem -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Vagas de Garagem</label>
+                    <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="0">Qualquer quantidade</option>
+                        <option value="1">1+ Vaga</option>
+                        <option value="2">2+ Vagas</option>
+                        <option value="3">3+ Vagas</option>
+                    </select>
+                </div>
+
+                <!-- 6. Faixa de Preço Máxima -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Preço Máximo (R$)</label>
+                    <input type="number" id="filtroPrecoMax" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                </div>
+            </div>
+        </section>
+
+        <!-- GRADE DE UNIDADES ENCONTRADAS -->
+        <main>
+            <div class="flex justify-between items-center mb-4 px-1">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades...</span>
+            </div>
+
+            <div id="gridResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Cards renderizados via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE CADASTRO EXPRESSO DE IMÓVEIS PRIVADOS -->
+    <div id="modalCadastro" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            
+            <div class="flex justify-between items-center border-b pb-3">
+                <div>
+                    <h3 class="font-black text-slate-900 text-lg">CADASTRO EXPRESSO DE IMÓVEL PRIVADO</h3>
+                    <p class="text-xs text-purple-700 font-bold uppercase">Inventário Exclusivo / Terceiros</p>
+                </div>
+                <button onclick="fecharModalCadastro()" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+            </div>
+
+            <form id="formNovoImovel" onsubmit="salvarImovelPrivado(event)" class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Nome do Empreendimento / Casa / Apto</label>
+                        <input type="text" id="addEmpreendimento" required placeholder="Ex: Ed. Mirante do Sol" class="w-full border p-2.5 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Construtora ou Proprietário</label>
+                        <input type="text" id="addConstrutora" required placeholder="Ex: Avulso / Sr. Marcos" class="w-full border p-2.5 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Bairro / Região</label>
+                        <input type="text" id="addBairro" required placeholder="Ex: Pinheiros" class="w-full border p-2.5 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Unidade / Número</label>
+                        <input type="text" id="addUnidade" required placeholder="Ex: 52 ou Casa 03" class="w-full border p-2.5 rounded-lg font-medium">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Área Privativa (m²)</label>
+                        <input type="number" id="addM2" step="0.1" required placeholder="Ex: 58.5" class="w-full border p-2 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Pavimento / Andar</label>
+                        <input type="number" id="addPavimento" required placeholder="Ex: 5" class="w-full border p-2 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Dormitórios</label>
+                        <input type="number" id="addDorms" min="0" required placeholder="Ex: 2" class="w-full border p-2 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Suítes</label>
+                        <input type="number" id="addSuites" min="0" required placeholder="Ex: 1" class="w-full border p-2 rounded-lg font-medium">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Vagas de Garagem</label>
+                        <input type="number" id="addVagas" min="0" required placeholder="Ex: 1" class="w-full border p-2.5 rounded-lg font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Depósito Privativo?</label>
+                        <select id="addDeposito" class="w-full border p-2.5 rounded-lg font-medium bg-white">
+                            <option value="false">Não possui</option>
+                            <option value="true">Sim, possui depósito</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Previsão Entrega / Chaves</label>
+                        <input type="month" id="addEntrega" required class="w-full border p-2.5 rounded-lg font-medium bg-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Preço de Tabela / Venda (R$)</label>
+                    <input type="number" id="addPrecoTabela" step="1000" required placeholder="Ex: 420000" class="w-full border p-3 rounded-lg font-black text-base text-slate-900">
+                </div>
+
+                <div class="flex gap-2 pt-2 border-t">
+                    <button type="button" onclick="fecharModalCadastro()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 rounded-xl transition shadow-md">
+                        💾 Salvar no Inventário Privado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT COMPLETO DE FUNCIONALIDADES E INTEGRAÇÕES -->
+    <script>
+        // MOCK DE ESTOQUE LOCAL
+        const ESTOQUE_MOCK = [
+            {
+                id: "101",
+                origem: "GLOBAL",
+                construtora: "Cambur Construções",
+                empreendimento: "Marquês by Cambur",
+                bairro: "Vila Buarque",
+                unidade: "131",
+                pavimento: 13,
+                dorms: 2,
+                suites: 1,
+                vagas: 1,
+                deposito: false,
+                m2: 64.5,
+                precoTabela: 500000,
+                entregaObra: "2029-10"
+            },
+            {
+                id: "102",
+                origem: "GLOBAL",
+                construtora: "Diálogo Engenharia",
+                empreendimento: "Boulevard Diálogo",
+                bairro: "Butantã",
+                unidade: "42",
+                pavimento: 4,
+                dorms: 3,
+                suites: 1,
+                vagas: 2,
+                deposito: true,
+                m2: 82.0,
+                precoTabela: 680000,
+                entregaObra: "2028-06"
+            },
+            {
+                id: "103",
+                origem: "PRIVADO",
+                construtora: "Avulso / Terceiros",
+                empreendimento: "Residencial Stay",
+                bairro: "Perdizes",
+                unidade: "81",
+                pavimento: 8,
+                dorms: 1,
+                suites: 1,
+                vagas: 1,
+                deposito: false,
+                m2: 38.0,
+                precoTabela: 390000,
+                entregaObra: "2027-12"
+            },
+            {
+                id: "104",
+                origem: "GLOBAL",
+                construtora: "Diálogo Engenharia",
+                empreendimento: "Vértice Butantã",
+                bairro: "Butantã",
+                unidade: "1104",
+                pavimento: 11,
+                dorms: 2,
+                suites: 1,
+                vagas: 1,
+                deposito: false,
+                m2: 56.0,
+                precoTabela: 450000,
+                entregaObra: "2028-11"
+            }
+        ];
+
+        function atualizarContadoresBadges() {
+            const countGlobal = ESTOQUE_MOCK.filter(i => i.origem === 'GLOBAL').length;
+            const countPrivado = ESTOQUE_MOCK.filter(i => i.origem === 'PRIVADO').length;
+
+            document.getElementById("badgeCountGlobal").innerText = `🏷️ ${countGlobal} Globais`;
+            document.getElementById("badgeCountPrivado").innerText = `🔒 ${countPrivado} Privados`;
+        }
+
+        function atualizarEmpreendimentos() {
+            const construtora = document.getElementById("filtroConstrutora").value;
+            const selectEmp = document.getElementById("filtroEmpreendimento");
+            
+            selectEmp.innerHTML = '<option value="TODOS">Todos os Empreendimentos</option>';
+
+            const empreendimentosUnicos = [...new Set(
+                ESTOQUE_MOCK
+                    .filter(i => construtora === "TODAS" || (construtora === "PRIVADO" ? i.origem === "PRIVADO" : i.construtora === construtora))
+                    .map(i => i.empreendimento)
+            )];
+
+            empreendimentosUnicos.forEach(emp => {
+                const opt = document.createElement("option");
+                opt.value = emp;
+                opt.innerText = emp;
+                selectEmp.appendChild(opt);
+            });
+        }
+
+        function renderizarCards(lista) {
+            const container = document.getElementById("gridResultados");
+            const lblContagem = document.getElementById("lblResultadoContagem");
+            container.innerHTML = "";
+
+            lblContagem.innerText = `${lista.length} UNIDADE(S) ENCONTRADA(S)`;
+
+            if (lista.length === 0) {
+                container.innerHTML = `<div class="col-span-full bg-white p-8 text-center rounded-2xl border border-slate-200 font-bold text-slate-400">Nenhum imóvel atende aos filtros selecionados.</div>`;
+                return;
+            }
+
+            lista.forEach(item => {
+                const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const isGlobal = item.origem === 'GLOBAL';
+                
+                const card = document.createElement("div");
+                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-400 transition";
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-start gap-2">
+                            <span class="text-[10px] font-black px-2.5 py-1 rounded-md uppercase ${isGlobal ? 'badge-global' : 'badge-privado'}">
+                                ${isGlobal ? '🏷️ GLOBAL' : '🔒 PRIVADO'}
+                            </span>
+                            <span class="text-xs font-bold text-slate-400">Entrega: ${item.entregaObra}</span>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-black text-slate-900 text-base leading-snug">${item.empreendimento}</h3>
+                            <p class="text-xs font-semibold text-slate-500">${item.construtora} • ${item.bairro}</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl grid grid-cols-2 gap-2 text-xs font-medium text-slate-700 border border-slate-100">
+                            <div><strong>Unidade:</strong> ${item.unidade} (${item.pavimento}º Andar)</div>
+                            <div><strong>Área:</strong> ${item.m2} m²</div>
+                            <div><strong>Dorms/Suíte:</strong> ${item.dorms}d / ${item.suites}s</div>
+                            <div><strong>Vagas/Dep.:</strong> ${item.vagas}v ${item.deposito ? '+ Dep.' : ''}</div>
+                        </div>
+
+                        <div class="pt-1">
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase">Preço Base de Tabela</span>
+                            <span class="text-xl font-black text-slate-900">${fmt(item.precoTabela)}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 space-y-2 border-t border-slate-100 mt-4">
+                        <button onclick="copiarFichaImovel('${item.id}')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2 rounded-lg text-xs transition">
+                            📋 Copiar Resumo da Unidade
+                        </button>
+                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-1">
+                            ⚡ Simular Fluxo na SuperCalc
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filtrarEstoque() {
+            const construtora = document.getElementById("filtroConstrutora").value;
+            const empreendimento = document.getElementById("filtroEmpreendimento").value;
+            const bairro = document.getElementById("filtroBairro").value;
+            const dorms = parseInt(document.getElementById("filtroDorms").value) || 0;
+            const vagas = parseInt(document.getElementById("filtroVagas").value) || 0;
+            const precoMax = parseFloat(document.getElementById("filtroPrecoMax").value) || Infinity;
+
+            const filtrados = ESTOQUE_MOCK.filter(item => {
+                const bateConstrutora = construtora === "TODAS" || 
+                                       (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
+                const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
+                const bateBairro = bairro === "TODOS" || item.bairro === bairro;
+                const bateDorms = item.dorms >= dorms;
+                const bateVagas = item.vagas >= vagas;
+                const batePreco = item.precoTabela <= precoMax;
+
+                return bateConstrutora && bateEmpreendimento && bateBairro && bateDorms && bateVagas && batePreco;
+            });
+
+            renderizarCards(filtrados);
+        }
+
+        function copiarFichaImovel(id) {
+            const item = ESTOQUE_MOCK.find(i => i.id === id);
+            if (!item) return;
+            const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const ficha = `*FICHA TÉCNICA DA UNIDADE*\n` +
+                          `🏢 Empreendimento: ${item.empreendimento}\n` +
+                          `📍 Localização: ${item.bairro} (${item.construtora})\n` +
+                          `------------------------------------\n` +
+                          `• Unidade: ${item.unidade} (${item.pavimento}º Pavimento)\n` +
+                          `• Metragem: ${item.m2} m² de área privativa\n` +
+                          `• Dormitórios: ${item.dorms} (${item.suites} suíte(s))\n` +
+                          `• Garagem: ${item.vagas} vaga(s)${item.deposito ? ' + Depósito Privativo' : ''}\n` +
+                          `• Preço de Tabela: ${fmt(item.precoTabela)}\n` +
+                          `• Previsão de Entrega: ${item.entregaObra}\n` +
+                          `------------------------------------\n` +
+                          `_Solicite uma simulação personalizada de fluxo de pagamento!_`;
+
+            navigator.clipboard.writeText(ficha);
+            alert("Resumo da unidade copiado com sucesso para a área de transferência!");
+        }
+
+        function enviarParaSuperCalc(id) {
+            const item = ESTOQUE_MOCK.find(i => i.id === id);
+            if (!item) return;
+
+            // Armazena no navegador e redireciona
+            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(item));
+            window.location.href = "supercalc.html";
+        }
+
+        // FUNÇÕES DO MODAL DE CADASTRO
+        function abrirModalCadastro() {
+            const modal = document.getElementById("modalCadastro");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function fecharModalCadastro() {
+            const modal = document.getElementById("modalCadastro");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function salvarImovelPrivado(event) {
+            event.preventDefault();
+
+            const novoImovel = {
+                id: "PRIV_" + Date.now(),
+                origem: "PRIVADO",
+                construtora: document.getElementById("addConstrutora").value.trim(),
+                empreendimento: document.getElementById("addEmpreendimento").value.trim(),
+                bairro: document.getElementById("addBairro").value.trim(),
+                unidade: document.getElementById("addUnidade").value.trim(),
+                pavimento: parseInt(document.getElementById("addPavimento").value) || 0,
+                dorms: parseInt(document.getElementById("addDorms").value) || 0,
+                suites: parseInt(document.getElementById("addSuites").value) || 0,
+                vagas: parseInt(document.getElementById("addVagas").value) || 0,
+                deposito: document.getElementById("addDeposito").value === "true",
+                m2: parseFloat(document.getElementById("addM2").value) || 0,
+                precoTabela: parseFloat(document.getElementById("addPrecoTabela").value) || 0,
+                entregaObra: document.getElementById("addEntrega").value
+            };
+
+            // Adiciona no topo do estoque
+            ESTOQUE_MOCK.unshift(novoImovel);
+
+            // Atualiza contadores, seletores e renderização
+            atualizarContadoresBadges();
+            atualizarEmpreendimentos();
+            filtrarEstoque();
+
+            // Limpa o formulário e fecha o modal
+            document.getElementById("formNovoImovel").reset();
+            fecharModalCadastro();
+
+            alert(`Imóvel "${novoImovel.empreendimento}" (Unidade ${novoImovel.unidade}) cadastrado com sucesso no seu Inventário Privado!`);
+        }
+
+        // INICIALIZAÇÃO DA PÁGINA
+        atualizarContadoresBadges();
+        atualizarEmpreendimentos();
+        filtrarEstoque();
+    </script>
+</body>
+</html>
