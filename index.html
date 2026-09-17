@@ -521,5 +521,25 @@
         atualizarEmpreendimentos();
         filtrarEstoque();
     </script>
+
+<!-- TESTE DE CONEXÃO SUPABASE -->
+    <script>
+      async function testarNuvem() {
+        try {
+          const { data, error } = await _supabase.from('developments').select('title').limit(1);
+          if (error) {
+            console.error(error);
+            alert("Erro na nuvem: " + error.message);
+          } else if (data && data.length > 0) {
+            alert("🎉 SUCESSO! Conectado à nuvem. Imóvel lido do banco: " + data[0].title);
+          }
+        } catch(err) {
+          alert("Erro no script: " + err);
+        }
+      }
+      // Executa o teste 1 segundo após a página abrir
+      setTimeout(testarNuvem, 1000);
+    </script>
+    
 </body>
 </html>
