@@ -6,8 +6,9 @@
     <title>SuperCalc - Prateleira de Oportunidades</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client CDN -->
+    <!-- Supabase JS Client CDN e Arquivo de Configuração -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <style>
         .badge-global { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
         .badge-privado { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
@@ -35,7 +36,7 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMBINADOS (MOBILE FIRST) -->
+        <!-- BARRA DE FILTROS COMBINADOS -->
         <section class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
             <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados de Busca</h2>
             
@@ -45,9 +46,6 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Incorporadora / Origem</label>
                     <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
                         <option value="TODAS">Todas as Construtoras</option>
-                        <option value="AAM Incorporadora">AAM Incorporadora</option>
-                        <option value="Diálogo Engenharia">Diálogo Engenharia</option>
-                        <option value="Cambur Construções">Cambur Construções</option>
                         <option value="PRIVADO">🔒 Inventário Privado (Terceiros)</option>
                     </select>
                 </div>
@@ -68,16 +66,15 @@
                         <option value="Pinheiros">Pinheiros</option>
                         <option value="Liberdade">Liberdade</option>
                         <option value="Butantã">Butantã</option>
-                        <option value="Vila Buarque">Vila Buarque</option>
-                        <option value="Perdizes">Perdizes</option>
                     </select>
                 </div>
 
-                <!-- 4. Dormitórios / Suítes -->
+                <!-- 4. Dormitórios / Tipologia -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Dormitórios Mínimos</label>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Dormitórios / Tipologia</label>
                     <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="0">Qualquer quantidade</option>
+                        <option value="TODOS">Qualquer tipologia</option>
+                        <option value="Studio">Studio</option>
                         <option value="1">1+ Dormitório</option>
                         <option value="2">2+ Dormitórios</option>
                         <option value="3">3+ Dormitórios</option>
@@ -91,11 +88,10 @@
                         <option value="0">Qualquer quantidade</option>
                         <option value="1">1+ Vaga</option>
                         <option value="2">2+ Vagas</option>
-                        <option value="3">3+ Vagas</option>
                     </select>
                 </div>
 
-                <!-- 6. Faixa de Preço Máxima -->
+                <!-- 6. Preço Máximo -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Preço Máximo (R$)</label>
                     <input type="number" id="filtroPrecoMax" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -106,7 +102,7 @@
         <!-- GRADE DE UNIDADES ENCONTRADAS -->
         <main>
             <div class="flex justify-between items-center mb-4 px-1">
-                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades...</span>
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades na nuvem...</span>
             </div>
 
             <div id="gridResultados" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -115,7 +111,7 @@
         </main>
     </div>
 
-    <!-- MODAL DE CADASTRO EXPRESSO DE IMÓVEIS PRIVADOS -->
+    <!-- MODAL DE CADASTRO DE IMÓVEIS PRIVADOS -->
     <div id="modalCadastro" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             
@@ -201,31 +197,17 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE INTEGRAÇÃO SUPABASE E NAVEGAÇÃO -->
+    <!-- INTEGRACAO SUPABASE E NAVEGACAO -->
     <script>
-        // MOCK BASE DE BACKUP / TESTES
-        let ESTOQUE_MOCK = [
-            {
-                id: "101",
-                origem: "GLOBAL",
-                construtora: "Cambur Construções",
-                empreendimento: "Marquês by Cambur",
-                bairro: "Vila Buarque",
-                unidade: "131",
-                pavimento: 13,
-                dorms: 2,
-                suites: 1,
-                vagas: 1,
-                deposito: false,
-                m2: 64.5,
-                precoTabela: 500000,
-                entregaObra: "2029-10"
-            }
-        ];
+        // BASE DE DADOS ZERADA (Sem backups antigos)
+        let ESTOQUE_MOCK = [];
 
-        // CARREGA O ESTOQUE REAL DA NUVEM (SUPABASE)
+        // CARREGA DADOS DIRETO DA NUVEM SUPABASE
         async function carregarEstoqueDaNuvem() {
-            if (typeof _supabase === 'undefined' || !_supabase) return;
+            if (typeof _supabase === 'undefined' || !_supabase) {
+                console.error("Supabase não inicializado. Verifique supabase-config.js");
+                return;
+            }
 
             try {
                 const { data, error } = await _supabase
@@ -252,13 +234,36 @@
                         entregaObra: u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12"
                     }));
 
+                    atualizarOpcoesConstrutoras();
                     atualizarContadoresBadges();
                     atualizarEmpreendimentos();
                     filtrarEstoque();
+                } else {
+                    ESTOQUE_MOCK = [];
+                    renderizarCards([]);
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados do Supabase:", err);
             }
+        }
+
+        function atualizarOpcoesConstrutoras() {
+            const selectConst = document.getElementById("filtroConstrutora");
+            const construtorasUnicas = [...new Set(ESTOQUE_MOCK.map(i => i.construtora))];
+            
+            selectConst.innerHTML = '<option value="TODAS">Todas as Construtoras</option>';
+            
+            construtorasUnicas.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c;
+                opt.innerText = c;
+                selectConst.appendChild(opt);
+            });
+
+            const optPrivado = document.createElement("option");
+            optPrivado.value = "PRIVADO";
+            optPrivado.innerText = "🔒 Inventário Privado (Terceiros)";
+            selectConst.appendChild(optPrivado);
         }
 
         function atualizarContadoresBadges() {
@@ -297,7 +302,7 @@
             lblContagem.innerText = `${lista.length} UNIDADE(S) ENCONTRADA(S)`;
 
             if (lista.length === 0) {
-                container.innerHTML = `<div class="col-span-full bg-white p-8 text-center rounded-2xl border border-slate-200 font-bold text-slate-400">Nenhum imóvel atende aos filtros selecionados.</div>`;
+                container.innerHTML = `<div class="col-span-full bg-white p-8 text-center rounded-2xl border border-slate-200 font-bold text-slate-400">Nenhum imóvel encontrado no banco de dados.</div>`;
                 return;
             }
 
@@ -351,7 +356,7 @@
             const construtora = document.getElementById("filtroConstrutora").value;
             const empreendimento = document.getElementById("filtroEmpreendimento").value;
             const bairro = document.getElementById("filtroBairro").value;
-            const dorms = parseInt(document.getElementById("filtroDorms").value) || 0;
+            const dorms = document.getElementById("filtroDorms").value;
             const vagas = parseInt(document.getElementById("filtroVagas").value) || 0;
             const precoMax = parseFloat(document.getElementById("filtroPrecoMax").value) || Infinity;
 
@@ -360,7 +365,7 @@
                                        (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
                 const bateBairro = bairro === "TODOS" || item.bairro.includes(bairro);
-                const bateDorms = dorms === 0 || item.dorms.toString().includes(dorms.toString());
+                const bateDorms = dorms === "TODOS" || item.dorms.toLowerCase().includes(dorms.toLowerCase());
                 const bateVagas = item.vagas >= vagas;
                 const batePreco = item.precoTabela <= precoMax;
 
@@ -389,7 +394,7 @@
                           `_Solicite uma simulação personalizada de fluxo de pagamento!_`;
 
             navigator.clipboard.writeText(ficha);
-            alert("Resumo da unidade copiado com sucesso para a área de transferência!");
+            alert("Resumo da unidade copiado para a área de transferência!");
         }
 
         function enviarParaSuperCalc(id) {
@@ -400,17 +405,14 @@
             window.location.href = "supercalc.html";
         }
 
-        // FUNÇÕES DO MODAL DE CADASTRO
         function abrirModalCadastro() {
-            const modal = document.getElementById("modalCadastro");
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            document.getElementById("modalCadastro").classList.remove("hidden");
+            document.getElementById("modalCadastro").classList.add("flex");
         }
 
         function fecharModalCadastro() {
-            const modal = document.getElementById("modalCadastro");
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
+            document.getElementById("modalCadastro").classList.add("hidden");
+            document.getElementById("modalCadastro").classList.remove("flex");
         }
 
         function salvarImovelPrivado(event) {
@@ -435,6 +437,7 @@
 
             ESTOQUE_MOCK.unshift(novoImovel);
 
+            atualizarOpcoesConstrutoras();
             atualizarContadoresBadges();
             atualizarEmpreendimentos();
             filtrarEstoque();
@@ -445,10 +448,7 @@
             alert(`Imóvel "${novoImovel.empreendimento}" cadastrado com sucesso!`);
         }
 
-        // INICIALIZAÇÃO DA PÁGINA
-        atualizarContadoresBadges();
-        atualizarEmpreendimentos();
-        filtrarEstoque();
+        // INICIALIZAÇÃO
         carregarEstoqueDaNuvem();
     </script>
 </body>
