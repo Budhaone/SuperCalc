@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperCalc - Prateleira de Oportunidades</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- CONEXÃO COM O BANCO SUPABASE -->
+    <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
     <style>
         .badge-global { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
         .badge-privado { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
@@ -35,7 +35,7 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMBINADOS -->
+        <!-- BARRA DE FILTROS COMBINADOS (MOBILE FIRST) -->
         <section class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
             <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados de Busca</h2>
             
@@ -45,6 +45,7 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Incorporadora / Origem</label>
                     <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
                         <option value="TODAS">Todas as Construtoras</option>
+                        <option value="AAM Incorporadora">AAM Incorporadora</option>
                         <option value="Diálogo Engenharia">Diálogo Engenharia</option>
                         <option value="Cambur Construções">Cambur Construções</option>
                         <option value="PRIVADO">🔒 Inventário Privado (Terceiros)</option>
@@ -64,14 +65,15 @@
                     <label class="block text-xs font-bold text-slate-600 mb-1">Bairro / Região</label>
                     <select id="filtroBairro" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
                         <option value="TODOS">Todos os Bairros</option>
-                        <option value="Vila Buarque">Vila Buarque</option>
-                        <option value="Butantã">Butantã</option>
-                        <option value="Perdizes">Perdizes</option>
                         <option value="Pinheiros">Pinheiros</option>
+                        <option value="Liberdade">Liberdade</option>
+                        <option value="Butantã">Butantã</option>
+                        <option value="Vila Buarque">Vila Buarque</option>
+                        <option value="Perdizes">Perdizes</option>
                     </select>
                 </div>
 
-                <!-- 4. Dormitórios -->
+                <!-- 4. Dormitórios / Suítes -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Dormitórios Mínimos</label>
                     <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -82,7 +84,7 @@
                     </select>
                 </div>
 
-                <!-- 5. Vagas -->
+                <!-- 5. Vagas de Garagem -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Vagas de Garagem</label>
                     <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -93,7 +95,7 @@
                     </select>
                 </div>
 
-                <!-- 6. Preço Máximo -->
+                <!-- 6. Faixa de Preço Máxima -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 mb-1">Preço Máximo (R$)</label>
                     <input type="number" id="filtroPrecoMax" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -199,45 +201,65 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FILTRAGEM E CONEXÃO SUPABASE -->
+    <!-- SCRIPT DE INTEGRAÇÃO SUPABASE E NAVEGAÇÃO -->
     <script>
-        let ESTOQUE_MOCK = [];
-
-async function carregarEstoqueDaNuvem() {
-    try {
-        // Busca os apartamentos salvos na tabela 'units' trazendo junto os dados do empreendimento
-        const { data, error } = await _supabase
-            .from('units')
-            .select('*, developments(*)');
-        
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-            ESTOQUE_MOCK = data.map(u => ({
-                id: u.id,
-                origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
-                construtora: u.developments?.developer_name || "AAM Incorporadora",
-                empreendimento: u.developments?.title || "Empreendimento",
-                bairro: u.developments?.address || "São Paulo - SP",
-                unidade: u.unit_number || "101",
-                pavimento: u.floor || 1,
-                dorms: u.typology || "Studio",
-                suites: 0,
-                vagas: u.parking_spaces || 0,
+        // MOCK BASE DE BACKUP / TESTES
+        let ESTOQUE_MOCK = [
+            {
+                id: "101",
+                origem: "GLOBAL",
+                construtora: "Cambur Construções",
+                empreendimento: "Marquês by Cambur",
+                bairro: "Vila Buarque",
+                unidade: "131",
+                pavimento: 13,
+                dorms: 2,
+                suites: 1,
+                vagas: 1,
                 deposito: false,
-                m2: u.private_area_m2 || 0,
-                precoTabela: u.list_price || 0,
-                entregaObra: u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12"
-            }));
+                m2: 64.5,
+                precoTabela: 500000,
+                entregaObra: "2029-10"
+            }
+        ];
 
-            atualizarContadoresBadges();
-            atualizarEmpreendimentos();
-            filtrarEstoque();
+        // CARREGA O ESTOQUE REAL DA NUVEM (SUPABASE)
+        async function carregarEstoqueDaNuvem() {
+            if (typeof _supabase === 'undefined' || !_supabase) return;
+
+            try {
+                const { data, error } = await _supabase
+                    .from('units')
+                    .select('*, developments(*)');
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    ESTOQUE_MOCK = data.map(u => ({
+                        id: u.id,
+                        origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
+                        construtora: u.developments?.developer_name || "AAM Incorporadora",
+                        empreendimento: u.developments?.title || "Empreendimento",
+                        bairro: u.developments?.address || "São Paulo - SP",
+                        unidade: u.unit_number || "101",
+                        pavimento: u.floor || 1,
+                        dorms: u.typology || "Studio",
+                        suites: 0,
+                        vagas: u.parking_spaces || 0,
+                        deposito: false,
+                        m2: u.private_area_m2 || 0,
+                        precoTabela: u.list_price || 0,
+                        entregaObra: u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12"
+                    }));
+
+                    atualizarContadoresBadges();
+                    atualizarEmpreendimentos();
+                    filtrarEstoque();
+                }
+            } catch (err) {
+                console.error("Erro ao carregar dados do Supabase:", err);
+            }
         }
-    } catch (err) {
-        console.error("Erro ao ler nuvem:", err);
-    }
-}
 
         function atualizarContadoresBadges() {
             const countGlobal = ESTOQUE_MOCK.filter(i => i.origem === 'GLOBAL').length;
@@ -300,9 +322,9 @@ async function carregarEstoqueDaNuvem() {
                         </div>
 
                         <div class="bg-slate-50 p-3 rounded-xl grid grid-cols-2 gap-2 text-xs font-medium text-slate-700 border border-slate-100">
-                            <div><strong>Unidade:</strong> ${item.unidade}</div>
+                            <div><strong>Unidade:</strong> ${item.unidade} (${item.pavimento}º Andar)</div>
                             <div><strong>Área:</strong> ${item.m2} m²</div>
-                            <div><strong>Dorms/Suíte:</strong> ${item.dorms}d / ${item.suites}s</div>
+                            <div><strong>Tipologia:</strong> ${item.dorms}</div>
                             <div><strong>Vagas/Dep.:</strong> ${item.vagas}v ${item.deposito ? '+ Dep.' : ''}</div>
                         </div>
 
@@ -337,8 +359,8 @@ async function carregarEstoqueDaNuvem() {
                 const bateConstrutora = construtora === "TODAS" || 
                                        (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
-                const bateBairro = bairro === "TODOS" || item.bairro === bairro;
-                const bateDorms = item.dorms >= dorms;
+                const bateBairro = bairro === "TODOS" || item.bairro.includes(bairro);
+                const bateDorms = dorms === 0 || item.dorms.toString().includes(dorms.toString());
                 const bateVagas = item.vagas >= vagas;
                 const batePreco = item.precoTabela <= precoMax;
 
@@ -357,14 +379,17 @@ async function carregarEstoqueDaNuvem() {
                           `🏢 Empreendimento: ${item.empreendimento}\n` +
                           `📍 Localização: ${item.bairro} (${item.construtora})\n` +
                           `------------------------------------\n` +
-                          `• Unidade: ${item.unidade}\n` +
+                          `• Unidade: ${item.unidade} (${item.pavimento}º Pavimento)\n` +
+                          `• Metragem: ${item.m2} m² de área privativa\n` +
+                          `• Tipologia: ${item.dorms}\n` +
+                          `• Garagem: ${item.vagas} vaga(s)${item.deposito ? ' + Depósito Privativo' : ''}\n` +
                           `• Preço de Tabela: ${fmt(item.precoTabela)}\n` +
                           `• Previsão de Entrega: ${item.entregaObra}\n` +
                           `------------------------------------\n` +
                           `_Solicite uma simulação personalizada de fluxo de pagamento!_`;
 
             navigator.clipboard.writeText(ficha);
-            alert("Resumo da unidade copiado para a área de transferência!");
+            alert("Resumo da unidade copiado com sucesso para a área de transferência!");
         }
 
         function enviarParaSuperCalc(id) {
@@ -375,6 +400,7 @@ async function carregarEstoqueDaNuvem() {
             window.location.href = "supercalc.html";
         }
 
+        // FUNÇÕES DO MODAL DE CADASTRO
         function abrirModalCadastro() {
             const modal = document.getElementById("modalCadastro");
             modal.classList.remove("hidden");
@@ -398,7 +424,7 @@ async function carregarEstoqueDaNuvem() {
                 bairro: document.getElementById("addBairro").value.trim(),
                 unidade: document.getElementById("addUnidade").value.trim(),
                 pavimento: parseInt(document.getElementById("addPavimento").value) || 0,
-                dorms: parseInt(document.getElementById("addDorms").value) || 0,
+                dorms: document.getElementById("addDorms").value + " Dorms",
                 suites: parseInt(document.getElementById("addSuites").value) || 0,
                 vagas: parseInt(document.getElementById("addVagas").value) || 0,
                 deposito: document.getElementById("addDeposito").value === "true",
@@ -408,6 +434,7 @@ async function carregarEstoqueDaNuvem() {
             };
 
             ESTOQUE_MOCK.unshift(novoImovel);
+
             atualizarContadoresBadges();
             atualizarEmpreendimentos();
             filtrarEstoque();
@@ -415,10 +442,13 @@ async function carregarEstoqueDaNuvem() {
             document.getElementById("formNovoImovel").reset();
             fecharModalCadastro();
 
-            alert(`Imóvel "${novoImovel.empreendimento}" cadastrado temporariamente no Inventário Privado!`);
+            alert(`Imóvel "${novoImovel.empreendimento}" cadastrado com sucesso!`);
         }
 
-        // INICIALIZAÇÃO DA PÁGINA CONECTADA À NUVEM
+        // INICIALIZAÇÃO DA PÁGINA
+        atualizarContadoresBadges();
+        atualizarEmpreendimentos();
+        filtrarEstoque();
         carregarEstoqueDaNuvem();
     </script>
 </body>
