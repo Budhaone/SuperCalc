@@ -203,37 +203,41 @@
     <script>
         let ESTOQUE_MOCK = [];
 
-        async function carregarEstoqueDaNuvem() {
-            try {
-                const { data, error } = await _supabase.from('developments').select('*');
-                if (error) throw error;
+async function carregarEstoqueDaNuvem() {
+    try {
+        // Busca os apartamentos salvos na tabela 'units' trazendo junto os dados do empreendimento
+        const { data, error } = await _supabase
+            .from('units')
+            .select('*, developments(*)');
+        
+        if (error) throw error;
 
-                if (data) {
-                    ESTOQUE_MOCK = data.map(emp => ({
-                        id: emp.id,
-                        origem: emp.is_third_party ? "PRIVADO" : "GLOBAL",
-                        construtora: emp.developer_name || "Construtora",
-                        empreendimento: emp.title,
-                        bairro: emp.address || "Bairro a definir",
-                        unidade: "A definir",
-                        pavimento: 0,
-                        dorms: 0,
-                        suites: 0,
-                        vagas: 0,
-                        deposito: false,
-                        m2: 0,
-                        precoTabela: 0,
-                        entregaObra: emp.delivery_date || "2029-12"
-                    }));
+        if (data && data.length > 0) {
+            ESTOQUE_MOCK = data.map(u => ({
+                id: u.id,
+                origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
+                construtora: u.developments?.developer_name || "AAM Incorporadora",
+                empreendimento: u.developments?.title || "Empreendimento",
+                bairro: u.developments?.address || "São Paulo - SP",
+                unidade: u.unit_number || "101",
+                pavimento: u.floor || 1,
+                dorms: u.typology || "Studio",
+                suites: 0,
+                vagas: u.parking_spaces || 0,
+                deposito: false,
+                m2: u.private_area_m2 || 0,
+                precoTabela: u.list_price || 0,
+                entregaObra: u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12"
+            }));
 
-                    atualizarContadoresBadges();
-                    atualizarEmpreendimentos();
-                    filtrarEstoque();
-                }
-            } catch (err) {
-                console.error("Erro ao ler nuvem:", err);
-            }
+            atualizarContadoresBadges();
+            atualizarEmpreendimentos();
+            filtrarEstoque();
         }
+    } catch (err) {
+        console.error("Erro ao ler nuvem:", err);
+    }
+}
 
         function atualizarContadoresBadges() {
             const countGlobal = ESTOQUE_MOCK.filter(i => i.origem === 'GLOBAL').length;
