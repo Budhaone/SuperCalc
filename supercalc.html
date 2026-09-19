@@ -3,295 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCalc - Cadastro de Imóveis de Terceiros</title>
-    
-    <style>
-        :root {
-            --primary: #1a252f;
-            --accent: #f1c40f;
-            --bg: #f4f6f9;
-            --card-bg: #ffffff;
-            --border: #cccccc;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --info: #2980b9;
-        }
-
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg); margin: 0; padding: 10px; font-size: 15px; color: #333; }
-
-        .btn-voltar { width: 100%; background: #64748b; color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-
-        .header-title {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #fff; padding: 14px; border-radius: 12px; margin-bottom: 12px;
-            border: 1px solid var(--accent); box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        }
-        .header-title h2 { margin: 0; font-size: 1.2rem; color: var(--accent); text-transform: uppercase; }
-        .header-title p { margin: 4px 0 0 0; font-size: 0.8rem; color: #cbd5e1; }
-
-        .card { background: var(--card-bg); padding: 14px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .card h3 { margin: 0 0 10px 0; font-size: 1rem; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
-
-        .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; color: #333; }
-        
-        input[type="text"], input[type="number"], input[type="month"], select, textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fff; }
-        
-        .toggle-group { display: flex; background: #e2e8f0; border-radius: 8px; padding: 2px; gap: 2px; width: 100%; margin-top: 4px; }
-        .toggle-btn { flex: 1; border: none; background: transparent; padding: 8px 4px; font-size: 0.78rem; font-weight: bold; color: #64748b; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .toggle-btn.active { background: var(--primary); color: #fff; border: 1px solid var(--accent); }
-
-        .switch-exclusivo {
-            display: flex; align-items: center; justify-content: space-between;
-            background: #fff8e1; border: 1.5px solid #ffe082; padding: 10px 12px; border-radius: 8px; margin-top: 8px;
-        }
-        .switch-exclusivo label { margin: 0; cursor: pointer; color: #b78103; font-weight: 800; }
-        .switch-exclusivo input[type="checkbox"] { width: 20px; height: 20px; accent-color: #b78103; cursor: pointer; }
-
-        .result-box {
-            background: #f8fafc; border: 2px solid #cbd5e1; padding: 12px; border-radius: 10px; margin-top: 8px;
-        }
-        .result-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; margin-bottom: 4px; }
-        .result-row.total { font-size: 1.1rem; font-weight: 800; color: var(--primary); border-top: 1px dashed #cbd5e1; padding-top: 6px; margin-top: 6px; }
-        .result-row.comissao { color: var(--success); font-weight: bold; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
-        @media (max-width: 600px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
-
-        .btn-salvar { width: 100%; background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); margin-top: 8px; }
-    </style>
+    <title>SuperCalc - Motor Financeiro & Simulação</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client & Configuração -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
 </head>
-<body>
+<body class="bg-slate-100 font-sans p-3 md:p-6 text-slate-800">
 
-    <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira de Imóveis</button>
+    <div class="max-w-5xl mx-auto space-y-6">
 
-    <div class="header-title">
-        <h2>🏠 Captação & Cadastro de Terceiros</h2>
-        <p>Cadastre imóveis avulsos de proprietários com inteligência financeira de comissão (Gross-Up 6%).</p>
+        <!-- NAVEGAÇÃO / CABEÇALHO -->
+        <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-2xl shadow-md border-b-4 border-emerald-500">
+            <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 px-4 rounded-xl text-xs transition flex items-center gap-1">
+                ← Voltar para a Prateleira de Imóveis
+            </button>
+            <div class="text-right">
+                <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Simulador Financeiro</span>
+                <span class="text-sm font-black" id="lblTopoEmpreendimento">Carregando Imóvel...</span>
+            </div>
+        </div>
+
+        <!-- RESUMO DA UNIDADE SELECIONADA -->
+        <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div>
+                <span class="block text-slate-400 font-bold uppercase text-[10px]">Empreendimento</span>
+                <strong class="text-sm text-slate-900 font-black" id="dispEmpreendimento">---</strong>
+            </div>
+            <div>
+                <span class="block text-slate-400 font-bold uppercase text-[10px]">Construtora / Bairro</span>
+                <strong class="text-sm text-slate-700" id="dispConstrutoraBairro">---</strong>
+            </div>
+            <div>
+                <span class="block text-slate-400 font-bold uppercase text-[10px]">Unidade / Metragem</span>
+                <strong class="text-sm text-slate-700" id="dispUnidadeM2">---</strong>
+            </div>
+            <div>
+                <span class="block text-slate-400 font-bold uppercase text-[10px]">Preço de Tabela</span>
+                <strong class="text-base text-emerald-600 font-black" id="dispPrecoTabela">R$ 0,00</strong>
+            </div>
+        </section>
+
+        <!-- ESTRUTURAÇÃO DO FLUXO DE PAGAMENTO -->
+        <main class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">1. Ajuste das Porcentagens do Fluxo</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Ato / Entrada (%)</label>
+                    <input type="number" id="percAto" value="10" oninput="calcularFluxo()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Mensais de Obra (%)</label>
+                    <input type="number" id="percMensais" value="10" oninput="calcularFluxo()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Semestrais / Chaves (%)</label>
+                    <input type="number" id="percSemestrais" value="10" oninput="calcularFluxo()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-slate-50">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Financiamento Bancário (%)</label>
+                    <input type="number" id="percFinanc" value="70" readonly class="w-full border border-slate-200 p-2.5 rounded-lg font-bold text-sm bg-slate-100 text-slate-500">
+                </div>
+            </div>
+
+            <!-- DETALHAMENTO DE PARCELAS -->
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2 pt-4">2. Resultado das Parcelas Calculadas</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span class="text-slate-500 font-bold block uppercase text-[10px]">Ato / Entrada</span>
+                    <strong class="text-base text-slate-900 font-black block" id="valAto">R$ 0,00</strong>
+                    <span class="text-[10px] text-slate-400 block">Sinal de Negócio</span>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span class="text-slate-500 font-bold block uppercase text-[10px]">36x Parcelas Mensais</span>
+                    <strong class="text-base text-slate-900 font-black block" id="valMensal">R$ 0,00 /mês</strong>
+                    <span class="text-[10px] text-slate-400 block" id="subTotalMensais">Total: R$ 0,00</span>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                    <span class="text-slate-500 font-bold block uppercase text-[10px]">6x Semestrais</span>
+                    <strong class="text-base text-slate-900 font-black block" id="valSemestral">R$ 0,00 /sem</strong>
+                    <span class="text-[10px] text-slate-400 block" id="subTotalSemestrais">Total: R$ 0,00</span>
+                </div>
+
+                <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-1">
+                    <span class="text-emerald-700 font-bold block uppercase text-[10px]">Financiamento Bancário</span>
+                    <strong class="text-base text-emerald-800 font-black block" id="valFinanc">R$ 0,00</strong>
+                    <span class="text-[10px] text-emerald-600 block">Na Entrega das Chaves</span>
+                </div>
+            </div>
+
+            <!-- NOME DO CLIENTE & BOTÃO DE DISPARO -->
+            <div class="pt-4 border-t space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nome do Cliente (para a proposta)</label>
+                    <input type="text" id="nomeCliente" placeholder="Ex: Sr. João Silva" class="w-full border border-slate-300 p-3 rounded-xl font-medium text-xs">
+                </div>
+
+                <button onclick="copiarPropostaWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                    📲 Copiar Simulação Formatada (WhatsApp)
+                </button>
+            </div>
+        </main>
     </div>
 
-    <form id="formCadastroTerceiros" onsubmit="salvarImovelTerceiro(event)">
-
-        <!-- 1. EXCLUSIVIDADE & DESTAQUE -->
-        <div class="card">
-            <h3>1. Status da Captação</h3>
-            <div class="switch-exclusivo">
-                <label for="chkExclusividade">⭐ CONTRATO COM EXCLUSIVIDADE?</label>
-                <input type="checkbox" id="chkExclusividade">
-            </div>
-            <p style="font-size: 0.75rem; color: #64748b; margin: 6px 0 0 0;">
-                Imóveis exclusivos recebem o selo de destaque na prateleira de vendas e prioridade de simulação.
-            </p>
-        </div>
-
-        <!-- 2. DADOS DO IMÓVEL -->
-        <div class="card">
-            <h3>2. Ficha Técnica do Imóvel</h3>
-            <div class="form-group">
-                <label for="txtTitulo">Nome / Identificação do Empreendimento ou Condomínio:</label>
-                <input type="text" id="txtTitulo" required placeholder="Ex: Edifício Chateau Jardin">
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="txtBairro">Bairro / Localização:</label>
-                    <input type="text" id="txtBairro" required placeholder="Ex: Jd. Guedala">
-                </div>
-                <div class="form-group">
-                    <label for="txtUnidade">Unidade / Número:</label>
-                    <input type="text" id="txtUnidade" required placeholder="Ex: Apt 42 / Casa 02">
-                </div>
-            </div>
-
-            <div class="grid-4">
-                <div class="form-group">
-                    <label for="selDorms">Dormitórios:</label>
-                    <select id="selDorms">
-                        <option value="0">Estúdio / Loft (0d)</option>
-                        <option value="1">1 Dormitório</option>
-                        <option value="2" selected>2 Dormitórios</option>
-                        <option value="3">3 Dormitórios</option>
-                        <option value="4">4+ Dormitórios</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="selSuites">Suítes:</label>
-                    <input type="number" id="selSuites" value="1" min="0">
-                </div>
-
-                <div class="form-group">
-                    <label for="selVagas">Vagas de Garagem:</label>
-                    <select id="selVagas">
-                        <option value="0">Sem vaga (0v)</option>
-                        <option value="1" selected>1 Vaga</option>
-                        <option value="2">2 Vagas</option>
-                        <option value="3">3+ Vagas</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="numM2">Área Privativa (m²):</label>
-                    <input type="number" id="numM2" required placeholder="Ex: 82" min="1">
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="numPavimento">Pavimento / Andar:</label>
-                    <input type="number" id="numPavimento" value="4" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="dataEntrega">Previsão Entrega (Ano-Mês):</label>
-                    <input type="month" id="dataEntrega" value="2027-12">
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. CALCULADORA DE COMISSÃO & VALORES -->
-        <div class="card">
-            <h3>3. Engenharia de Preço & Comissão CRECI</h3>
-
-            <div class="form-group">
-                <label>Origem da Informação de Preço:</label>
-                <div class="toggle-group">
-                    <button type="button" class="toggle-btn active" id="btnModoLiquido" onclick="setModoComissao('LIQUIDO')">PROPRIETÁRIO QUER VALOR LÍQUIDO</button>
-                    <button type="button" class="toggle-btn" id="btnModoBruto" onclick="setModoComissao('BRUTO')">VALOR ANUNCIADO (BRUTO COMISSAO)</button>
-                </div>
-            </div>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label id="lblValorDigitado">Valor Líquido Pretendido pelo Proprietário (R$):</label>
-                    <input type="number" id="numValorDigitado" required value="640000" step="1000" oninput="calcularValoresComissao()">
-                </div>
-
-                <div class="form-group">
-                    <label for="numPctComissao">Alíquota da Comissão (%):</label>
-                    <input type="number" id="numPctComissao" value="6.00" step="0.5" min="1" max="15" oninput="calcularValoresComissao()">
-                </div>
-            </div>
-
-            <div class="result-box">
-                <div class="result-row">
-                    <span>Valor Líquido do Proprietário:</span>
-                    <strong id="txtResultadoLiquido">R$ 0,00</strong>
-                </div>
-                <div class="result-row comissao">
-                    <span id="txtLabelComissao">(+) Comissão CRECI (6,00%):</span>
-                    <strong id="txtResultadoComissao">R$ 0,00</strong>
-                </div>
-                <div class="result-row total">
-                    <span>(=) VALOR TOTAL DE ANÚNCIO / TABELA:</span>
-                    <strong id="txtResultadoTotal">R$ 0,00</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. DADOS DO PROPRIETÁRIO -->
-        <div class="card">
-            <h3>4. Dados do Proprietário (Uso Interno / Privado)</h3>
-            <div class="grid-2">
-                <div class="form-group">
-                    <label for="txtNomeProprietario">Nome do Proprietário:</label>
-                    <input type="text" id="txtNomeProprietario" placeholder="Ex: Sr. João Mendes">
-                </div>
-                <div class="form-group">
-                    <label for="txtFoneProprietario">Telefone / WhatsApp:</label>
-                    <input type="text" id="txtFoneProprietario" placeholder="Ex: (11) 97777-8888">
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn-salvar">💾 Salvar no Inventário Privado & Ir para Prateleira</button>
-    </form>
-
+    <!-- SCRIPT DE LÓGICA E INTEGRAÇÃO -->
     <script>
-        let modoComissao = 'LIQUIDO';
+        let unidadeAtual = null;
 
-        window.onload = function() {
-            calcularValoresComissao();
-        };
-
-        function setModoComissao(modo) {
-            modoComissao = modo;
-            document.getElementById("btnModoLiquido").className = 'toggle-btn ' + (modo === 'LIQUIDO' ? 'active' : '');
-            document.getElementById("btnModoBruto").className = 'toggle-btn ' + (modo === 'BRUTO' ? 'active' : '');
-
-            const lbl = document.getElementById("lblValorDigitado");
-            if (modo === 'LIQUIDO') {
-                lbl.innerText = "Valor Líquido Pretendido pelo Proprietário (R$):";
+        function inicializarSimulador() {
+            const rawData = localStorage.getItem("UNIDADE_SELECIONADA");
+            
+            if (rawData) {
+                unidadeAtual = JSON.parse(rawData);
             } else {
-                lbl.innerText = "Valor Total Bruto Solicitado (R$):";
+                unidadeAtual = {
+                    id: "demo",
+                    empreendimento: "Sky Pinheiros",
+                    construtora: "AAM Incorporadora",
+                    bairro: "Pinheiros",
+                    unidade: "2001",
+                    m2: 27.12,
+                    precoTabela: 667599
+                };
             }
-
-            calcularValoresComissao();
-        }
-
-        function calcularValoresComissao() {
-            const valInput = parseFloat(document.getElementById("numValorDigitado").value) || 0;
-            const pctComissao = parseFloat(document.getElementById("numPctComissao").value) || 6.0;
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            let valorLiquido = 0;
-            let valorComissao = 0;
-            let valorTotalTabela = 0;
+            document.getElementById("lblTopoEmpreendimento").innerText = `${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})`;
+            document.getElementById("dispEmpreendimento").innerText = unidadeAtual.empreendimento;
+            document.getElementById("dispConstrutoraBairro").innerText = `${unidadeAtual.construtora} • ${unidadeAtual.bairro}`;
+            document.getElementById("dispUnidadeM2").innerText = `Apto ${unidadeAtual.unidade} (${unidadeAtual.m2} m²)`;
+            document.getElementById("dispPrecoTabela").innerText = fmt(unidadeAtual.precoTabela);
 
-            if (modoComissao === 'LIQUIDO') {
-                valorLiquido = valInput;
-                valorTotalTabela = valorLiquido / (1 - (pctComissao / 100));
-                valorComissao = valorTotalTabela - valorLiquido;
-            } else {
-                valorTotalTabela = valInput;
-                valorComissao = valorTotalTabela * (pctComissao / 100);
-                valorLiquido = valorTotalTabela - valorComissao;
+            calcularFluxo();
+        }
+
+        function calcularFluxo() {
+            if (!unidadeAtual) return;
+
+            const preco = unidadeAtual.precoTabela || 0;
+            const percAto = parseFloat(document.getElementById("percAto").value) || 0;
+            const percMensais = parseFloat(document.getElementById("percMensais").value) || 0;
+            const percSemestrais = parseFloat(document.getElementById("percSemestrais").value) || 0;
+
+            const percFinanc = Math.max(0, 100 - (percAto + percMensais + percSemestrais));
+            document.getElementById("percFinanc").value = percFinanc;
+
+            const valAto = preco * (percAto / 100);
+            const valTotalMensais = preco * (percMensais / 100);
+            const valParcelaMensal = valTotalMensais / 36;
+
+            const valTotalSemestrais = preco * (percSemestrais / 100);
+            const valParcelaSemestral = valTotalSemestrais / 6;
+
+            const valFinanc = preco * (percFinanc / 100);
+
+            const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            document.getElementById("valAto").innerText = fmt(valAto);
+            document.getElementById("valMensal").innerText = `${fmt(valParcelaMensal)} /mês`;
+            document.getElementById("subTotalMensais").innerText = `Total (36x): ${fmt(valTotalMensais)}`;
+
+            document.getElementById("valSemestral").innerText = `${fmt(valParcelaSemestral)} /sem`;
+            document.getElementById("subTotalSemestrais").innerText = `Total (6x): ${fmt(valTotalSemestrais)}`;
+
+            document.getElementById("valFinanc").innerText = fmt(valFinanc);
+        }
+
+        async function copiarPropostaWhatsApp() {
+            if (!unidadeAtual) return;
+
+            const cliente = document.getElementById("nomeCliente").value.trim() || "Cliente";
+            const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            const preco = unidadeAtual.precoTabela || 0;
+            const percAto = parseFloat(document.getElementById("percAto").value) || 0;
+            const percMensais = parseFloat(document.getElementById("percMensais").value) || 0;
+            const percSemestrais = parseFloat(document.getElementById("percSemestrais").value) || 0;
+            const percFinanc = parseFloat(document.getElementById("percFinanc").value) || 0;
+
+            const valAto = preco * (percAto / 100);
+            const valMensal = (preco * (percMensais / 100)) / 36;
+            const valSemestral = (preco * (percSemestrais / 100)) / 6;
+            const valFinanc = preco * (percFinanc / 100);
+
+            const textoProposta = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n` +
+                `👤 Cliente: ${cliente}\n` +
+                `🏢 Empreendimento: ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n` +
+                `📍 Local: ${unidadeAtual.bairro} (${unidadeAtual.m2} m²)\n` +
+                `------------------------------------\n` +
+                `💰 Preço de Tabela: ${fmt(preco)}\n\n` +
+                `*FLUXO DE PAGAMENTO SUGESTIVO:*\n` +
+                `• Entrada / Ato (${percAto}%): ${fmt(valAto)}\n` +
+                `• 36x Mensais de Obra (${percMensais}%): ${fmt(valMensal)} /mês\n` +
+                `• 6x Semestrais (${percSemestrais}%): ${fmt(valSemestral)} /sem\n` +
+                `• Financiamento Bancário (${percFinanc}%): ${fmt(valFinanc)}\n` +
+                `------------------------------------\n` +
+                `_Valores sujeitos à aprovação de crédito e alteração sem aviso prévio._`;
+
+            navigator.clipboard.writeText(textoProposta);
+
+            // Grava o histórico na nuvem se o Supabase estiver conectado
+            if (typeof _supabase !== 'undefined' && _supabase) {
+                try {
+                    await _supabase.from('proposals').insert([{
+                        unit_id: unidadeAtual.id !== 'demo' ? unidadeAtual.id : null,
+                        client_name: cliente,
+                        flow_data: { preco, percAto, percMensais, percSemestrais, percFinanc },
+                        status: 'ENVIADA'
+                    }]);
+                } catch (e) {
+                    console.log("Histórico não salvo na nuvem:", e);
+                }
             }
 
-            document.getElementById("txtLabelComissao").innerText = `(+) Comissão CRECI (${pctComissao.toFixed(2).replace('.', ',')}%):`;
-            document.getElementById("txtResultadoLiquido").innerText = fmt(valorLiquido);
-            document.getElementById("txtResultadoComissao").innerText = fmt(valorComissao);
-            document.getElementById("txtResultadoTotal").innerText = fmt(valorTotalTabela);
-
-            return { valorLiquido, valorComissao, valorTotalTabela, pctComissao };
+            alert("Proposta copiada com sucesso! Abra o WhatsApp e cole a mensagem.");
         }
 
-        function salvarImovelTerceiro(e) {
-            e.preventDefault();
-
-            const calculos = calcularValoresComissao();
-            
-            const novoImovel = {
-                id: 'PRIV_' + Date.now(),
-                origem: 'PRIVADO',
-                construtora: 'Avulso / Terceiros',
-                empreendimento: document.getElementById("txtTitulo").value.trim(),
-                bairro: document.getElementById("txtBairro").value.trim(),
-                unidade: document.getElementById("txtUnidade").value.trim(),
-                pavimento: parseInt(document.getElementById("numPavimento").value) || 0,
-                dorms: parseInt(document.getElementById("selDorms").value) || 0,
-                suites: parseInt(document.getElementById("selSuites").value) || 0,
-                vagas: parseInt(document.getElementById("selVagas").value) || 0,
-                deposito: false,
-                m2: parseFloat(document.getElementById("numM2").value) || 0,
-                precoTabela: calculos.valorTotalTabela,
-                valorLiquidoProprietario: calculos.valorLiquido,
-                valorComissao: calculos.valorComissao,
-                pctComissao: calculos.pctComissao,
-                ehExclusivo: document.getElementById("chkExclusividade").checked,
-                entregaObra: document.getElementById("dataEntrega").value || '2027-12'
-            };
-
-            const existentes = JSON.parse(localStorage.getItem("IMOVEIS_PRIVADOS") || "[]");
-            existentes.unshift(novoImovel);
-            localStorage.setItem("IMOVEIS_PRIVADOS", JSON.stringify(existentes));
-
-            alert(`Imóvel "${novoImovel.empreendimento}" (Unidade ${novoImovel.unidade}) cadastrado no Inventário Privado!`);
-            window.location.href = 'index.html';
-        }
+        inicializarSimulador();
     </script>
 </body>
 </html>
