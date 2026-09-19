@@ -20,7 +20,7 @@
 
     <div class="max-w-4xl mx-auto space-y-4">
 
-        <!-- BARRA FIXA DO TOPO (STICKY BANNER DE RESUMO) -->
+        <!-- BARRA FIXA DO TOPO -->
         <header class="sticky top-2 z-40 bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl border-b-4 border-emerald-500 space-y-2">
             <div class="flex justify-between items-center text-xs">
                 <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">
@@ -48,7 +48,12 @@
 
         <!-- IDENTIFICAÇÃO E DADOS DA UNIDADE SELECIONADA -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">1. Dados do Cliente e Imóvel</h2>
+            <div class="flex justify-between items-center border-b pb-1">
+                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Imóvel</h2>
+                <span id="badgeTipoModalidade" class="text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
+                    🏗️ EM CONSTRUÇÃO
+                </span>
+            </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <input type="text" id="inputNomeCliente" placeholder="Digite o nome do cliente" class="border border-slate-300 p-2 rounded-lg font-medium">
@@ -67,11 +72,11 @@
         <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 text-xs">
             <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">2. Engenharia do Fluxo de Entrada</h2>
 
-            <!-- 1. ATO / SINAL -->
+            <!-- 1. ATO -->
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                 <label class="font-bold text-slate-800 block">1. Ato / Sinal de Entrada (Imediato):</label>
                 <div class="flex gap-2">
-                    <input type="number" id="valAto" value="17932.20" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                    <input type="number" id="valAto" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
                     <select id="modeAto" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
                         <option value="R_FIXO">R$ FIXO</option>
                         <option value="PERC_TOT">% DO TOTAL</option>
@@ -80,92 +85,95 @@
                 <div id="badgeAto" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total Ato: R$ 0,00 (0.00%)</div>
             </div>
 
-            <!-- 2. ENTRADA FACILITADA (30/60/90) -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">2. Parcelas de Entrada Facilitada (30 / 60 / 90 dias):</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Parcelas</span>
-                        <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                    </div>
-                    <div class="col-span-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
-                        <div class="flex gap-1">
-                            <input type="number" id="valEntrada" value="5977.40" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                            <select id="modeEntrada" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
-                                <option value="PARC_R">R$ / PARCELA</option>
-                                <option value="PERC_TOT">% TOT. ENTRADA</option>
-                                <option value="TOT_R">R$ TOT. ENTRADA</option>
-                            </select>
+            <!-- SEÇÕES DE OBRA (OCULTADAS AUTOMATICAMENTE SE FOR IMÓVEL PRONTO) -->
+            <div id="secaoParcelasObra" class="space-y-4">
+                <!-- 2. ENTRADA FACILITADA -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <label class="font-bold text-slate-800 block">2. Parcelas de Entrada Facilitada (30 / 60 / 90 dias):</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Parcelas</span>
+                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <div class="flex gap-1">
+                                <input type="number" id="valEntrada" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                                <select id="modeEntrada" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                    <option value="PARC_R">R$ / PARCELA</option>
+                                    <option value="PERC_TOT">% TOT. ENTRADA</option>
+                                    <option value="TOT_R">R$ TOT. ENTRADA</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+                    <div id="badgeEntrada" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
                 </div>
-                <div id="badgeEntrada" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
-            </div>
 
-            <!-- 3. PARCELAS MENSAIS -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">3. Parcelas Mensais de Obra:</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nº Mensais</span>
-                        <input type="number" id="qtdMensais" value="43" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                    </div>
-                    <div class="col-span-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
-                        <div class="flex gap-1">
-                            <input type="number" id="valMensais" value="1251.08" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                            <select id="modeMensais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
-                                <option value="PARC_R">R$ / PARCELA</option>
-                                <option value="PERC_TOT">% TOT. MENSAL</option>
-                                <option value="TOT_R">R$ TOT. MENSAL</option>
-                            </select>
+                <!-- 3. MENSAIS -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <label class="font-bold text-slate-800 block">3. Parcelas Mensais de Obra:</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nº Mensais</span>
+                            <input type="number" id="qtdMensais" value="36" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <div class="flex gap-1">
+                                <input type="number" id="valMensais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                                <select id="modeMensais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                    <option value="PARC_R">R$ / PARCELA</option>
+                                    <option value="PERC_TOT">% TOT. MENSAL</option>
+                                    <option value="TOT_R">R$ TOT. MENSAL</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+                    <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">36x de R$ 0,00 /mês - Tot: R$ 0,00</div>
                 </div>
-                <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">43x de R$ 0,00 /mês - Tot: R$ 0,00</div>
-            </div>
 
-            <!-- 4. INTERMEDIÁRIAS (BALÕES) -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <div class="flex justify-between items-center">
-                    <label class="font-bold text-slate-800">4. Intermediárias (Periódicas):</label>
-                    <select id="tipoIntermediaria" onchange="recalculateAll()" class="border border-slate-300 p-1 rounded-lg text-[10px] font-bold bg-white">
-                        <option value="ANUAL">ANUAL (Máx 3x)</option>
-                        <option value="SEMESTRAL">SEMESTRAL (Máx 7x)</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Interm.</span>
-                        <input type="number" id="qtdAnuais" value="3" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                <!-- 4. INTERMEDIÁRIAS -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="font-bold text-slate-800">4. Intermediárias (Periódicas):</label>
+                        <select id="tipoIntermediaria" onchange="recalculateAll()" class="border border-slate-300 p-1 rounded-lg text-[10px] font-bold bg-white">
+                            <option value="ANUAL">ANUAL</option>
+                            <option value="SEMESTRAL">SEMESTRAL</option>
+                        </select>
                     </div>
-                    <div class="col-span-2">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
-                        <div class="flex gap-1">
-                            <input type="number" id="valAnuais" value="5977.40" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                            <select id="modeAnuais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
-                                <option value="PARC_R">R$ / PARCELA</option>
-                                <option value="PERC_TOT">% TOT. INTERM.</option>
-                                <option value="TOT_R">R$ TOT. INTERM.</option>
-                            </select>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Interm.</span>
+                            <input type="number" id="qtdAnuais" value="3" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                        </div>
+                        <div class="col-span-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <div class="flex gap-1">
+                                <input type="number" id="valAnuais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                                <select id="modeAnuais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                    <option value="PARC_R">R$ / PARCELA</option>
+                                    <option value="PERC_TOT">% TOT. INTERM.</option>
+                                    <option value="TOT_R">R$ TOT. INTERM.</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+                    <div id="badgeAnuais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
                 </div>
-                <div id="badgeAnuais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
-            </div>
 
-            <!-- 5. PARCELA ÚNICA DE CHAVES -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">5. Parcela Única de Chaves:</label>
-                <div class="flex gap-2">
-                    <input type="number" id="valChaves" value="17932.20" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
-                    <select id="modeChaves" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
-                        <option value="R_FIXO">R$ FIXO</option>
-                        <option value="PERC_TOT">% DO TOTAL</option>
-                    </select>
+                <!-- 5. CHAVES -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                    <label class="font-bold text-slate-800 block">5. Parcela Única de Chaves:</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm bg-white">
+                        <select id="modeChaves" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
+                            <option value="R_FIXO">R$ FIXO</option>
+                            <option value="PERC_TOT">% DO TOTAL</option>
+                        </select>
+                    </div>
+                    <div id="badgeChaves" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Chaves (1x): R$ 0,00</div>
                 </div>
-                <div id="badgeChaves" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Chaves (1x): R$ 0,00</div>
             </div>
         </section>
 
@@ -174,9 +182,9 @@
             <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">3. Saldo a Financiar e Teto Bancário</h2>
 
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">6. Saldo a Financiar Resultante (R$ Digitável):</label>
+                <label class="font-bold text-slate-800 block">Saldo a Financiar Resultante (R$ Digitável):</label>
                 <div class="flex items-center gap-2">
-                    <input type="number" id="valFinanciamento" value="233118.60" step="100" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
+                    <input type="number" id="valFinanciamento" value="0" step="100" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
                     <span id="percFinanciamento" class="font-black text-slate-900 text-sm min-w-[70px] text-right">0.00%</span>
                 </div>
             </div>
@@ -184,13 +192,13 @@
             <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
                 <div class="flex justify-between items-center">
                     <strong class="text-slate-700">Teto Máx. Financiável do Banco (%):</strong>
-                    <input type="number" id="tetoFinanciamentoPerc" value="70" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold">
+                    <input type="number" id="tetoFinanciamentoPerc" value="80" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold">
                 </div>
                 <div class="text-slate-500 font-semibold text-[11px]">Valor Limite de Aprovação: <strong id="txtValorMaxFinanciavel" class="text-slate-900">R$ 0,00</strong></div>
             </div>
         </section>
 
-        <!-- BALANÇA DE VALOR (CHECAGEM DE FECHAMENTO) -->
+        <!-- BALANÇA DE VALOR -->
         <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
             <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">4. Balança de Valor (Checagem de Fechamento)</h2>
 
@@ -213,9 +221,10 @@
         </section>
     </div>
 
-    <!-- SCRIPT DE CÁLCULO E INTEGRAÇÃO -->
+    <!-- SCRIPT DE CÁLCULO -->
     <script>
         let unidadeAtual = null;
+        let ePronto = false;
 
         function inicializarDadosUnidade() {
             const rawData = localStorage.getItem("UNIDADE_SELECIONADA");
@@ -228,8 +237,39 @@
                     construtora: "AAM Incorporadora",
                     unidade: "3711",
                     m2: 48.25,
-                    precoTabela: 937685
+                    precoTabela: 937685,
+                    entregaObra: "2029-12"
                 };
+            }
+
+            // Verifica se o imóvel está pronto
+            const mesAtual = new Date().toISOString().substring(0, 7);
+            ePronto = unidadeAtual.is_ready || (unidadeAtual.entregaObra && unidadeAtual.entregaObra <= mesAtual);
+
+            const badgeModalidade = document.getElementById("badgeTipoModalidade");
+            const secaoObra = document.getElementById("secaoParcelasObra");
+
+            if (ePronto) {
+                badgeModalidade.innerText = "🏠 PRONTO PARA MORAR";
+                badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
+                secaoObra.style.display = "none";
+                
+                // Valores padrão para imóvel pronto: 20% Entrada e 80% Financiamento
+                const preco = unidadeAtual.precoTabela || 0;
+                document.getElementById("valAto").value = (preco * 0.20).toFixed(2);
+                document.getElementById("valFinanciamento").value = (preco * 0.80).toFixed(2);
+            } else {
+                badgeModalidade.innerText = "🏗️ EM CONSTRUÇÃO";
+                badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
+                secaoObra.style.display = "block";
+
+                // Valores padrão para imóvel em obra: 10% Ato, 10% Mensais, 10% Intermediárias, 70% Financiamento
+                const preco = unidadeAtual.precoTabela || 0;
+                document.getElementById("valAto").value = (preco * 0.10).toFixed(2);
+                document.getElementById("valFinanciamento").value = (preco * 0.70).toFixed(2);
+                document.getElementById("valEntrada").value = (preco * 0.05 / 3).toFixed(2);
+                document.getElementById("valMensais").value = (preco * 0.10 / 36).toFixed(2);
+                document.getElementById("valAnuais").value = (preco * 0.05 / 3).toFixed(2);
             }
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -255,63 +295,58 @@
             let percAto = (totAto / totalTabela) * 100;
             document.getElementById("badgeAto").innerText = `Total Ato: ${fmt(totAto)} (${percAto.toFixed(2)}%)`;
 
-            // 2. ENTRADA
-            const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
-            const valEntradaRaw = parseFloat(document.getElementById("valEntrada").value) || 0;
-            const modeEntrada = document.getElementById("modeEntrada").value;
-            let totEntrada = 0, parcEntrada = 0;
-            if (qtdEntrada > 0) {
-                totEntrada = modeEntrada === 'PERC_TOT' ? (totalTabela * (valEntradaRaw / 100)) : (modeEntrada === 'PARC_R' ? valEntradaRaw * qtdEntrada : valEntradaRaw);
-                parcEntrada = totEntrada / qtdEntrada;
+            let totEntrada = 0, totMensais = 0, totAnuais = 0, totChaves = 0;
+
+            if (!ePronto) {
+                // ENTRADA
+                const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
+                const valEntradaRaw = parseFloat(document.getElementById("valEntrada").value) || 0;
+                const modeEntrada = document.getElementById("modeEntrada").value;
+                if (qtdEntrada > 0) {
+                    totEntrada = modeEntrada === 'PERC_TOT' ? (totalTabela * (valEntradaRaw / 100)) : (modeEntrada === 'PARC_R' ? valEntradaRaw * qtdEntrada : valEntradaRaw);
+                }
+                document.getElementById("badgeEntrada").innerText = `${qtdEntrada}x - Tot: ${fmt(totEntrada)}`;
+
+                // MENSAIS
+                const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
+                const valMensaisRaw = parseFloat(document.getElementById("valMensais").value) || 0;
+                const modeMensais = document.getElementById("modeMensais").value;
+                if (qtdMensais > 0) {
+                    totMensais = modeMensais === 'PERC_TOT' ? (totalTabela * (valMensaisRaw / 100)) : (modeMensais === 'PARC_R' ? valMensaisRaw * qtdMensais : valMensaisRaw);
+                }
+                document.getElementById("badgeMensais").innerText = `${qtdMensais}x - Tot: ${fmt(totMensais)}`;
+
+                // INTERMEDIÁRIAS
+                const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
+                const valAnuaisRaw = parseFloat(document.getElementById("valAnuais").value) || 0;
+                const modeAnuais = document.getElementById("modeAnuais").value;
+                if (qtdAnuais > 0) {
+                    totAnuais = modeAnuais === 'PERC_TOT' ? (totalTabela * (valAnuaisRaw / 100)) : (modeAnuais === 'PARC_R' ? valAnuaisRaw * qtdAnuais : valAnuaisRaw);
+                }
+                document.getElementById("badgeAnuais").innerText = `${qtdAnuais}x - Tot: ${fmt(totAnuais)}`;
+
+                // CHAVES
+                const valChavesRaw = parseFloat(document.getElementById("valChaves").value) || 0;
+                const modeChaves = document.getElementById("modeChaves").value;
+                totChaves = modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw;
+                document.getElementById("badgeChaves").innerText = `Chaves (1x): ${fmt(totChaves)}`;
             }
-            document.getElementById("badgeEntrada").innerText = `${qtdEntrada}x de ${fmt(parcEntrada)} - Tot: ${fmt(totEntrada)}`;
 
-            // 3. MENSAIS
-            const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
-            const valMensaisRaw = parseFloat(document.getElementById("valMensais").value) || 0;
-            const modeMensais = document.getElementById("modeMensais").value;
-            let totMensais = 0, parcMensal = 0;
-            if (qtdMensais > 0) {
-                totMensais = modeMensais === 'PERC_TOT' ? (totalTabela * (valMensaisRaw / 100)) : (modeMensais === 'PARC_R' ? valMensaisRaw * qtdMensais : valMensaisRaw);
-                parcMensal = totMensais / qtdMensais;
-            }
-            document.getElementById("badgeMensais").innerText = `${qtdMensais}x de ${fmt(parcMensal)} /mês - Tot: ${fmt(totMensais)}`;
-
-            // 4. INTERMEDIÁRIAS
-            const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnuaisRaw = parseFloat(document.getElementById("valAnuais").value) || 0;
-            const modeAnuais = document.getElementById("modeAnuais").value;
-            let totAnuais = 0, parcAnual = 0;
-            if (qtdAnuais > 0) {
-                totAnuais = modeAnuais === 'PERC_TOT' ? (totalTabela * (valAnuaisRaw / 100)) : (modeAnuais === 'PARC_R' ? valAnuaisRaw * qtdAnuais : valAnuaisRaw);
-                parcAnual = totAnuais / qtdAnuais;
-            }
-            document.getElementById("badgeAnuais").innerText = `${qtdAnuais}x de ${fmt(parcAnual)} - Tot: ${fmt(totAnuais)}`;
-
-            // 5. CHAVES
-            const valChavesRaw = parseFloat(document.getElementById("valChaves").value) || 0;
-            const modeChaves = document.getElementById("modeChaves").value;
-            let totChaves = modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw;
-            document.getElementById("badgeChaves").innerText = `Chaves (1x): ${fmt(totChaves)}`;
-
-            // SOMATORIA DO FLUXO DE ENTRADA
             const somaEntradas = totAto + totEntrada + totMensais + totAnuais + totChaves;
 
-            // 6. FINANCIAMENTO
+            // FINANCIAMENTO
             const totFinanciamentoDigitado = parseFloat(document.getElementById("valFinanciamento").value) || 0;
             const percFinan = (totFinanciamentoDigitado / totalTabela) * 100;
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
 
-            const tetoPerc = parseFloat(document.getElementById("tetoFinanciamentoPerc").value) || 70;
+            const tetoPerc = parseFloat(document.getElementById("tetoFinanciamentoPerc").value) || 80;
             const valorMaxFinanciavel = totalTabela * (tetoPerc / 100);
             document.getElementById("txtValorMaxFinanciavel").innerText = fmt(valorMaxFinanciavel);
 
-            // TOTAL GERAL DA PROPOSTA
             const totalProposta = somaEntradas + totFinanciamentoDigitado;
             const diferencaBalanca = totalProposta - totalTabela;
             const percTotalProposta = (totalProposta / totalTabela) * 100;
 
-            // PREENCHIMENTO DOS PAINÉIS
             document.getElementById("txtSomaEntradas").innerText = fmt(somaEntradas);
             document.getElementById("txtFinanciadoDigitado").innerText = fmt(totFinanciamentoDigitado);
             document.getElementById("txtTotalProposta").innerText = fmt(totalProposta);
@@ -349,12 +384,6 @@
                 badgeHeader.innerText = `PROPOSTA SUPERIOR À TABELA (+${fmt(diferencaBalanca)})`;
                 badgeHeader.className = "px-3 py-1 rounded-full text-[10px] font-black uppercase inline-block status-info";
             }
-
-            if (totFinanciamentoDigitado > valorMaxFinanciavel) {
-                const excede = totFinanciamentoDigitado - valorMaxFinanciavel;
-                badgeHeader.innerText = `EXCEDE TETO DO BANCO EM +${fmt(excede)}`;
-                badgeHeader.className = "px-3 py-1 rounded-full text-[10px] font-black uppercase inline-block status-warning";
-            }
         }
 
         function copyProposal() {
@@ -369,62 +398,24 @@
             const modeAto = document.getElementById("modeAto").value;
             let totAto = modeAto === 'PERC_TOT' ? (totalTabela * (valAtoRaw / 100)) : valAtoRaw;
 
-            const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
-            const valEntradaRaw = parseFloat(document.getElementById("valEntrada").value) || 0;
-            const modeEntrada = document.getElementById("modeEntrada").value;
-            let totEntrada = 0, parcEntrada = 0;
-            if (qtdEntrada > 0) {
-                totEntrada = modeEntrada === 'PERC_TOT' ? (totalTabela * (valEntradaRaw / 100)) : (modeEntrada === 'PARC_R' ? valEntradaRaw * qtdEntrada : valEntradaRaw);
-                parcEntrada = totEntrada / qtdEntrada;
-            }
-
-            const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
-            const valMensaisRaw = parseFloat(document.getElementById("valMensais").value) || 0;
-            const modeMensais = document.getElementById("modeMensais").value;
-            let totMensais = 0, parcMensal = 0;
-            if (qtdMensais > 0) {
-                totMensais = modeMensais === 'PERC_TOT' ? (totalTabela * (valMensaisRaw / 100)) : (modeMensais === 'PARC_R' ? valMensaisRaw * qtdMensais : valMensaisRaw);
-                parcMensal = totMensais / qtdMensais;
-            }
-
-            const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnuaisRaw = parseFloat(document.getElementById("valAnuais").value) || 0;
-            const modeAnuais = document.getElementById("modeAnuais").value;
-            let totAnuais = 0, parcAnual = 0;
-            if (qtdAnuais > 0) {
-                totAnuais = modeAnuais === 'PERC_TOT' ? (totalTabela * (valAnuaisRaw / 100)) : (modeAnuais === 'PARC_R' ? valAnuaisRaw * qtdAnuais : valAnuaisRaw);
-                parcAnual = totAnuais / qtdAnuais;
-            }
-
-            const valChavesRaw = parseFloat(document.getElementById("valChaves").value) || 0;
-            const modeChaves = document.getElementById("modeChaves").value;
-            let totChaves = modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw;
-
             const totFin = parseFloat(document.getElementById("valFinanciamento").value) || 0;
-            const totalProposta = totAto + totEntrada + totMensais + totAnuais + totChaves + totFin;
 
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
             if (nomeCliente) texto += `👤 A/C Cliente: ${nomeCliente}\n`;
             texto += `🏢 Empreendimento: ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n`;
-            texto += `📍 Local: ${unidadeAtual.construtora} (${unidadeAtual.m2} m²)\n`;
+            texto += `📍 Status: ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
             texto += `👔 Corretor: ${nomeCorretor}\n`;
             texto += `------------------------------------\n`;
             texto += `💰 Valor de Tabela: ${fmt(totalTabela)}\n\n`;
             texto += `*CONDIÇÕES PROPOSTAS:*\n`;
-
-            if (totAto > 0) texto += `• Ato / Sinal: ${fmt(totAto)}\n`;
-            if (qtdEntrada > 0 && totEntrada > 0) texto += `• Entrada Facilitada (${qtdEntrada}x): ${fmt(parcEntrada)} /cada\n`;
-            if (qtdMensais > 0 && totMensais > 0) texto += `• Parcelas Mensais (${qtdMensais}x): ${fmt(parcMensal)} /mês\n`;
-            if (qtdAnuais > 0 && totAnuais > 0) texto += `• Intermediárias (${qtdAnuais}x): ${fmt(parcAnual)} /cada\n`;
-            if (totChaves > 0) texto += `• Parcela de Chaves: ${fmt(totChaves)}\n`;
-            if (totFin > 0) texto += `• Saldo Financiado: ${fmt(totFin)}\n`;
-
+            texto += `• Entrada / Sinal: ${fmt(totAto)}\n`;
+            texto += `• Saldo Financiado / Recursos Próprios: ${fmt(totFin)}\n`;
             texto += `------------------------------------\n`;
-            texto += `*TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n\n`;
-            texto += `_Obs: Proposta sujeita a aprovação de crédito e reajustes contratuais._`;
+            texto += `*TOTAL DA PROPOSTA:* ${fmt(totAto + totFin)}\n\n`;
+            texto += `_Obs: Proposta sujeita a aprovação de crédito bancário._`;
 
             navigator.clipboard.writeText(texto);
-            alert("Proposta comercial copiada com sucesso para a área de transferência!");
+            alert("Proposta copiada com sucesso para a área de transferência!");
         }
 
         inicializarDadosUnidade();
