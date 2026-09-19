@@ -6,12 +6,14 @@
     <title>SuperCalc - Prateleira de Oportunidades</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS Client CDN e Arquivo de Configuração -->
+    <!-- Supabase JS Client & Configuração -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <style>
         .badge-global { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
         .badge-privado { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .badge-pronto { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .badge-obra { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
     </style>
 </head>
 <body class="bg-slate-100 font-sans p-3 md:p-6 text-slate-800">
@@ -58,14 +60,13 @@
                     </select>
                 </div>
 
-                <!-- 3. Bairro -->
+                <!-- 3. Status da Entrega -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">Bairro / Região</label>
-                    <select id="filtroBairro" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODOS">Todos os Bairros</option>
-                        <option value="Pinheiros">Pinheiros</option>
-                        <option value="Liberdade">Liberdade</option>
-                        <option value="Butantã">Butantã</option>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Status da Entrega</label>
+                    <select id="filtroStatusEntrega" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODOS">Todos os Status</option>
+                        <option value="PRONTO">🏠 Pronto para Morar</option>
+                        <option value="OBRA">🏗️ Em Construção</option>
                     </select>
                 </div>
 
@@ -168,10 +169,10 @@
                         <input type="number" id="addVagas" min="0" required placeholder="Ex: 1" class="w-full border p-2.5 rounded-lg font-medium">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Depósito Privativo?</label>
-                        <select id="addDeposito" class="w-full border p-2.5 rounded-lg font-medium bg-white">
-                            <option value="false">Não possui</option>
-                            <option value="true">Sim, possui depósito</option>
+                        <label class="block font-bold text-slate-700 mb-1">Imóvel Pronto para Morar?</label>
+                        <select id="addIsReady" class="w-full border p-2.5 rounded-lg font-medium bg-white">
+                            <option value="false">Não, em construção</option>
+                            <option value="true">Sim, pronto para morar</option>
                         </select>
                     </div>
                     <div>
@@ -199,10 +200,8 @@
 
     <!-- INTEGRACAO SUPABASE E NAVEGACAO -->
     <script>
-        // BASE DE DADOS ZERADA (Sem backups antigos)
         let ESTOQUE_MOCK = [];
 
-        // CARREGA DADOS DIRETO DA NUVEM SUPABASE
         async function carregarEstoqueDaNuvem() {
             if (typeof _supabase === 'undefined' || !_supabase) {
                 console.error("Supabase não inicializado. Verifique supabase-config.js");
@@ -216,23 +215,32 @@
 
                 if (error) throw error;
 
+                const mesAtual = new Date().toISOString().substring(0, 7);
+
                 if (data && data.length > 0) {
-                    ESTOQUE_MOCK = data.map(u => ({
-                        id: u.id,
-                        origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
-                        construtora: u.developments?.developer_name || "AAM Incorporadora",
-                        empreendimento: u.developments?.title || "Empreendimento",
-                        bairro: u.developments?.address || "São Paulo - SP",
-                        unidade: u.unit_number || "101",
-                        pavimento: u.floor || 1,
-                        dorms: u.typology || "Studio",
-                        suites: 0,
-                        vagas: u.parking_spaces || 0,
-                        deposito: false,
-                        m2: u.private_area_m2 || 0,
-                        precoTabela: u.list_price || 0,
-                        entregaObra: u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12"
-                    }));
+                    ESTOQUE_MOCK = data.map(u => {
+                        const entregaObra = u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12";
+                        const isReadyDb = u.developments?.is_ready || false;
+                        const ePronto = isReadyDb || (entregaObra && entregaObra <= mesAtual);
+
+                        return {
+                            id: u.id,
+                            origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
+                            construtora: u.developments?.developer_name || "AAM Incorporadora",
+                            empreendimento: u.developments?.title || "Empreendimento",
+                            bairro: u.developments?.address || "São Paulo - SP",
+                            unidade: u.unit_number || "101",
+                            pavimento: u.floor || 1,
+                            dorms: u.typology || "Studio",
+                            suites: 0,
+                            vagas: u.parking_spaces || 0,
+                            deposito: false,
+                            m2: u.private_area_m2 || 0,
+                            precoTabela: u.list_price || 0,
+                            entregaObra: entregaObra,
+                            is_ready: ePronto
+                        };
+                    });
 
                     atualizarOpcoesConstrutoras();
                     atualizarContadoresBadges();
@@ -309,16 +317,22 @@
             lista.forEach(item => {
                 const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 const isGlobal = item.origem === 'GLOBAL';
+                const isPronto = item.is_ready;
                 
                 const card = document.createElement("div");
                 card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:border-slate-400 transition";
                 card.innerHTML = `
                     <div class="space-y-3">
                         <div class="flex justify-between items-start gap-2">
-                            <span class="text-[10px] font-black px-2.5 py-1 rounded-md uppercase ${isGlobal ? 'badge-global' : 'badge-privado'}">
-                                ${isGlobal ? '🏷️ GLOBAL' : '🔒 PRIVADO'}
-                            </span>
-                            <span class="text-xs font-bold text-slate-400">Entrega: ${item.entregaObra}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-md uppercase ${isGlobal ? 'badge-global' : 'badge-privado'}">
+                                    ${isGlobal ? '🏷️ GLOBAL' : '🔒 PRIVADO'}
+                                </span>
+                                <span class="text-[10px] font-black px-2.5 py-1 rounded-md uppercase ${isPronto ? 'badge-pronto' : 'badge-obra'}">
+                                    ${isPronto ? '🏠 PRONTO' : '🏗️ EM OBRA'}
+                                </span>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">${isPronto ? 'Pronto' : 'Entrega: ' + item.entregaObra}</span>
                         </div>
                         
                         <div>
@@ -355,7 +369,7 @@
         function filtrarEstoque() {
             const construtora = document.getElementById("filtroConstrutora").value;
             const empreendimento = document.getElementById("filtroEmpreendimento").value;
-            const bairro = document.getElementById("filtroBairro").value;
+            const statusEntrega = document.getElementById("filtroStatusEntrega").value;
             const dorms = document.getElementById("filtroDorms").value;
             const vagas = parseInt(document.getElementById("filtroVagas").value) || 0;
             const precoMax = parseFloat(document.getElementById("filtroPrecoMax").value) || Infinity;
@@ -364,12 +378,16 @@
                 const bateConstrutora = construtora === "TODAS" || 
                                        (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
-                const bateBairro = bairro === "TODOS" || item.bairro.includes(bairro);
+                
+                let bateStatus = true;
+                if (statusEntrega === "PRONTO") bateStatus = item.is_ready;
+                else if (statusEntrega === "OBRA") bateStatus = !item.is_ready;
+
                 const bateDorms = dorms === "TODOS" || item.dorms.toLowerCase().includes(dorms.toLowerCase());
                 const bateVagas = item.vagas >= vagas;
                 const batePreco = item.precoTabela <= precoMax;
 
-                return bateConstrutora && bateEmpreendimento && bateBairro && bateDorms && bateVagas && batePreco;
+                return bateConstrutora && bateEmpreendimento && bateStatus && bateDorms && bateVagas && batePreco;
             });
 
             renderizarCards(filtrados);
@@ -389,7 +407,7 @@
                           `• Tipologia: ${item.dorms}\n` +
                           `• Garagem: ${item.vagas} vaga(s)${item.deposito ? ' + Depósito Privativo' : ''}\n` +
                           `• Preço de Tabela: ${fmt(item.precoTabela)}\n` +
-                          `• Previsão de Entrega: ${item.entregaObra}\n` +
+                          `• Status: ${item.is_ready ? 'PRONTO PARA MORAR' : 'Previsão Entrega ' + item.entregaObra}\n` +
                           `------------------------------------\n` +
                           `_Solicite uma simulação personalizada de fluxo de pagamento!_`;
 
@@ -418,6 +436,9 @@
         function salvarImovelPrivado(event) {
             event.preventDefault();
 
+            const isReady = document.getElementById("addIsReady").value === "true";
+            const entregaDate = document.getElementById("addEntrega").value;
+
             const novoImovel = {
                 id: "PRIV_" + Date.now(),
                 origem: "PRIVADO",
@@ -429,10 +450,11 @@
                 dorms: document.getElementById("addDorms").value + " Dorms",
                 suites: parseInt(document.getElementById("addSuites").value) || 0,
                 vagas: parseInt(document.getElementById("addVagas").value) || 0,
-                deposito: document.getElementById("addDeposito").value === "true",
+                deposito: false,
                 m2: parseFloat(document.getElementById("addM2").value) || 0,
                 precoTabela: parseFloat(document.getElementById("addPrecoTabela").value) || 0,
-                entregaObra: document.getElementById("addEntrega").value
+                entregaObra: entregaDate,
+                is_ready: isReady
             };
 
             ESTOQUE_MOCK.unshift(novoImovel);
@@ -448,7 +470,6 @@
             alert(`Imóvel "${novoImovel.empreendimento}" cadastrado com sucesso!`);
         }
 
-        // INICIALIZAÇÃO
         carregarEstoqueDaNuvem();
     </script>
 </body>
