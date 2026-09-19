@@ -1,282 +1,51 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor de Estoque Central - SuperCalc</title>
-    <style>
-        :root {
-            --primary: #1a252f;
-            --accent: #f1c40f;
-            --bg: #f4f6f9;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --info: #2980b9;
-            --border: #cccccc;
-        }
+function recalcularFluxoPronto(isReadyOrThirdParty) {
+    const valorTotal = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+    
+    // Se for Imóvel Pronto, Mobiliado ou Terceiro
+    if (isReadyOrThirdParty) {
+        // Oculta/Zera parcelas de obra (mensais, balões e chaves)
+        document.getElementById("qtdMensais").value = 0;
+        document.getElementById("valMensais").value = 0;
+        document.getElementById("qtdAnuais").value = 0;
+        document.getElementById("valAnuais").value = 0;
+        document.getElementById("qtdChaves").value = 0;
+        document.getElementById("valChaves").value = 0;
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        body { background: var(--bg); padding: 8px; font-size: 13px; color: #333; padding-bottom: 75px; }
+        let valAto = parseFloat(document.getElementById("valAto").value) || (valorTotal * 0.30);
+        
+        // Garante que a soma entre Entrada e Financiamento feche sempre em 100%
+        let valFinanciamento = valorTotal - valAto;
 
-        /* CABEÇALHO E CONTROLES */
-        .top-bar {
-            background: linear-gradient(135deg, #111 0%, #2c3e50 100%);
-            color: var(--accent); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
-            border: 1.5px solid var(--accent); display: flex; justify-content: space-between; align-items: center;
-        }
-        .top-bar h1 { font-size: 0.9rem; font-weight: 800; color: #fff; text-transform: uppercase; }
+        // Atualiza os campos na tela
+        document.getElementById("valAto").value = valAto.toFixed(2);
+        document.getElementById("valFinanciamento").value = valFinanciamento.toFixed(2);
+        
+        let percAto = ((valAto / valorTotal) * 100).toFixed(2);
+        let percFin = ((valFinanciamento / valorTotal) * 100).toFixed(2);
 
-        .control-card {
-            background: #fff; padding: 8px; border-radius: 10px; margin-bottom: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #ddd;
-        }
-        .grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
-        .grid-select label { font-size: 0.7rem; font-weight: bold; color: var(--primary); display: block; }
-        .grid-select select { width: 100%; padding: 6px; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; font-weight: bold; }
+        document.getElementById("badgeAto").innerText = `Entrada/Ato (${percAto}%): R$ ${valAto.toLocaleString('pt-BR')}`;
+        document.getElementById("percFinanciamento").innerText = `${percFin}%`;
+    }
+}
 
-        /* SELETOR DAS 5 GAVETAS / MODALIDADES */
-        .gavetas-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 6px; }
-        .btn-gaveta {
-            padding: 5px 10px; font-size: 0.72rem; font-weight: bold; border: 1.5px solid var(--border);
-            border-radius: 20px; background: #fff; cursor: pointer; white-space: nowrap; color: var(--primary);
-        }
-        .btn-gaveta.active { background: var(--primary); color: var(--accent); border-color: var(--primary); }
+// Evento ao alterar o valor digitado da Entrada/Ato
+document.getElementById("valAto").addEventListener("input", function() {
+    const valorTotal = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+    let valAto = parseFloat(this.value) || 0;
+    
+    // Recalcula o Financiamento para fechar 100%
+    let valFinanciamento = valorTotal - valAto;
+    document.getElementById("valFinanciamento").value = valFinanciamento > 0 ? valFinanciamento.toFixed(2) : 0;
+    recalculateAll();
+});
 
-        /* MODO DE CLIQUE */
-        .mode-toggle-container { display: flex; gap: 4px; background: #eaeded; padding: 3px; border-radius: 8px; margin-bottom: 6px; }
-        .mode-btn { flex: 1; padding: 6px 4px; font-size: 0.72rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-align: center; color: #555; }
-        .mode-btn.active-lock { background: #e74c3c; color: #fff; }
-        .mode-btn.active-promo { background: #2980b9; color: #fff; }
-
-        /* MATRIZ DE ESTOQUE FLEXÍVEL */
-        .matrix-wrapper {
-            background: #fff; padding: 6px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            overflow-x: auto; max-height: 70vh; border: 1px solid #ddd;
-        }
-        .matrix-table { width: 100%; border-collapse: separate; border-spacing: 2px; }
-        .matrix-table th { background: #2c3e50; color: var(--accent); padding: 5px 2px; font-size: 0.7rem; font-weight: 800; border-radius: 4px; text-align: center; position: sticky; top: 0; z-index: 2; }
-        .andar-tag { background: #eaeded; color: #1a252f; font-size: 0.7rem; font-weight: 800; padding: 4px; border-radius: 4px; text-align: center; position: sticky; left: 0; z-index: 1; }
-
-        /* CARDS DE UNIDADE */
-        .unit-card {
-            border-radius: 4px; padding: 2px; min-width: 42px; min-height: 32px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; cursor: pointer; user-select: none; border: 1.5px solid transparent;
-        }
-        .unit-card .num { font-size: 0.72rem; font-weight: 800; line-height: 1; }
-        .unit-card .st { font-size: 0.55rem; font-weight: 700; margin-top: 1px; text-transform: uppercase; }
-
-        .unit-disp { background: #e8f8f5; color: #1e8449; border-color: #27ae60; }
-        .unit-promo { background: #ebf5fb; color: #1b4f72; border-color: #2980b9; }
-        .unit-indisp { background: #fadbd8; color: #78281f; border-color: #e74c3c; text-decoration: line-through; }
-
-        .btn-fab-save { position: fixed; bottom: 16px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: #27ae60; color: #fff; font-size: 1.4rem; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 99; }
-    </style>
-</head>
-<body>
-
-    <div class="top-bar">
-        <h1>GESTOR MULTI-EMPREENDIMENTO</h1>
-        <button onclick="window.print()" style="background:#2980b9; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-weight:bold; cursor:pointer;">PDF Espelho</button>
-    </div>
-
-    <!-- PAINEL DE CONTROLE DE EMBARQUE E GAVETAS -->
-    <div class="control-card">
-        <div class="grid-select">
-            <div>
-                <label>INCORPORADORA:</label>
-                <select id="selIncorporadora" onchange="carregarEmpreendimentos()">
-                    <option value="">Todas</option>
-                    <option value="AAM Incorporadora">AAM Incorporadora</option>
-                    <option value="Marquês Construtora">Marquês Construtora</option>
-                    <option value="Terceiros">Imóveis de Terceiros</option>
-                </select>
-            </div>
-            <div>
-                <label>EMPREENDIMENTO:</label>
-                <select id="selEmpreendimento" onchange="carregarMapeamentoEmpreendimento()">
-                    <option value="">Selecione...</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- FILTRO DAS 5 GAVETAS (TIPOLOGIAS/MODALIDADES) -->
-        <label style="font-size: 0.7rem; font-weight: bold; color: var(--primary); margin-bottom: 2px; display: block;">FILTRAR GAVETA / MODALIDADE:</label>
-        <div class="gavetas-bar">
-            <button class="btn-gaveta active" onclick="filtrarGaveta('TODOS', this)">Todas as Unidades</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('HIS', this)">Gaveta 1: HIS</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('HMP', this)">Gaveta 2: HMP</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('NR', this)">Gaveta 3: NR / Short Stay</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('R2V', this)">Gaveta 4: R2V (Com Vaga)</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('TERCEIROS', this)">Gaveta 5: Avulsos</button>
-        </div>
-
-        <div class="mode-toggle-container">
-            <button id="btnModoTrava" class="mode-btn active-lock" onclick="setModo('TRAVA')">🔴 Clique: Disp ⇄ Trava</button>
-            <button id="btnModoPromo" class="mode-btn" onclick="setModo('PROMO')">🔵 Clique: Disp ⇄ Promo</button>
-        </div>
-    </div>
-
-    <!-- GRID VISUAL MAPEADO -->
-    <div class="matrix-wrapper">
-        <table class="matrix-table">
-            <thead>
-                <tr id="matrixHeader"><th>Andar</th></tr>
-            </thead>
-            <tbody id="matrixBody"></tbody>
-        </table>
-    </div>
-
-    <button class="btn-fab-save" onclick="salvarEstoque()" title="Salvar Alterações">💾</button>
-
-    <script>
-        let unidadesGlobais = [];
-        let prumadasUnicas = [];
-        let modoAtivo = 'TRAVA';
-        let gavetaAtiva = 'TODOS';
-
-        // 1. Carga inicial dos empreendimentos
-        async function carregarEmpreendimentos() {
-            const inc = document.getElementById("selIncorporadora").value;
-            const selEmp = document.getElementById("selEmpreendimento");
-            selEmp.innerHTML = '<option value="">Carregando...</option>';
-
-            // Consulta Supabase
-            const { data: developments } = await supabase.from('developments').select('*').order('title');
-            
-            selEmp.innerHTML = '<option value="">Selecione um empreendimento...</option>';
-            developments.forEach(emp => {
-                if (!inc || emp.developer_name === inc) {
-                    const opt = document.createElement("option");
-                    opt.value = emp.id;
-                    opt.innerText = `${emp.title} (${emp.developer_name})`;
-                    selEmp.appendChild(opt);
-                }
-            });
-        }
-
-        // 2. Monta o Espelho de Vendas conforme a grade real do prédio
-        async function carregarMapeamentoEmpreendimento() {
-            const empId = document.getElementById("selEmpreendimento").value;
-            if (!empId) return;
-
-            // Busca todas as unidades cadastradas no Supabase para o prédio
-            const { data: units } = await supabase.from('units').select('*').eq('development_id', empId).order('unit_number');
-
-            unidadesGlobais = units;
-
-            // Extrai as prumadas/finais dinamicamente
-            const pSet = new Set();
-            unidadesGlobais.forEach(u => {
-                const num = String(u.unit_number);
-                const final = num.length >= 3 ? num.slice(-2) : num;
-                pSet.add(final);
-            });
-            prumadasUnicas = Array.from(pSet).sort((a,b) => parseInt(a) - parseInt(b));
-
-            renderizarGrid();
-        }
-
-        // 3. Renderiza a Matriz (Andares x Prumadas)
-        function renderizarGrid() {
-            const thead = document.getElementById("matrixHeader");
-            const tbody = document.getElementById("matrixBody");
-            
-            thead.innerHTML = '<th>Andar</th>';
-            prumadasUnicas.forEach(p => thead.innerHTML += `<th>P.${p}</th>`);
-
-            tbody.innerHTML = '';
-
-            // Agrupa por pavimento
-            const andaresMap = new Map();
-            unidadesGlobais.forEach(u => {
-                const num = String(u.unit_number);
-                const final = num.length >= 3 ? num.slice(-2) : num;
-                
-                // Filtro pelas 5 gavetas
-                if (gavetaAtiva !== 'TODOS' && !u.typology.toUpperCase().includes(gavetaAtiva)) return;
-
-                if (!andaresMap.has(u.floor)) andaresMap.set(u.floor, new Map());
-                andaresMap.get(u.floor).set(final, u);
-            });
-
-            const andaresOrdenados = Array.from(andaresMap.keys()).sort((a,b) => b - a);
-
-            andaresOrdenados.forEach(andar => {
-                const tr = document.createElement("tr");
-                let rowHtml = `<td class="andar-tag">${andar}º</td>`;
-
-                prumadasUnicas.forEach(p => {
-                    const u = andaresMap.get(andar)?.get(p);
-                    if (u) {
-                        let stClass = 'unit-disp';
-                        let stTxt = 'DISP';
-                        if (u.status === 'INDISPONIVEL') { stClass = 'unit-indisp'; stTxt = 'TRAV'; }
-                        if (u.status === 'PROMOCIONAL') { stClass = 'unit-promo'; stTxt = 'PROMO'; }
-
-                        rowHtml += `
-                            <td>
-                                <div class="unit-card ${stClass}" onclick="alternarStatus('${u.id}')" ondblclick="enviarParaSuperCalc('${u.id}')">
-                                    <span class="num">${u.unit_number}</span>
-                                    <span class="st">${stTxt}</span>
-                                </div>
-                            </td>`;
-                    } else {
-                        rowHtml += `<td></td>`;
-                    }
-                });
-
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // 4. Alteração de Status com 1 clique e persistência
-        async function alternarStatus(unitId) {
-            const u = unidadesGlobais.find(x => x.id === unitId);
-            if (!u) return;
-
-            let novoStatus = 'DISPONIVEL';
-            if (modoAtivo === 'TRAVA') {
-                novoStatus = (u.status === 'INDISPONIVEL') ? 'DISPONIVEL' : 'INDISPONIVEL';
-            } else {
-                novoStatus = (u.status === 'PROMOCIONAL') ? 'DISPONIVEL' : 'PROMOCIONAL';
-            }
-
-            u.status = novoStatus;
-            renderizarGrid();
-
-            // Grava no Supabase
-            await supabase.from('units').update({ status: novoStatus }).eq('id', unitId);
-        }
-
-        // 5. Filtro de Gavetas
-        function filtrarGaveta(gaveta, btn) {
-            gavetaAtiva = gaveta;
-            document.querySelectorAll('.btn-gaveta').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderizarGrid();
-        }
-
-        function setModo(m) {
-            modoAtivo = m;
-            document.getElementById("btnModoTrava").className = m === 'TRAVA' ? 'mode-btn active-lock' : 'mode-btn';
-            document.getElementById("btnModoPromo").className = m === 'PROMO' ? 'mode-btn active-promo' : 'mode-btn';
-        }
-
-        // 6. Envia a unidade para a SuperCalc com duplo clique no card
-        function enviarParaSuperCalc(unitId) {
-            const u = unidadesGlobais.find(x => x.id === unitId);
-            if (!u || u.status === 'INDISPONIVEL') return;
-
-            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify({
-                unidade: u.unit_number,
-                precoTabela: u.list_price,
-                m2: u.private_area_m2,
-                tipologia: u.typology
-            }));
-
-            window.location.href = "supercalc.html";
-        }
-    </script>
-</body>
-</html>
+// Evento ao alterar o valor digitado do Financiamento
+document.getElementById("valFinanciamento").addEventListener("input", function() {
+    const valorTotal = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+    let valFinanciamento = parseFloat(this.value) || 0;
+    
+    // Recalcula a Entrada/Ato para fechar 100%
+    let valAto = valorTotal - valFinanciamento;
+    document.getElementById("valAto").value = valAto > 0 ? valAto.toFixed(2) : 0;
+    recalculateAll();
+});
