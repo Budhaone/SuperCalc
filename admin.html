@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Gestor de Estoque SuperCalc</title>
-
+    <title>Gestor de Estoque Central - SuperCalc</title>
     <style>
         :root {
             --primary: #1a252f;
@@ -16,576 +15,268 @@
             --border: #cccccc;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg); padding: 8px; font-size: 14px; color: #333; padding-bottom: 75px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: var(--bg); padding: 8px; font-size: 13px; color: #333; padding-bottom: 75px; }
 
-        /* CABEÇALHO COMPACTO */
+        /* CABEÇALHO E CONTROLES */
         .top-bar {
-            background: linear-gradient(135deg, #111111 0%, #2c3e50 100%);
+            background: linear-gradient(135deg, #111 0%, #2c3e50 100%);
             color: var(--accent); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
-            border: 1.5px solid var(--accent); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;
+            border: 1.5px solid var(--accent); display: flex; justify-content: space-between; align-items: center;
         }
-        .top-bar h1 { font-size: 0.95rem; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
-        .top-bar .btn-group { display: flex; gap: 4px; }
-        .btn-sm { padding: 4px 8px; font-size: 0.72rem; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; color: #fff; text-decoration: none; }
-        .btn-pdf-color { background: #2980b9; }
-        .btn-pdf-pb { background: #555; }
+        .top-bar h1 { font-size: 0.9rem; font-weight: 800; color: #fff; text-transform: uppercase; }
 
-        /* PAINEL DE SELEÇÃO MULTI-EMPREENDIMENTO */
-        .selector-card {
-            background: #fff; padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1.5px solid #2980b9;
-        }
-        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .selector-grid label { font-size: 0.72rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 2px; }
-        .selector-grid select { width: 100%; padding: 6px 8px; font-size: 0.82rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; font-weight: bold; }
-
-        /* RESUMO DE ESTOQUE */
-        .stats-bar {
-            background: #fff; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px;
-            font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #ddd; flex-wrap: wrap; gap: 4px;
-        }
-        .st-disp { color: #27ae60; }
-        .st-promo { color: #2980b9; }
-        .st-indisp { color: #e74c3c; }
-
-        /* PAINEL DE CONTROLE E FILTROS */
         .control-card {
             background: #fff; padding: 8px; border-radius: 10px; margin-bottom: 6px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #ddd;
         }
-        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-bottom: 6px; }
-        .filter-grid input, .filter-grid select {
-            width: 100%; padding: 6px 8px; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff;
-        }
+        .grid-select { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+        .grid-select label { font-size: 0.7rem; font-weight: bold; color: var(--primary); display: block; }
+        .grid-select select { width: 100%; padding: 6px; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; font-weight: bold; }
 
-        /* TOGGLE DE MODO DE CLIQUE (TRAVA VS PROMOÇÃO) */
-        .mode-toggle-container {
-            display: flex; gap: 4px; background: #eaeded; padding: 3px; border-radius: 8px; margin-bottom: 6px;
+        /* SELETOR DAS 5 GAVETAS / MODALIDADES */
+        .gavetas-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 6px; }
+        .btn-gaveta {
+            padding: 5px 10px; font-size: 0.72rem; font-weight: bold; border: 1.5px solid var(--border);
+            border-radius: 20px; background: #fff; cursor: pointer; white-space: nowrap; color: var(--primary);
         }
-        .mode-btn {
-            flex: 1; padding: 6px 4px; font-size: 0.73rem; font-weight: bold; border: none; border-radius: 6px;
-            cursor: pointer; text-align: center; color: #555; background: transparent; transition: all 0.15s ease;
-        }
-        .mode-btn.active-lock { background: #e74c3c; color: #fff; box-shadow: 0 2px 5px rgba(231,76,60,0.3); }
-        .mode-btn.active-promo { background: #2980b9; color: #fff; box-shadow: 0 2px 5px rgba(41,128,185,0.3); }
+        .btn-gaveta.active { background: var(--primary); color: var(--accent); border-color: var(--primary); }
 
-        .bulk-actions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
-        @media (max-width: 500px) { .bulk-actions { grid-template-columns: 1fr 1fr; } }
-        
-        .btn-bulk { padding: 6px 4px; font-size: 0.72rem; font-weight: bold; border-radius: 6px; border: none; color: #fff; cursor: pointer; text-align: center; }
-        .btn-lock { background: #e74c3c; }
-        .btn-free { background: #27ae60; }
-        .btn-promo-bulk { background: #2980b9; }
-        .btn-reset { background: #7f8c8d; }
+        /* MODO DE CLIQUE */
+        .mode-toggle-container { display: flex; gap: 4px; background: #eaeded; padding: 3px; border-radius: 8px; margin-bottom: 6px; }
+        .mode-btn { flex: 1; padding: 6px 4px; font-size: 0.72rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-align: center; color: #555; }
+        .mode-btn.active-lock { background: #e74c3c; color: #fff; }
+        .mode-btn.active-promo { background: #2980b9; color: #fff; }
 
-        /* MATRIZ DE PRUMADAS */
+        /* MATRIZ DE ESTOQUE FLEXÍVEL */
         .matrix-wrapper {
             background: #fff; padding: 6px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            overflow-x: auto; border: 1px solid #ddd;
+            overflow-x: auto; max-height: 70vh; border: 1px solid #ddd;
         }
         .matrix-table { width: 100%; border-collapse: separate; border-spacing: 2px; }
-        .matrix-table th { background: #2c3e50; color: var(--accent); padding: 5px 2px; font-size: 0.72rem; font-weight: 800; border-radius: 4px; text-align: center; }
-        .andar-tag { background: #eaeded; color: #1a252f; font-size: 0.72rem; font-weight: 800; padding: 4px 2px; border-radius: 4px; text-align: center; white-space: nowrap; }
+        .matrix-table th { background: #2c3e50; color: var(--accent); padding: 5px 2px; font-size: 0.7rem; font-weight: 800; border-radius: 4px; text-align: center; position: sticky; top: 0; z-index: 2; }
+        .andar-tag { background: #eaeded; color: #1a252f; font-size: 0.7rem; font-weight: 800; padding: 4px; border-radius: 4px; text-align: center; position: sticky; left: 0; z-index: 1; }
 
-        /* CARDS DE UNIDADE MICRO (32PX ALTURA) */
+        /* CARDS DE UNIDADE */
         .unit-card {
-            border-radius: 5px; padding: 2px 1px; min-height: 32px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; cursor: pointer; user-select: none;
-            transition: transform 0.1s ease, filter 0.1s ease; border: 1.5px solid transparent;
+            border-radius: 4px; padding: 2px; min-width: 42px; min-height: 32px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; cursor: pointer; user-select: none; border: 1.5px solid transparent;
         }
-        .unit-card:active { transform: scale(0.92); }
-        .unit-card .num { font-size: 0.75rem; font-weight: 800; line-height: 1; }
-        .unit-card .st { font-size: 0.58rem; font-weight: 700; line-height: 1; margin-top: 1px; text-transform: uppercase; }
+        .unit-card .num { font-size: 0.72rem; font-weight: 800; line-height: 1; }
+        .unit-card .st { font-size: 0.55rem; font-weight: 700; margin-top: 1px; text-transform: uppercase; }
 
         .unit-disp { background: #e8f8f5; color: #1e8449; border-color: #27ae60; }
         .unit-promo { background: #ebf5fb; color: #1b4f72; border-color: #2980b9; }
         .unit-indisp { background: #fadbd8; color: #78281f; border-color: #e74c3c; text-decoration: line-through; }
 
-        /* BOTÃO FLUTUANTE SALVAR */
-        .btn-fab-save {
-            position: fixed; bottom: 16px; right: 16px; width: 54px; height: 54px;
-            border-radius: 50%; background: #27ae60; color: #fff; font-size: 1.5rem;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.35); border: 2.5px solid #ffffff; z-index: 9999;
-            cursor: pointer; transition: transform 0.15s ease, background-color 0.2s ease;
-        }
-        .btn-fab-save:active { transform: scale(0.9); background: #1e8449; }
-
-        /* OVERLAY PIN */
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a252f; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-
-        /* MODAL RESET */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 16px; }
-        .modal-box { background: #fff; border-radius: 12px; padding: 20px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); border: 2px solid var(--accent); }
-        .modal-box h3 { margin-bottom: 12px; color: var(--primary); font-size: 1.1rem; }
-        .modal-btn { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .btn-fab-save { position: fixed; bottom: 16px; right: 16px; width: 52px; height: 52px; border-radius: 50%; background: #27ae60; color: #fff; font-size: 1.4rem; border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 99; }
     </style>
 </head>
 <body>
 
-    <!-- BLOQUEIO DE SEGURANÇA COM PIN -->
-    <div id="loginOverlay">
-        <div style="background: #ffffff; padding: 28px 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid #f1c40f;">
-            <h2 style="margin: 0 0 6px 0; color: #1a252f; font-size: 1.3rem;">SUPERCALC - ADMIN</h2>
-            <p style="margin: 0 0 16px 0; color: #666; font-size: 0.85rem;">Digite o PIN master de gestão:</p>
-            <input type="password" id="inputPinAdmin" placeholder="••••••" style="width: 100%; text-align: center; font-size: 1.8rem; padding: 10px; border: 2px solid #cccccc; border-radius: 10px; margin-bottom: 14px;" onkeyup="if(event.key==='Enter') validarPinAdmin()">
-            <button onclick="validarPinAdmin()" style="width: 100%; background: #27ae60; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer;">Acessar Gestor Central</button>
-            <p id="msgErroAdmin" style="color: #e74c3c; font-size: 0.85rem; margin-top: 10px; display: none; font-weight: bold;">PIN incorreto ou não autorizado!</p>
-        </div>
-    </div>
-
-    <!-- CABEÇALHO -->
     <div class="top-bar">
-        <h1>GESTOR CENTRAL DE ESTOQUE SUPERCALC</h1>
-        <div class="btn-group">
-            <button class="btn-sm btn-pdf-color" onclick="exportarPDF()">PDF Cores</button>
-            <button class="btn-sm btn-pdf-pb" onclick="exportarPDF()">PDF P&B</button>
-        </div>
+        <h1>GESTOR MULTI-EMPREENDIMENTO</h1>
+        <button onclick="window.print()" style="background:#2980b9; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-weight:bold; cursor:pointer;">PDF Espelho</button>
     </div>
 
-    <!-- SELETOR DE INCORPORADORA E EMPREENDIMENTO -->
-    <div class="selector-card">
-        <div class="selector-grid">
+    <!-- PAINEL DE CONTROLE DE EMBARQUE E GAVETAS -->
+    <div class="control-card">
+        <div class="grid-select">
             <div>
-                <label>1. INCORPORADORA:</label>
-                <select id="selIncorporadora" onchange="filtrarEmpreendimentos()">
-                    <option value="">Todas as Incorporadoras</option>
-                    <option value="Marquês Construtora">Marquês Construtora</option>
+                <label>INCORPORADORA:</label>
+                <select id="selIncorporadora" onchange="carregarEmpreendimentos()">
+                    <option value="">Todas</option>
                     <option value="AAM Incorporadora">AAM Incorporadora</option>
-                    <option value="Imóveis de Terceiros">Imóveis de Terceiros</option>
+                    <option value="Marquês Construtora">Marquês Construtora</option>
+                    <option value="Terceiros">Imóveis de Terceiros</option>
                 </select>
             </div>
             <div>
-                <label>2. EMPREENDIMENTO:</label>
-                <select id="selEmpreendimento" onchange="carregarEmpreendimentoSelecionado()">
+                <label>EMPREENDIMENTO:</label>
+                <select id="selEmpreendimento" onchange="carregarMapeamentoEmpreendimento()">
                     <option value="">Selecione...</option>
                 </select>
             </div>
         </div>
-    </div>
 
-    <!-- RESUMO DE ESTOQUE -->
-    <div class="stats-bar">
-        <span>Matriz: <strong id="lblTotalMatriz">0</strong></span>
-        <span class="st-disp">🟢 Disp: <strong id="lblTotalDisp">0</strong></span>
-        <span class="st-promo">🔵 Promo: <strong id="lblTotalPromo">0</strong></span>
-        <span class="st-indisp">🔴 Indisp: <strong id="lblTotalIndisp">0</strong></span>
-    </div>
+        <!-- FILTRO DAS 5 GAVETAS (TIPOLOGIAS/MODALIDADES) -->
+        <label style="font-size: 0.7rem; font-weight: bold; color: var(--primary); margin-bottom: 2px; display: block;">FILTRAR GAVETA / MODALIDADE:</label>
+        <div class="gavetas-bar">
+            <button class="btn-gaveta active" onclick="filtrarGaveta('TODOS', this)">Todas as Unidades</button>
+            <button class="btn-gaveta" onclick="filtrarGaveta('HIS', this)">Gaveta 1: HIS</button>
+            <button class="btn-gaveta" onclick="filtrarGaveta('HMP', this)">Gaveta 2: HMP</button>
+            <button class="btn-gaveta" onclick="filtrarGaveta('NR', this)">Gaveta 3: NR / Short Stay</button>
+            <button class="btn-gaveta" onclick="filtrarGaveta('R2V', this)">Gaveta 4: R2V (Com Vaga)</button>
+            <button class="btn-gaveta" onclick="filtrarGaveta('TERCEIROS', this)">Gaveta 5: Avulsos</button>
+        </div>
 
-    <!-- PAINEL DE CONTROLE, FILTROS E TOGGLE DE MODO -->
-    <div class="control-card">
         <div class="mode-toggle-container">
-            <button id="btnModoTrava" class="mode-btn active-lock" onclick="definirModoClique('TRAVA')">
-                🔴 Clique Alterna: Disponível ⇄ Trava
-            </button>
-            <button id="btnModoPromo" class="mode-btn" onclick="definirModoClique('PROMO')">
-                🔵 Clique Alterna: Disponível ⇄ Promo
-            </button>
-        </div>
-
-        <div class="filter-grid">
-            <input type="text" id="filterText" placeholder="Filtrar andar ou unidade..." onkeyup="aplicarFiltros()">
-            <select id="filterPrumada" onchange="aplicarFiltros()">
-                <option value="">Todas as Prumadas</option>
-            </select>
-        </div>
-
-        <!-- BOTOES DE AÇÃO EM LOTE COM TRAVA DE SEGURANÇA -->
-        <div class="bulk-actions">
-            <button class="btn-bulk btn-lock" onclick="confirmarAlterarStatusVisiveis('INDISPONIVEL')">🔒 Travar Visíveis</button>
-            <button class="btn-bulk btn-free" onclick="confirmarAlterarStatusVisiveis('DISPONIVEL')">🔓 Liberar Visíveis</button>
-            <button class="btn-bulk btn-promo-bulk" onclick="confirmarAlterarStatusVisiveis('PROMOCIONAL')">🏷️ Promo Visíveis</button>
-            <button class="btn-bulk btn-reset" onclick="abrirModalReset()">🔄 Resetar...</button>
+            <button id="btnModoTrava" class="mode-btn active-lock" onclick="setModo('TRAVA')">🔴 Clique: Disp ⇄ Trava</button>
+            <button id="btnModoPromo" class="mode-btn" onclick="setModo('PROMO')">🔵 Clique: Disp ⇄ Promo</button>
         </div>
     </div>
 
-    <!-- MATRIZ DE ESTOQUE -->
+    <!-- GRID VISUAL MAPEADO -->
     <div class="matrix-wrapper">
         <table class="matrix-table">
             <thead>
-                <tr id="matrixHeaderRow">
-                    <th style="width: 38px;">Andar</th>
-                </tr>
+                <tr id="matrixHeader"><th>Andar</th></tr>
             </thead>
-            <tbody id="matrixTbody"></tbody>
+            <tbody id="matrixBody"></tbody>
         </table>
     </div>
 
-    <!-- BOTÃO FLUTUANTE SALVAR -->
-    <button class="btn-fab-save" onclick="salvarEstoque()" title="Salvar Alterações de Estoque">
-        💾
-    </button>
-
-    <!-- MODAL CONFIRMAÇÃO RESET -->
-    <div class="modal-overlay" id="modalReset">
-        <div class="modal-box">
-            <h3>🔄 Opções de Reset de Estoque</h3>
-            <p style="font-size:0.8rem; color:#666; margin-bottom:14px;">Escolha a ação desejada para o empreendimento atual:</p>
-            
-            <button class="modal-btn" style="background:#2980b9; color:#fff;" onclick="executarReset('FILTROS')">
-                1. Limpar Apenas Filtros da Tela
-            </button>
-            <button class="modal-btn" style="background:#e67e22; color:#fff;" onclick="executarReset('RASCUNHO')">
-                2. Descartar Alterações Não Salvas
-            </button>
-            <button class="modal-btn" style="background:#e74c3c; color:#fff;" onclick="executarReset('ZERAR')">
-                3. ⚠️ ZERAR ESTOQUE (Tudo Liberado/Disponível)
-            </button>
-            <button class="modal-btn" style="background:#7f8c8d; color:#fff; margin-top:6px;" onclick="fecharModalReset()">
-                Cancelar
-            </button>
-        </div>
-    </div>
+    <button class="btn-fab-save" onclick="salvarEstoque()" title="Salvar Alterações">💾</button>
 
     <script>
-        // BANCO DE DADOS DE TESTE LOCAL (MOCK MULTI-EMPREENDIMENTO)
-        const BASE_EMPREENDIMENTOS = [
-            { id: "emp_1", nome: "Marquês by Cambur", inc: "Marquês Construtora", andares: 25, prumadas: 18 },
-            { id: "emp_2", nome: "Residencial AAM Vila Mariana", inc: "AAM Incorporadora", andares: 15, prumadas: 8 },
-            { id: "emp_3", nome: "Avulso Moema 3D", inc: "Imóveis de Terceiros", andares: 12, prumadas: 4 }
-        ];
-
-        let empreendimentoAtual = null;
-        let setIndisponiveis = new Set();
-        let setPromocionais = new Set();
-        let listaUnidadesGlobal = [];
+        let unidadesGlobais = [];
         let prumadasUnicas = [];
-        let modoCliqueAtivo = 'TRAVA';
+        let modoAtivo = 'TRAVA';
+        let gavetaAtiva = 'TODOS';
 
-        window.onload = function() {
-            if (sessionStorage.getItem("auth_admin_ok") === "true") {
-                document.getElementById("loginOverlay").style.display = "none";
-                inicializarPainel();
-            }
-        };
-
-        function validarPinAdmin() {
-            const digitado = document.getElementById("inputPinAdmin").value.trim();
-            if (digitado === "123456" || digitado === "120873") {
-                sessionStorage.setItem("auth_admin_ok", "true");
-                document.getElementById("loginOverlay").style.display = "none";
-                inicializarPainel();
-            } else {
-                const msg = document.getElementById("msgErroAdmin");
-                msg.style.display = "block";
-            }
-        }
-
-        function inicializarPainel() {
-            filtrarEmpreendimentos();
-        }
-
-        function filtrarEmpreendimentos() {
-            const incSel = document.getElementById("selIncorporadora").value;
+        // 1. Carga inicial dos empreendimentos
+        async function carregarEmpreendimentos() {
+            const inc = document.getElementById("selIncorporadora").value;
             const selEmp = document.getElementById("selEmpreendimento");
-            selEmp.innerHTML = '<option value="">Selecione um Empreendimento...</option>';
+            selEmp.innerHTML = '<option value="">Carregando...</option>';
 
-            BASE_EMPREENDIMENTOS.forEach(emp => {
-                if (!incSel || emp.inc === incSel) {
+            // Consulta Supabase
+            const { data: developments } = await supabase.from('developments').select('*').order('title');
+            
+            selEmp.innerHTML = '<option value="">Selecione um empreendimento...</option>';
+            developments.forEach(emp => {
+                if (!inc || emp.developer_name === inc) {
                     const opt = document.createElement("option");
                     opt.value = emp.id;
-                    opt.innerText = `${emp.nome} (${emp.inc})`;
+                    opt.innerText = `${emp.title} (${emp.developer_name})`;
                     selEmp.appendChild(opt);
                 }
             });
-
-            if (selEmp.options.length > 1) {
-                selEmp.selectedIndex = 1;
-                carregarEmpreendimentoSelecionado();
-            }
         }
 
-        function carregarEmpreendimentoSelecionado() {
+        // 2. Monta o Espelho de Vendas conforme a grade real do prédio
+        async function carregarMapeamentoEmpreendimento() {
             const empId = document.getElementById("selEmpreendimento").value;
-            empreendimentoAtual = BASE_EMPREENDIMENTOS.find(e => e.id === empId);
-            if (!empreendimentoAtual) return;
+            if (!empId) return;
 
-            listaUnidadesGlobal = [];
-            for (let a = 1; a <= empreendimentoAtual.andares; a++) {
-                for (let p = 1; p <= empreendimentoAtual.prumadas; p++) {
-                    const pStr = p < 10 ? `0${p}` : `${p}`;
-                    listaUnidadesGlobal.push({
-                        num: `${a}${pStr}`,
-                        andar: a,
-                        prumada: pStr
-                    });
-                }
-            }
+            // Busca todas as unidades cadastradas no Supabase para o prédio
+            const { data: units } = await supabase.from('units').select('*').eq('development_id', empId).order('unit_number');
 
-            const pSet = new Set(listaUnidadesGlobal.map(u => u.prumada));
+            unidadesGlobais = units;
+
+            // Extrai as prumadas/finais dinamicamente
+            const pSet = new Set();
+            unidadesGlobais.forEach(u => {
+                const num = String(u.unit_number);
+                const final = num.length >= 3 ? num.slice(-2) : num;
+                pSet.add(final);
+            });
             prumadasUnicas = Array.from(pSet).sort((a,b) => parseInt(a) - parseInt(b));
 
-            const selP = document.getElementById("filterPrumada");
-            selP.innerHTML = '<option value="">Todas as Prumadas</option>';
-            prumadasUnicas.forEach(p => {
-                const opt = document.createElement("option");
-                opt.value = p;
-                opt.innerText = `Prumada ${p}`;
-                selP.appendChild(opt);
-            });
-
-            carregarCacheLocalEmpreendimento();
-            montarEstruturaTabelaMatriz();
-            renderizarMatrizEstoque();
+            renderizarGrid();
         }
 
-        function carregarCacheLocalEmpreendimento() {
-            setIndisponiveis.clear();
-            setPromocionais.clear();
-            const salvo = localStorage.getItem(`estoque_${empreendimentoAtual.id}`);
-            if (salvo) {
-                try {
-                    const parsed = JSON.parse(salvo);
-                    if (Array.isArray(parsed.indisponiveis)) setIndisponiveis = new Set(parsed.indisponiveis.map(String));
-                    if (Array.isArray(parsed.promocionais)) setPromocionais = new Set(parsed.promocionais.map(String));
-                } catch(e) {}
-            }
-        }
+        // 3. Renderiza a Matriz (Andares x Prumadas)
+        function renderizarGrid() {
+            const thead = document.getElementById("matrixHeader");
+            const tbody = document.getElementById("matrixBody");
+            
+            thead.innerHTML = '<th>Andar</th>';
+            prumadasUnicas.forEach(p => thead.innerHTML += `<th>P.${p}</th>`);
 
-        function salvarCacheLocalEmpreendimento() {
-            if (!empreendimentoAtual) return;
-            const payload = {
-                indisponiveis: Array.from(setIndisponiveis),
-                promocionais: Array.from(setPromocionais)
-            };
-            localStorage.setItem(`estoque_${empreendimentoAtual.id}`, JSON.stringify(payload));
-        }
-
-        function definirModoClique(modo) {
-            modoCliqueAtivo = modo;
-            document.getElementById("btnModoTrava").className = modo === 'TRAVA' ? 'mode-btn active-lock' : 'mode-btn';
-            document.getElementById("btnModoPromo").className = modo === 'PROMO' ? 'mode-btn active-promo' : 'mode-btn';
-        }
-
-        function montarEstruturaTabelaMatriz() {
-            const headerRow = document.getElementById("matrixHeaderRow");
-            headerRow.innerHTML = '<th style="width: 38px;">Andar</th>';
-            prumadasUnicas.forEach(p => {
-                const th = document.createElement("th");
-                th.innerText = `P.${p}`;
-                th.className = `col-prumada-${p}`;
-                headerRow.appendChild(th);
-            });
-        }
-
-        function renderizarMatrizEstoque() {
-            const tbody = document.getElementById("matrixTbody");
             tbody.innerHTML = '';
 
+            // Agrupa por pavimento
             const andaresMap = new Map();
-            listaUnidadesGlobal.forEach(u => {
-                if (!andaresMap.has(u.andar)) andaresMap.set(u.andar, new Map());
-                andaresMap.get(u.andar).set(u.prumada, u);
+            unidadesGlobais.forEach(u => {
+                const num = String(u.unit_number);
+                const final = num.length >= 3 ? num.slice(-2) : num;
+                
+                // Filtro pelas 5 gavetas
+                if (gavetaAtiva !== 'TODOS' && !u.typology.toUpperCase().includes(gavetaAtiva)) return;
+
+                if (!andaresMap.has(u.floor)) andaresMap.set(u.floor, new Map());
+                andaresMap.get(u.floor).set(final, u);
             });
 
             const andaresOrdenados = Array.from(andaresMap.keys()).sort((a,b) => b - a);
-            let cntDisp = 0, cntPromo = 0, cntIndisp = 0;
 
             andaresOrdenados.forEach(andar => {
                 const tr = document.createElement("tr");
-                tr.setAttribute("data-andar", andar);
-                let htmlRow = `<td class="andar-tag">${andar}º</td>`;
+                let rowHtml = `<td class="andar-tag">${andar}º</td>`;
 
                 prumadasUnicas.forEach(p => {
-                    const u = andaresMap.get(andar).get(p);
+                    const u = andaresMap.get(andar)?.get(p);
                     if (u) {
-                        const numStr = String(u.num);
-                        const isIndisp = setIndisponiveis.has(numStr);
-                        const isPromo = setPromocionais.has(numStr);
+                        let stClass = 'unit-disp';
+                        let stTxt = 'DISP';
+                        if (u.status === 'INDISPONIVEL') { stClass = 'unit-indisp'; stTxt = 'TRAV'; }
+                        if (u.status === 'PROMOCIONAL') { stClass = 'unit-promo'; stTxt = 'PROMO'; }
 
-                        let classeCard = 'unit-disp';
-                        let textoStatus = 'DISP';
-
-                        if (isIndisp) {
-                            classeCard = 'unit-indisp';
-                            textoStatus = 'TRAV';
-                            cntIndisp++;
-                        } else if (isPromo) {
-                            classeCard = 'unit-promo';
-                            textoStatus = 'PROMO';
-                            cntPromo++;
-                        } else {
-                            cntDisp++;
-                        }
-
-                        htmlRow += `
-                            <td class="col-prumada-${p}">
-                                <div class="unit-card ${classeCard}" data-num="${numStr}" onclick="alternarStatusUnidade('${numStr}')">
-                                    <span class="num">${numStr}</span>
-                                    <span class="st">${textoStatus}</span>
+                        rowHtml += `
+                            <td>
+                                <div class="unit-card ${stClass}" onclick="alternarStatus('${u.id}')" ondblclick="enviarParaSuperCalc('${u.id}')">
+                                    <span class="num">${u.unit_number}</span>
+                                    <span class="st">${stTxt}</span>
                                 </div>
                             </td>`;
                     } else {
-                        htmlRow += `<td class="col-prumada-${p}"></td>`;
+                        rowHtml += `<td></td>`;
                     }
                 });
 
-                tr.innerHTML = htmlRow;
+                tr.innerHTML = rowHtml;
                 tbody.appendChild(tr);
             });
-
-            document.getElementById("lblTotalMatriz").innerText = listaUnidadesGlobal.length;
-            document.getElementById("lblTotalDisp").innerText = cntDisp;
-            document.getElementById("lblTotalPromo").innerText = cntPromo;
-            document.getElementById("lblTotalIndisp").innerText = cntIndisp;
-
-            aplicarFiltros();
         }
 
-        function alternarStatusUnidade(numStr) {
-            if (modoCliqueAtivo === 'TRAVA') {
-                if (setIndisponiveis.has(numStr)) {
-                    setIndisponiveis.delete(numStr);
-                } else {
-                    setIndisponiveis.add(numStr);
-                    setPromocionais.delete(numStr);
-                }
+        // 4. Alteração de Status com 1 clique e persistência
+        async function alternarStatus(unitId) {
+            const u = unidadesGlobais.find(x => x.id === unitId);
+            if (!u) return;
+
+            let novoStatus = 'DISPONIVEL';
+            if (modoAtivo === 'TRAVA') {
+                novoStatus = (u.status === 'INDISPONIVEL') ? 'DISPONIVEL' : 'INDISPONIVEL';
             } else {
-                if (setPromocionais.has(numStr)) {
-                    setPromocionais.delete(numStr);
-                } else {
-                    setPromocionais.add(numStr);
-                    setIndisponiveis.delete(numStr);
-                }
+                novoStatus = (u.status === 'PROMOCIONAL') ? 'DISPONIVEL' : 'PROMOCIONAL';
             }
 
-            salvarCacheLocalEmpreendimento();
-            renderizarMatrizEstoque();
+            u.status = novoStatus;
+            renderizarGrid();
+
+            // Grava no Supabase
+            await supabase.from('units').update({ status: novoStatus }).eq('id', unitId);
         }
 
-        function aplicarFiltros() {
-            const textoQuery = document.getElementById("filterText").value.trim().toLowerCase();
-            const prumadaSel = document.getElementById("filterPrumada").value;
-
-            prumadasUnicas.forEach(p => {
-                const cols = document.querySelectorAll(`.col-prumada-${p}`);
-                const visivel = !prumadaSel || prumadaSel === p;
-                cols.forEach(c => c.style.display = visivel ? '' : 'none');
-            });
-
-            const trs = document.querySelectorAll("#matrixTbody tr");
-            trs.forEach(tr => {
-                const andar = tr.getAttribute("data-andar");
-                const cards = tr.querySelectorAll(".unit-card");
-                let algumVisivel = false;
-
-                cards.forEach(card => {
-                    const num = card.getAttribute("data-num");
-                    if (!textoQuery || num.includes(textoQuery) || andar === textoQuery) algumVisivel = true;
-                });
-
-                tr.style.display = (!textoQuery || algumVisivel) ? '' : 'none';
-            });
+        // 5. Filtro de Gavetas
+        function filtrarGaveta(gaveta, btn) {
+            gavetaAtiva = gaveta;
+            document.querySelectorAll('.btn-gaveta').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderizarGrid();
         }
 
-        /* TRAVA DE SEGURANÇA PARA AÇÕES EM LOTE */
-        function confirmarAlterarStatusVisiveis(novoStatus) {
-            const trsVisiveis = document.querySelectorAll("#matrixTbody tr:not([style*='display: none'])");
-            let totalAfetados = 0;
-
-            trsVisiveis.forEach(tr => {
-                const cardsVisiveis = tr.querySelectorAll(".unit-card");
-                cardsVisiveis.forEach(card => {
-                    const parentTd = card.closest('td');
-                    if (parentTd && parentTd.style.display !== 'none') {
-                        totalAfetados++;
-                    }
-                });
-            });
-
-            if (totalAfetados === 0) {
-                alert("⚠️ Nenhuma unidade visível na tela para alterar com os filtros atuais.");
-                return;
-            }
-
-            let nomeStatus = 'DISPONÍVEIS';
-            if (novoStatus === 'INDISPONIVEL') nomeStatus = 'TRAVADAS (INDISPONÍVEIS)';
-            if (novoStatus === 'PROMOCIONAL') nomeStatus = 'PROMOCIONAIS';
-
-            const confirmou = confirm(
-                `⚠️ TRAVA DE SEGURANÇA ⚠️\n\n` +
-                `Você está prestes a alterar o status de ${totalAfetados} unidade(s) visíveis na tela para "${nomeStatus}".\n\n` +
-                `Esta ação modificará todas as unidades filtradas de uma só vez.\n\n` +
-                `Deseja REALMENTE continuar?`
-            );
-
-            if (confirmou) {
-                alterarStatusVisiveis(novoStatus);
-            }
+        function setModo(m) {
+            modoAtivo = m;
+            document.getElementById("btnModoTrava").className = m === 'TRAVA' ? 'mode-btn active-lock' : 'mode-btn';
+            document.getElementById("btnModoPromo").className = m === 'PROMO' ? 'mode-btn active-promo' : 'mode-btn';
         }
 
-        function alterarStatusVisiveis(novoStatus) {
-            const trsVisiveis = document.querySelectorAll("#matrixTbody tr:not([style*='display: none'])");
-            trsVisiveis.forEach(tr => {
-                const cardsVisiveis = tr.querySelectorAll(".unit-card");
-                cardsVisiveis.forEach(card => {
-                    const parentTd = card.closest('td');
-                    if (parentTd && parentTd.style.display !== 'none') {
-                        const numStr = card.getAttribute("data-num");
-                        if (novoStatus === 'INDISPONIVEL') {
-                            setIndisponiveis.add(numStr); setPromocionais.delete(numStr);
-                        } else if (novoStatus === 'DISPONIVEL') {
-                            setIndisponiveis.delete(numStr); setPromocionais.delete(numStr);
-                        } else if (novoStatus === 'PROMOCIONAL') {
-                            setPromocionais.add(numStr); setIndisponiveis.delete(numStr);
-                        }
-                    }
-                });
-            });
+        // 6. Envia a unidade para a SuperCalc com duplo clique no card
+        function enviarParaSuperCalc(unitId) {
+            const u = unidadesGlobais.find(x => x.id === unitId);
+            if (!u || u.status === 'INDISPONIVEL') return;
 
-            salvarCacheLocalEmpreendimento();
-            renderizarMatrizEstoque();
+            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify({
+                unidade: u.unit_number,
+                precoTabela: u.list_price,
+                m2: u.private_area_m2,
+                tipologia: u.typology
+            }));
+
+            window.location.href = "supercalc.html";
         }
-
-        function abrirModalReset() { document.getElementById("modalReset").style.display = "flex"; }
-        function fecharModalReset() { document.getElementById("modalReset").style.display = "none"; }
-
-        function executarReset(tipo) {
-            fecharModalReset();
-            if (tipo === 'FILTROS') {
-                document.getElementById("filterText").value = '';
-                document.getElementById("filterPrumada").value = '';
-                aplicarFiltros();
-            } else if (tipo === 'RASCUNHO') {
-                const confirmou = confirm("Deseja descartar as alterações não salvas e recarregar o último estado gravado?");
-                if (confirmou) {
-                    carregarCacheLocalEmpreendimento();
-                    renderizarMatrizEstoque();
-                }
-            } else if (tipo === 'ZERAR') {
-                const confirmou = confirm(
-                    `⚠️ TRAVA DE SEGURANÇA CRÍTICA ⚠️\n\n` +
-                    `Tem certeza de que deseja ZERAR todo o estoque do empreendimento "${empreendimentoAtual.nome}"?\n\n` +
-                    `Esta ação removerá TODAS as travas e promoções e deixará 100% das unidades DISPONÍVEIS.`
-                );
-
-                if (confirmou) {
-                    setIndisponiveis.clear(); 
-                    setPromocionais.clear();
-                    salvarCacheLocalEmpreendimento();
-                    renderizarMatrizEstoque();
-                    alert("🔄 Estoque zerado com sucesso! Todas as unidades foram liberadas.");
-                }
-            }
-        }
-
-        function salvarEstoque() {
-            if (!empreendimentoAtual) {
-                alert("⚠️ Selecione um empreendimento antes de salvar.");
-                return;
-            }
-
-            const confirmou = confirm(`💾 CONFIRMAÇÃO DE GRAVAÇÃO\n\nDeseja salvar as alterações no estoque do empreendimento "${empreendimentoAtual.nome}"?`);
-
-            if (confirmou) {
-                salvarCacheLocalEmpreendimento();
-                alert(`✅ Estoque do empreendimento "${empreendimentoAtual.nome}" salvo com sucesso!`);
-            }
-        }
-
-        function exportarPDF() { window.print(); }
     </script>
 </body>
 </html>
