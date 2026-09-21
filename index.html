@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prateleira de Imóveis - SuperCalc</title>
+    <title>SuperCalc - Prateleira de Imóveis</title>
     
     <!-- FAVICON SUPERCALC -->
     <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
@@ -20,7 +20,6 @@
         .badge-pronto { background-color: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
         .badge-obra { background-color: #fffaf0; color: #7b341e; border: 1px solid #feebc8; }
         
-        /* Tabela Compacta Mobile */
         .list-row:nth-child(even) { background-color: #f8fafc; }
         .list-row:hover { background-color: #f1f5f9; }
     </style>
@@ -29,7 +28,7 @@
 
     <div class="max-w-7xl mx-auto space-y-4">
 
-        <!-- CABEÇALHO COMPACTO DA PRATELEIRA -->
+        <!-- CABEÇALHO DA PRATELEIRA PRINCIPAL -->
         <header class="bg-slate-900 text-white p-4 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b-4 border-yellow-400">
             <div>
                 <h1 class="text-lg md:text-xl font-black tracking-tight flex items-center gap-2">
@@ -38,24 +37,24 @@
                 <p class="text-[11px] text-yellow-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
             </div>
 
-            <!-- FILTRO RÁPIDO: GLOBAL VS PRIVADO E MODO DE VISÃO -->
+            <!-- FILTRO DE ORIGEM (GLOBAL VS PRIVADO) E VISUALIZAÇÃO -->
             <div class="flex flex-wrap items-center gap-2 text-xs font-bold w-full md:w-auto">
-                <button onclick="setFiltroOrigem('TODOS', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-900 shadow-sm">
+                <button onclick="setFiltroOrigem('TODOS', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-900 shadow-sm font-black">
                     Todos
                 </button>
                 <button onclick="setFiltroOrigem('GLOBAL', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700">
                     🏷️ Globais
                 </button>
                 <button onclick="setFiltroOrigem('PRIVADO', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700">
-                    🔒 Privados
+                    🔒 Privados / Terceiros
                 </button>
 
                 <div class="h-5 w-[1px] bg-slate-700 hidden md:block"></div>
 
-                <!-- ALTERNADOR LISTA / CARDS -->
+                <!-- ALTERNADOR DE VISÃO (LISTA COMPACTA VS CARDS) -->
                 <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
                     <button id="btnViewLista" onclick="setModoVisao('LISTA')" class="px-2.5 py-1 rounded-md bg-yellow-400 text-slate-900 font-black">
-                        📋 Lista
+                        📋 Lista Densa
                     </button>
                     <button id="btnViewCards" onclick="setModoVisao('CARDS')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-bold">
                         🎴 Cards
@@ -64,7 +63,7 @@
             </div>
         </header>
 
-        <!-- FILTROS AVANÇADOS COMBINADOS -->
+        <!-- FILTROS COMBINADOS -->
         <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
             <div class="flex justify-between items-center border-b pb-2">
                 <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Filtros Avançados de Busca</h2>
@@ -79,7 +78,7 @@
                         <option value="TODAS">Todas as Construtoras</option>
                         <option value="AAM Incorporadora">AAM Incorporadora</option>
                         <option value="Marquês Construtora">Marquês Construtora</option>
-                        <option value="PRIVADO">🔒 Apenas Terceiros (Privado)</option>
+                        <option value="Imóveis de Terceiros">🔒 Terceiros / Avulsos</option>
                     </select>
                 </div>
 
@@ -140,7 +139,7 @@
                 <span class="text-xs font-black text-slate-600 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades...</span>
             </div>
 
-            <!-- MODO LISTA COMPACTA (PADRÃO) -->
+            <!-- MODO LISTA COMPACTA (PADRÃO PARA CELULAR E DESKTOP) -->
             <div id="containerLista" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -156,37 +155,86 @@
                             </tr>
                         </thead>
                         <tbody id="tbodyLista" class="text-xs font-medium text-slate-700 divide-y divide-slate-100">
-                            <!-- Linhas inseridas via JS -->
+                            <!-- Inserido dinamicamente via JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- MODO CARDS (OPCIONAL) -->
+            <!-- MODO CARDS -->
             <div id="containerCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 hidden">
-                <!-- Cards inseridos via JS -->
+                <!-- Inserido dinamicamente via JS -->
             </div>
         </main>
     </div>
 
     <script>
-        // MOCK LOCAL DE INVENTÁRIO (SUL/SP)
+        // CONFIGURAÇÃO SUPABASE
+        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
+        const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC_AQUI';
+        let supabaseClient = null;
+
+        if (typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('SEU_PROJETO') === -1) {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        // MOCK DE FALLBACK LOCAL
         const ESTOQUE_MOCK = [
-            { id: "u1", origem: "GLOBAL", construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2001", pavimento: 20, dorms: 0, vagas: 0, m2: 27.12, precoTabela: 667599, is_ready: true },
-            { id: "u2", origem: "GLOBAL", construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2006", pavimento: 20, dorms: 0, vagas: 0, m2: 28.52, precoTabela: 695110, is_ready: true },
-            { id: "u3", origem: "GLOBAL", construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2008", pavimento: 20, dorms: 0, vagas: 0, m2: 25.80, precoTabela: 628817, is_ready: true },
-            { id: "u4", origem: "GLOBAL", construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "101", pavimento: 1, dorms: 1, vagas: 0, m2: 28.50, precoTabela: 251400, is_ready: false },
-            { id: "u5", origem: "GLOBAL", construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "1204", pavimento: 12, dorms: 2, vagas: 1, m2: 48.00, precoTabela: 525900, is_ready: false },
-            { id: "u6", origem: "PRIVADO", construtora: "Imóveis de Terceiros", empreendimento: "Residencial Avulso Pinheiros", unidade: "81", pavimento: 8, dorms: 2, vagas: 1, m2: 55.00, precoTabela: 590000, is_ready: true }
+            { id: "u1", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2001", pavimento: 20, dorms: 0, vagas: 0, m2: 27.12, precoTabela: 667599, is_ready: true },
+            { id: "u2", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2006", pavimento: 20, dorms: 0, vagas: 0, m2: 28.52, precoTabela: 695110, is_ready: true },
+            { id: "u3", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "101", pavimento: 1, dorms: 1, vagas: 0, m2: 28.50, precoTabela: 251400, is_ready: false },
+            { id: "u4", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "1204", pavimento: 12, dorms: 2, vagas: 1, m2: 48.00, precoTabela: 525900, is_ready: false },
+            { id: "u5", is_global: false, construtora: "Imóveis de Terceiros", empreendimento: "Residencial Avulso Pinheiros", unidade: "81", pavimento: 8, dorms: 2, vagas: 1, m2: 55.00, precoTabela: 590000, is_ready: true }
         ];
 
-        let modoVisaoAtual = 'LISTA'; // 'LISTA' ou 'CARDS'
-        let filtroOrigemAtual = 'TODOS'; // 'TODOS', 'GLOBAL', 'PRIVADO'
+        let unidadesCarregadas = [];
+        let modoVisaoAtual = 'LISTA';
+        let filtroOrigemAtual = 'TODOS';
 
-        window.onload = function() {
+        window.onload = async function() {
+            await carregarEstoqueGeral();
             atualizarEmpreendimentos();
             filtrarEstoque();
         };
+
+        async function carregarEstoqueGeral() {
+            unidadesCarregadas = [];
+
+            if (supabaseClient) {
+                try {
+                    const { data: units, error } = await supabaseClient
+                        .from('units')
+                        .select('*, developments(title, developer_name, is_ready, is_global)')
+                        .eq('status', 'DISPONIVEL');
+
+                    if (!error && data && data.length > 0) {
+                        unidadesCarregadas = data.map(u => {
+                            const isThird = u.developments?.developer_name === 'Imóveis de Terceiros' || u.developments?.is_third_party;
+                            // Se for imóvel de terceiros/avulso, is_global é estritamente FALSE
+                            const flagGlobal = isThird ? false : (u.developments?.is_global ?? true);
+
+                            return {
+                                id: u.id,
+                                is_global: flagGlobal,
+                                construtora: u.developments?.developer_name || 'Desconhecida',
+                                empreendimento: u.developments?.title || 'Edifício',
+                                unidade: String(u.unit_number),
+                                pavimento: u.floor,
+                                dorms: u.typology?.includes('HIS') ? 1 : (u.typology?.includes('R2V') ? 2 : 0),
+                                vagas: u.parking_spaces || 0,
+                                m2: u.private_area_m2 || 0,
+                                precoTabela: u.list_price || 0,
+                                is_ready: u.developments?.is_ready || false
+                            };
+                        });
+                    }
+                } catch(e) {}
+            }
+
+            if (unidadesCarregadas.length === 0) {
+                unidadesCarregadas = ESTOQUE_MOCK;
+            }
+        }
 
         function setModoVisao(modo) {
             modoVisaoAtual = modo;
@@ -224,8 +272,8 @@
             selectEmp.innerHTML = '<option value="TODOS">Todos os Edifícios</option>';
 
             const empreendimentosUnicos = [...new Set(
-                ESTOQUE_MOCK
-                    .filter(i => construtora === "TODAS" || (construtora === "PRIVADO" ? i.origem === "PRIVADO" : i.construtora === construtora))
+                unidadesCarregadas
+                    .filter(i => construtora === "TODAS" || (construtora === "PRIVADO" ? !i.is_global : i.construtora === construtora))
                     .map(i => i.empreendimento)
             )];
 
@@ -245,14 +293,19 @@
             const vagasSel = document.getElementById("filtroVagas").value;
             const precoMax = parseFloat(document.getElementById("filtroPrecoMax").value) || Infinity;
 
-            const filtrados = ESTOQUE_MOCK.filter(item => {
-                // Origem
-                const bateOrigem = filtroOrigemAtual === 'TODOS' || item.origem === filtroOrigemAtual;
+            const filtrados = unidadesCarregadas.filter(item => {
+                // Origem Global vs Privado
+                let bateOrigem = true;
+                if (filtroOrigemAtual === 'GLOBAL') bateOrigem = item.is_global === true;
+                if (filtroOrigemAtual === 'PRIVADO') bateOrigem = item.is_global === false;
+
                 // Construtora
-                const bateConstrutora = construtora === "TODAS" || (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
+                const bateConstrutora = construtora === "TODAS" || (construtora === "PRIVADO" ? !item.is_global : item.construtora === construtora);
+                
                 // Empreendimento
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
-                // Status Entrega
+                
+                // Status Entrega (Pronto x Obra)
                 let bateStatus = true;
                 if (statusEntrega === "PRONTO") bateStatus = item.is_ready;
                 if (statusEntrega === "OBRA") bateStatus = !item.is_ready;
@@ -297,7 +350,7 @@
                 }
 
                 lista.forEach(item => {
-                    const isGlobal = item.origem === 'GLOBAL';
+                    const isGlobal = item.is_global;
                     const isReady = item.is_ready;
 
                     const tr = document.createElement("tr");
@@ -346,7 +399,7 @@
                 }
 
                 lista.forEach(item => {
-                    const isGlobal = item.origem === 'GLOBAL';
+                    const isGlobal = item.is_global;
                     const isReady = item.is_ready;
 
                     const card = document.createElement("div");
@@ -398,7 +451,7 @@
         }
 
         function enviarParaSuperCalc(id) {
-            const item = ESTOQUE_MOCK.find(i => i.id === id);
+            const item = unidadesCarregadas.find(i => i.id === id);
             if (!item) return;
 
             const payload = {
@@ -409,7 +462,7 @@
                 dorms: item.dorms === 0 ? 'Studio / Loft' : `${item.dorms} Dormitório(s)`,
                 vagas: item.vagas,
                 is_ready: item.is_ready,
-                origem: item.origem
+                origem: item.is_global ? 'GLOBAL' : 'PRIVADO'
             };
 
             localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(payload));
