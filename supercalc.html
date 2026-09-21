@@ -33,10 +33,7 @@
             border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px; margin-bottom: 6px;
         }
 
-        .sticky-summary .emp-title-compact {
-            font-size: 1rem; font-weight: 900; color: var(--accent); text-transform: uppercase;
-        }
-
+        .sticky-summary .emp-title-compact { font-size: 1rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
         .sticky-summary .emp-sub-compact { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; }
 
         .sticky-summary .proposal-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -81,7 +78,7 @@
 
     <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira de Imóveis</button>
 
-    <!-- PAINEL SUPERIOR FIXO -->
+    <!-- PAINEL FIXO DE COMUNICAÇÃO DO TOTAL -->
     <div class="sticky-summary">
         <div class="unit-info-row">
             <div>
@@ -89,7 +86,7 @@
                 <div class="emp-sub-compact" id="bannerEmpSub">Aguardando dados...</div>
             </div>
             <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.65rem; font-weight:800; padding:3px 6px; border-radius:4px; border:1px solid var(--accent);">
-                FLUXO DE OBRA
+                FLUXO DADOS DA TABELA
             </span>
         </div>
         
@@ -107,7 +104,7 @@
     <!-- IDENTIFICAÇÃO -->
     <div class="card">
         <h3>Identificação Completa da Proposta</h3>
-        <div class="grid-3">
+        <div class="grid-4">
             <div>
                 <label>Empreendimento:</label>
                 <input type="text" id="inputEmpreendimento" value="NENHUM SELECIONADO" oninput="atualizarHeader()">
@@ -119,6 +116,10 @@
             <div>
                 <label>Unidade / Apto:</label>
                 <input type="text" id="inputUnidade" value="000" oninput="atualizarHeader()">
+            </div>
+            <div>
+                <label>Andar / Pavimento:</label>
+                <input type="text" id="inputAndar" value="0" oninput="atualizarHeader()">
             </div>
         </div>
 
@@ -132,7 +133,7 @@
                 <input type="text" id="inputCPF" placeholder="000.000.000-00">
             </div>
             <div>
-                <label>Contacto / Telemóvel:</label>
+                <label>Contacto / Telefone:</label>
                 <input type="text" id="inputTelefoneCliente" placeholder="(11) 99999-9999">
             </div>
         </div>
@@ -161,9 +162,9 @@
         </div>
     </div>
 
-    <!-- VALORES BASE -->
+    <!-- VALORES BASE E ESPECIFICAÇÕES -->
     <div class="card">
-        <h3>1. Valores Base da Unidade</h3>
+        <h3>1. Linha de Tabela & Especificações da Unidade</h3>
         <div class="grid-4">
             <div>
                 <label>Tipologia:</label>
@@ -174,19 +175,23 @@
                 <input type="text" id="inputAreaM2" value="0.00" oninput="atualizarHeader()">
             </div>
             <div>
-                <label>Valor Tabela (R$):</label>
-                <input type="number" id="valorTotalTabela" value="0" step="1000" oninput="recalculateAll()">
+                <label>Vagas de Garagem:</label>
+                <input type="text" id="inputVagas" value="0" oninput="atualizarHeader()">
             </div>
             <div>
-                <label style="color: #2980b9;">Opcionais / Extras (R$):</label>
-                <input type="number" id="valOpcionais" value="0" step="1000" oninput="recalculateAll()">
+                <label style="color:var(--success);">Preço Tabela (R$):</label>
+                <input type="number" id="valorTotalTabela" value="0" step="1000" oninput="recalculateAll()">
             </div>
+        </div>
+        <div style="margin-top: 8px;">
+            <label style="color: #2980b9;">Opcionais / Acabamentos / Extras (R$):</label>
+            <input type="number" id="valOpcionais" value="0" step="1000" oninput="recalculateAll()">
         </div>
     </div>
 
-    <!-- FLUXO DE PAGAMENTO COMPLETO DE OBRA -->
+    <!-- ENGENHARIA FINANCEIRA COMPLETA E COMUNICANTE -->
     <div class="card">
-        <h3>2. Fluxo de Pagamento (Período de Obras + Financiamento)</h3>
+        <h3>2. Engenharia Financeira da Proposta (Comunicação em Tempo Real)</h3>
 
         <!-- SINAL / ATO -->
         <div class="form-group">
@@ -201,9 +206,9 @@
             <div class="calculated-badge" id="badgeAto">Sinal: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- PARCELAS MENSAIS -->
+        <!-- MENSEIS -->
         <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-            <label style="font-weight:bold; color:#1e293b;">2. Mensais durante as Obras:</label>
+            <label style="font-weight:bold; color:#1e293b;">2. Parcelas Mensais durante a Obra:</label>
             <div class="grid-2">
                 <div>
                     <label>Qtd. Parcelas:</label>
@@ -217,7 +222,7 @@
             <div class="calculated-badge" id="badgeTotalMensais">Total Mensais: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- PARCELAS ANUAIS / INTERMEDIÁRIAS -->
+        <!-- INTERMEDIÁRIAS / ANUAIS -->
         <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
             <label style="font-weight:bold; color:#1e293b;">3. Intermediárias / Anuais:</label>
             <div class="grid-2">
@@ -233,23 +238,24 @@
             <div class="calculated-badge" id="badgeTotalAnuais">Total Anuais: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- PARCELA UNICA DAS CHAVES -->
+        <!-- CHAVES / ENTREGA -->
         <div class="form-group">
             <label style="font-weight:bold;">4. Parcela das Chaves / Entrega (R$):</label>
             <input type="number" id="valChaves" value="0" oninput="recalculateAll()">
             <div class="calculated-badge" id="badgeChaves">Chaves: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- FINANCIAMENTO BANCÁRIO / SALDO REVESTIDO -->
+        <!-- FINANCIAMENTO BANCÁRIO -->
         <div class="form-group" style="border-top: 2px solid var(--accent); padding-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
-            <label style="color: var(--primary); font-size: 0.95rem; font-weight:bold;">5. Financiamento Bancário (Habite-se / Repasse):</label>
+            <label style="color: var(--primary); font-size: 0.95rem; font-weight:bold;">5. Financiamento Bancário / Saldo Devedor:</label>
             <div style="display:flex; gap:8px; align-items:center;">
                 <input type="number" id="valFinanciamento" value="0" oninput="recalculateAll()">
                 <span id="percFinanciamento" style="font-weight: bold; width: 100px; text-align: right; color: var(--primary); font-size: 1.1rem;">0,00%</span>
             </div>
+            <div class="calculated-badge" id="badgeFinan">Financiamento: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- COMPARADOR DE VALOR DA PROPOSTA X TABELA -->
+        <!-- PAINEL COMPARATIVO TOTAL DA PROPOSTA X TABELA BASE -->
         <div class="comparador-box">
             <div>
                 <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">SOMA DA PROPOSTA:</span>
@@ -257,7 +263,7 @@
             </div>
             <div>
                 <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">DIFERENÇA X TABELA:</span>
-                <strong id="txtDiferencaBox" style="font-size:1.1rem; color:var(--success);">R$ 0,00 (0,00%)</strong>
+                <strong id="txtDiferencaBox" style="font-size:1.1rem; color:var(--success);">R$ 0,00 (100% Tabela)</strong>
             </div>
         </div>
     </div>
@@ -270,7 +276,7 @@
 
         window.onload = function() {
             document.getElementById("inputDataProposta").valueAsDate = new Date();
-            carregarDadosLocalStorage();
+            carregarDadosEInicializarFluxo();
         };
 
         function setModoAto(modo) {
@@ -293,16 +299,35 @@
             recalculateAll();
         }
 
-        function carregarDadosLocalStorage() {
+        function carregarDadosEInicializarFluxo() {
             const dadosStr = localStorage.getItem("UNIDADE_SELECIONADA");
             if (dadosStr) {
                 const item = JSON.parse(dadosStr);
                 if (item.empreendimento) document.getElementById("inputEmpreendimento").value = item.empreendimento;
                 if (item.unidade) document.getElementById("inputUnidade").value = item.unidade;
+                if (item.andar) document.getElementById("inputAndar").value = item.andar;
                 if (item.precoTabela) document.getElementById("valorTotalTabela").value = item.precoTabela;
                 if (item.dorms) document.getElementById("inputTipologia").value = item.dorms;
                 if (item.m2) document.getElementById("inputAreaM2").value = item.m2;
+                if (item.vagas !== undefined) document.getElementById("inputVagas").value = item.vagas > 0 ? item.vagas + " Vaga(s)" : "Sem Vaga";
             }
+
+            // PRÉ-PREENCHIMENTO AUTOMÁTICO PADRÃO DE TABELA (100% FECHADO):
+            const tabVal = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+            if (tabVal > 0) {
+                document.getElementById("inputAtoEntrada").value = (tabVal * 0.10).toFixed(2); // 10% Ato
+                
+                document.getElementById("qtdMensais").value = 36;
+                document.getElementById("valMensalUnit").value = ((tabVal * 0.15) / 36).toFixed(2); // 15% Mensais em 36x
+                
+                document.getElementById("qtdAnuais").value = 3;
+                document.getElementById("valAnualUnit").value = ((tabVal * 0.10) / 3).toFixed(2); // 10% Anuais em 3x
+                
+                document.getElementById("valChaves").value = (tabVal * 0.05).toFixed(2); // 5% Chaves
+                
+                document.getElementById("valFinanciamento").value = (tabVal * 0.60).toFixed(2); // 60% Financiamento
+            }
+
             atualizarHeader();
             recalculateAll();
         }
@@ -310,63 +335,64 @@
         function atualizarHeader() {
             const emp = document.getElementById("inputEmpreendimento").value.toUpperCase();
             const uni = document.getElementById("inputUnidade").value;
+            const andar = document.getElementById("inputAndar").value;
             const tipo = document.getElementById("inputTipologia").value;
             const m2 = document.getElementById("inputAreaM2").value;
+            const vagas = document.getElementById("inputVagas").value;
 
-            document.getElementById("bannerEmpTitle").innerText = `${emp} — UNIDADE ${uni}`;
-            document.getElementById("bannerEmpSub").innerText = `${tipo} • ${m2}m²`;
+            document.getElementById("bannerEmpTitle").innerText = `${emp} — APTO ${uni} (${andar}º ANDAR)`;
+            document.getElementById("bannerEmpSub").innerText = `${tipo} • ${m2}m² • ${vagas}`;
         }
 
         function recalculateAll() {
-            const totalTabela = (parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0);
+            const valorTabelaBase = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+            const valOpcionais = parseFloat(document.getElementById("valOpcionais").value) || 0;
+            const totalAlvoTabela = valorTabelaBase + valOpcionais;
+
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            if (totalTabela <= 0) return;
+            if (totalAlvoTabela <= 0) return;
 
-            // 1. Ato
+            // 1. Entrada / Sinal (Ato)
             const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
-            let valAto = modoAto === 'PERC' ? (totalTabela * inputAto) / 100 : inputAto;
-            let percAto = (valAto / totalTabela) * 100;
+            let valAto = modoAto === 'PERC' ? (totalAlvoTabela * inputAto) / 100 : inputAto;
+            let percAto = (valAto / totalAlvoTabela) * 100;
             document.getElementById("badgeAto").innerText = `Sinal: ${fmt(valAto)} (${percAto.toFixed(2)}%)`;
 
             // 2. Mensais
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
             const valMensalUnit = parseFloat(document.getElementById("valMensalUnit").value) || 0;
             const totalMensais = qtdMensais * valMensalUnit;
-            const percMensais = (totalMensais / totalTabela) * 100;
+            const percMensais = (totalMensais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totalMensais)} (${percMensais.toFixed(2)}%)`;
 
             // 3. Anuais
             const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
             const valAnualUnit = parseFloat(document.getElementById("valAnualUnit").value) || 0;
             const totalAnuais = qtdAnuais * valAnualUnit;
-            const percAnuais = (totalAnuais / totalTabela) * 100;
+            const percAnuais = (totalAnuais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalAnuais").innerText = `Total Anuais (${qtdAnuais}x): ${fmt(totalAnuais)} (${percAnuais.toFixed(2)}%)`;
 
             // 4. Chaves
             const valChaves = parseFloat(document.getElementById("valChaves").value) || 0;
-            const percChaves = (valChaves / totalTabela) * 100;
+            const percChaves = (valChaves / totalAlvoTabela) * 100;
             document.getElementById("badgeChaves").innerText = `Chaves: ${fmt(valChaves)} (${percChaves.toFixed(2)}%)`;
 
-            // 5. Financiamento (Se zero, auto-calcula o complemento para fechar 100% da tabela)
-            let valFinan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
-            const somaAnterior = valAto + totalMensais + totalAnuais + valChaves;
-
-            if (valFinan === 0 && somaAnterior < totalTabela) {
-                valFinan = totalTabela - somaAnterior;
-                document.getElementById("valFinanciamento").value = valFinan.toFixed(2);
-            }
-
-            const percFinan = (valFinan / totalTabela) * 100;
+            // 5. Financiamento
+            const valFinan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+            const percFinan = (valFinan / totalAlvoTabela) * 100;
+            document.getElementById("valFinanciamento").value = valFinan.toFixed(2);
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2).replace('.', ',') + '%';
+            document.getElementById("badgeFinan").innerText = `Financiamento: ${fmt(valFinan)} (${percFinan.toFixed(2)}%)`;
 
-            // TOTAL DA PROPOSTA E COMPARADOR X TABELA
-            const totalProposta = somaAnterior + valFinan;
-            const diferenca = totalProposta - totalTabela;
-            const percDiferenca = (diferenca / totalTabela) * 100;
+            // SOMA TOTAL DA PROPOSTA
+            const totalProposta = valAto + totalMensais + totalAnuais + valChaves + valFinan;
+            const diferenca = totalProposta - totalAlvoTabela;
+            const percDiferenca = (diferenca / totalAlvoTabela) * 100;
 
+            // ATUALIZAÇÃO DA INTERFACE EM TEMPO REAL
             document.getElementById("txtTotalPropostaSticky").innerText = fmt(totalProposta);
-            document.getElementById("txtTabelaSticky").innerText = fmt(totalTabela);
+            document.getElementById("txtTabelaSticky").innerText = fmt(totalAlvoTabela);
             document.getElementById("txtSomaPropostaBox").innerText = fmt(totalProposta);
 
             const txtDiffBox = document.getElementById("txtDiferencaBox");
@@ -394,6 +420,7 @@
             const emp = document.getElementById("inputEmpreendimento").value;
             const torre = document.getElementById("inputTorre").value;
             const unidade = document.getElementById("inputUnidade").value;
+            const andar = document.getElementById("inputAndar").value;
             const cliente = document.getElementById("inputCliente").value;
             const cpf = document.getElementById("inputCPF").value;
             const corretor = document.getElementById("inputCorretor").value;
@@ -420,14 +447,14 @@
 
             const texto = `📌 *PROPOSTA COMERCIAL DE COMPRA - SUPERCALC*\n` +
                           `🏢 *Empreendimento:* ${emp} (${torre})\n` +
-                          `🚪 *Unidade:* ${unidade}\n` +
+                          `🚪 *Unidade:* Apto ${unidade} (${andar}º Pavimento)\n` +
                           `👤 *Cliente:* ${cliente || 'Não Informado'} ${cpf ? `(CPF: ${cpf})` : ''}\n` +
                           `👔 *Corretor:* ${corretor} (CRECI: ${creci})\n` +
                           `📅 *Data:* ${dataProp} | *Validade:* ${validade}\n` +
                           `------------------------------------\n` +
                           `💵 *Valor de Tabela:* ${fmt(totalTabela)}\n` +
                           `💰 *VALOR TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n\n` +
-                          `*FLUXO DE PAGAMENTO (OBRA):*\n` +
+                          `*ENGENHARIA FINANCEIRA DE PAGAMENTO:*\n` +
                           `• *Entrada / Ato:* ${fmt(valAto)}\n` +
                           (qtdMensais > 0 ? `• *Mensais:* ${qtdMensais}x de ${fmt(valMensalUnit)} (${fmt(qtdMensais * valMensalUnit)})\n` : '') +
                           (qtdAnuais > 0 ? `• *Intermediárias/Anuais:* ${qtdAnuais}x de ${fmt(valAnualUnit)} (${fmt(qtdAnuais * valAnualUnit)})\n` : '') +
@@ -440,7 +467,7 @@
             const box = document.getElementById("outputBox");
             box.innerText = texto;
             box.style.display = "block";
-            alert("Proposta com fluxo completo de obra copiada com sucesso para o WhatsApp!");
+            alert("Proposta com engenharia financeira e linha de tabela copiada com sucesso para o WhatsApp!");
         }
     </script>
 </body>
