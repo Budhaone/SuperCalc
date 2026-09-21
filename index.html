@@ -41,7 +41,7 @@
         label { display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: #475569; }
         select, input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
 
-        /* VISTA EM CARDS */
+        /* VISTA CARDS */
         .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
         .unit-card {
             background: var(--card-bg); border-radius: 10px; padding: 14px;
@@ -55,7 +55,7 @@
         .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
         .unit-price { font-size: 1.2rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
 
-        /* VISTA EM TABELA */
+        /* VISTA TABELA */
         .table-container { background: #fff; border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; display: none; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
         th { background: #f8fafc; padding: 10px 12px; font-weight: bold; color: #475569; border-bottom: 2px solid var(--border); }
@@ -75,7 +75,7 @@
     <header>
         <div>
             <h1>SuperCalc — Prateleira de Imóveis</h1>
-            <p class="sub" id="txtContador">Carregando inventário do Supabase...</p>
+            <p class="sub" id="txtContador">Conectando ao banco de dados...</p>
         </div>
         <div class="view-toggle">
             <button class="view-btn active" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
@@ -83,10 +83,10 @@
         </div>
     </header>
 
-    <!-- PAINEL DE FILTROS COMPLETOS -->
+    <!-- FILTROS COMPLETOS RESTAURADOS -->
     <div class="filters-card">
         <div>
-            <label>Empreendimento:</label>
+            <label>Empreendimento / Projeto:</label>
             <select id="filterEmp" onchange="renderUnits()">
                 <option value="TODOS">Todos os Empreendimentos</option>
             </select>
@@ -146,7 +146,7 @@
 
         async function fetchUnidades() {
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/units?select=*,developments(title)&order=unit_number.asc`, {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/units?select=*,developments(title)&order=floor.asc,unit_number.asc`, {
                     headers: {
                         "apikey": SUPABASE_KEY,
                         "Authorization": `Bearer ${SUPABASE_KEY}`
@@ -159,7 +159,7 @@
                 todasAsUnidades = data.map(u => ({
                     emp: u.developments ? u.developments.title : 'NÃO INFORMADO',
                     unidade: u.unit_number,
-                    andar: u.floor,
+                    andar: parseInt(u.floor) || 0,
                     tipo: u.typology,
                     m2: u.private_area_m2,
                     vagas: u.parking_spaces || 0,
@@ -198,12 +198,18 @@
             const vagasFiltro = document.getElementById("filterVagas").value;
             const busca = document.getElementById("filterBusca").value.toLowerCase().trim();
 
-            const filtrados = todasAsUnidades.filter(u => {
+            let filtrados = todasAsUnidades.filter(u => {
                 const matchEmp = empFiltro === "TODOS" || u.emp === empFiltro;
                 const matchTipo = tipoFiltro === "TODOS" || u.tipo.includes(tipoFiltro);
                 const matchVagas = vagasFiltro === "TODOS" || (vagasFiltro === "COM" ? u.vagas > 0 : u.vagas === 0);
                 const matchBusca = !busca || u.unidade.toLowerCase().includes(busca) || u.m2.toString().includes(busca);
                 return matchEmp && matchTipo && matchVagas && matchBusca;
+            });
+
+            // ORDENAÇÃO HUMANA NATURAL (ORDENA PRIMEIRO POR ANDAR NUMÉRICO, DEPOIS POR APTO NUMÉRICO)
+            filtrados.sort((a, b) => {
+                if (a.andar !== b.andar) return a.andar - b.andar;
+                return a.unidade.localeCompare(b.unidade, undefined, { numeric: true, sensitivity: 'base' });
             });
 
             document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas na base`;
@@ -213,7 +219,7 @@
                 const container = document.getElementById("containerCards");
                 container.innerHTML = "";
                 if (filtrados.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada.</div>`;
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada no banco.</div>`;
                     return;
                 }
                 filtrados.forEach(u => {
@@ -242,7 +248,7 @@
                 const tbody = document.getElementById("tbodyUnits");
                 tbody.innerHTML = "";
                 if (filtrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Nenhuma unidade encontrada.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Nenhuma unidade encontrada no banco.</td></tr>`;
                     return;
                 }
                 filtrados.forEach(u => {
