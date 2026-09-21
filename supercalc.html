@@ -13,7 +13,6 @@
             --card-bg: #ffffff;
             --border: #cccccc;
             --success: #27ae60;
-            --danger: #e74c3c;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -22,7 +21,7 @@
         .sticky-summary {
             position: sticky; top: 8px; z-index: 1000;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #fff; padding: 10px 14px; border-radius: 12px;
+            color: #fff; padding: 12px 16px; border-radius: 12px;
             margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);
             border: 1px solid var(--accent);
         }
@@ -33,47 +32,38 @@
         }
 
         .sticky-summary .emp-title-compact {
-            font-size: 0.95rem; font-weight: 900; color: var(--accent); text-transform: uppercase;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 1rem; font-weight: 900; color: var(--accent); text-transform: uppercase;
         }
 
-        .sticky-summary .emp-sub-compact { font-size: 0.75rem; font-weight: 600; color: #cbd5e1; }
-
-        .sticky-summary .badge-origem-compact {
-            background: rgba(241, 196, 15, 0.2); color: var(--accent); font-size: 0.65rem; font-weight: 800;
-            padding: 2px 6px; border-radius: 4px; border: 1px solid var(--accent); white-space: nowrap;
-        }
+        .sticky-summary .emp-sub-compact { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; }
 
         .sticky-summary .proposal-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .sticky-summary .total-bar { font-size: 1.3rem; font-weight: 900; color: var(--accent); }
-        .sticky-summary .tabela-bar { font-size: 0.8rem; color: #94a3b8; font-weight: 600; }
-
-        .status-badge {
-            display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 900;
-            line-height: 1.2; text-transform: uppercase; text-align: center;
-        }
-
-        .status-valid { background: var(--success); color: #fff; }
+        .sticky-summary .total-bar { font-size: 1.35rem; font-weight: 900; color: var(--accent); }
+        .sticky-summary .tabela-bar { font-size: 0.82rem; color: #94a3b8; font-weight: 600; }
 
         .card { background: var(--card-bg); padding: 14px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
         .card h3 { margin: 0 0 10px 0; font-size: 1.05rem; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
 
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: bold; font-size: 0.88rem; margin-bottom: 4px; color: #333; }
-        .input-row { display: flex; gap: 8px; align-items: center; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-weight: bold; font-size: 0.82rem; margin-bottom: 4px; color: #475569; }
         
-        input[type="text"], input[type="month"], select { width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fff; }
-        input[type="number"] { width: 100%; padding: 5px 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.3rem; font-weight: 800; color: #1a252f; background: #fff; }
+        input[type="text"], input[type="date"], input[type="month"], select { 
+            width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: #fff; 
+        }
+        input[type="number"] { 
+            width: 100%; padding: 6px 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.2rem; font-weight: 800; color: #1a252f; background: #fff; 
+        }
 
         .toggle-group { display: flex; background: #e2e8f0; border-radius: 8px; padding: 2px; gap: 2px; width: 120px; }
         .toggle-btn { flex: 1; border: none; background: transparent; padding: 6px 4px; font-size: 0.75rem; font-weight: bold; color: #64748b; border-radius: 6px; cursor: pointer; text-align: center; }
         .toggle-btn.active { background: var(--primary); color: #fff; border: 1px solid var(--accent); }
 
-        .calculated-badge { font-size: 0.95rem; font-weight: 700; color: #1e8449; background: #e8f8f5; padding: 6px 10px; border-radius: 8px; display: block; margin-top: 4px; border: 1px solid #a3e4d7; text-align: center; }
+        .calculated-badge { font-size: 0.9rem; font-weight: 700; color: #1e8449; background: #e8f8f5; padding: 6px 10px; border-radius: 8px; display: block; margin-top: 4px; border: 1px solid #a3e4d7; text-align: center; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
-        @media (max-width: 600px) { .grid-2, .grid-4 { grid-template-columns: 1fr; } }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+        @media (max-width: 650px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
         .tarja-status { display: block; width: 100%; padding: 8px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem; text-align: center; margin-top: 6px; }
         .tarja-amarelo { background-color: #fbc02d; color: #000000; border: 1px solid #c49000; }
@@ -85,98 +75,148 @@
 </head>
 <body>
 
-    <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira</button>
+    <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira de Imóveis</button>
 
+    <!-- BANNER TOPO -->
     <div class="sticky-summary">
         <div class="unit-info-row">
             <div>
                 <div class="emp-title-compact" id="bannerEmpTitle">SELECIONE UMA UNIDADE</div>
                 <div class="emp-sub-compact" id="bannerEmpSub">Aguardando dados...</div>
             </div>
-            <span id="bannerTagOrigem" class="badge-origem-compact" style="display:none;">🏷️ GLOBAL</span>
+            <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.65rem; font-weight:800; padding:3px 6px; border-radius:4px; border:1px solid var(--accent);">
+                SIMULAÇÃO
+            </span>
         </div>
         
         <div class="proposal-row">
             <div>
                 <div class="total-bar" id="txtTotalPropostaSticky">R$ 0,00</div>
-                <div class="tabela-bar">Tabela: <strong id="txtTabelaSticky" style="color:#fff;">R$ 0,00</strong></div>
+                <div class="tabela-bar">Tabela Base: <strong id="txtTabelaSticky" style="color:#fff;">R$ 0,00</strong></div>
             </div>
-            <span class="status-badge status-valid" id="statusBadgeSticky">ANALISANDO...</span>
+            <span style="background: var(--success); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 900;">
+                ATIVA
+            </span>
         </div>
     </div>
 
+    <!-- IDENTIFICAÇÃO DA PROPOSTA -->
     <div class="card">
-        <h3>Identificação da Proposta</h3>
-        <div class="grid-2">
+        <h3>Identificação Completa da Proposta</h3>
+        <div class="grid-3">
             <div>
-                <label>Cliente / Proposta Para:</label>
-                <input type="text" id="inputCliente" placeholder="Ex: Sr. Carlos Silva">
+                <label>Empreendimento:</label>
+                <input type="text" id="inputEmpreendimento" value="NENHUM SELECIONADO" oninput="atualizarHeader()">
             </div>
             <div>
-                <label>Corretor / CRECI:</label>
-                <input type="text" id="inputCorretor" value="Wilson Wong - CRECI 120873F">
+                <label>Bloco / Torre:</label>
+                <input type="text" id="inputTorre" value="Torre Única">
+            </div>
+            <div>
+                <label>Unidade / Apto:</label>
+                <input type="text" id="inputUnidade" value="000" oninput="atualizarHeader()">
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 8px;">
+            <div>
+                <label>Nome do Cliente:</label>
+                <input type="text" id="inputCliente" placeholder="Ex: Carlos Eduardo Silva">
+            </div>
+            <div>
+                <label>CPF / CNPJ do Cliente:</label>
+                <input type="text" id="inputCPF" placeholder="000.000.000-00">
+            </div>
+            <div>
+                <label>Contacto / Telemóvel:</label>
+                <input type="text" id="inputTelefoneCliente" placeholder="(11) 99999-9999">
+            </div>
+        </div>
+
+        <div class="grid-4" style="margin-top: 8px;">
+            <div>
+                <label>Corretor Responsável:</label>
+                <input type="text" id="inputCorretor" value="Wilson Wong">
+            </div>
+            <div>
+                <label>CRECI Corretor:</label>
+                <input type="text" id="inputCreci" value="120873F">
+            </div>
+            <div>
+                <label>Data da Proposta:</label>
+                <input type="date" id="inputDataProposta">
+            </div>
+            <div>
+                <label>Validade da Proposta:</label>
+                <select id="selectValidade">
+                    <option value="3 dias">3 Dias Úteis</option>
+                    <option value="5 dias">5 Dias Úteis</option>
+                    <option value="7 dias">7 Dias Úteis</option>
+                </select>
             </div>
         </div>
     </div>
 
+    <!-- VALORES E TIPOLOGIA -->
     <div class="card">
-        <h3>1. Unidade & Valor Base</h3>
+        <h3>1. Valores Base & Tipologia</h3>
         <div class="grid-4">
             <div>
-                <label>Unidade:</label>
-                <input type="text" id="inputUnidade" value="101">
+                <label>Tipologia:</label>
+                <input type="text" id="inputTipologia" value="Studio" oninput="atualizarHeader()">
             </div>
             <div>
-                <label>Data Entrega:</label>
-                <input type="month" id="dataEntregaObra" value="2029-12">
+                <label>Área Privativa (m²):</label>
+                <input type="text" id="inputAreaM2" value="0.00" oninput="atualizarHeader()">
             </div>
             <div>
                 <label>Valor Tabela (R$):</label>
-                <input type="number" id="valorTotalTabela" value="500000" step="1000" oninput="recalculateAll()">
+                <input type="number" id="valorTotalTabela" value="0" step="1000" oninput="recalculateAll()">
             </div>
             <div>
-                <label style="color: #2980b9;">Opcionais (R$):</label>
+                <label style="color: #2980b9;">Opcionais / Extras (R$):</label>
                 <input type="number" id="valOpcionais" value="0" step="1000" oninput="recalculateAll()">
             </div>
         </div>
     </div>
 
+    <!-- CONDICIONAL FINANCEIRA -->
     <div class="card">
-        <h3>2. Fluxo de Pagamento</h3>
+        <h3>2. Condições de Pagamento</h3>
 
         <div class="form-group">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="margin:0;">1. Entrada / Sinal (Ato):</label>
+                <label style="margin:0;">Entrada / Sinal (Ato):</label>
                 <div class="toggle-group">
                     <button id="btnModoAtoVal" class="toggle-btn active" onclick="setModoAto('VALOR')">R$ Valor</button>
                     <button id="btnModoAtoPerc" class="toggle-btn" onclick="setModoAto('PERC')">% Porc.</button>
                 </div>
             </div>
-            
-            <div class="input-row">
-                <input type="number" id="inputAtoEntrada" value="150000" oninput="processarInputAto()">
+            <div class="input-row" style="display:flex; gap:8px;">
+                <input type="number" id="inputAtoEntrada" value="0" oninput="recalculateAll()">
             </div>
-            <div class="calculated-badge" id="badgeAto">Ato Calculated</div>
+            <div class="calculated-badge" id="badgeAto">Sinal: R$ 0,00 (0,00%)</div>
         </div>
 
         <div class="form-group" style="border-top: 2px solid var(--accent); padding-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
-            <label style="color: var(--primary); font-size: 1rem;">Financiamento Bancário (Complemento de 100%):</label>
-            <div class="input-row">
-                <input type="number" id="valFinanciamento" value="350000" readonly style="background:#e9ecef;">
-                <span id="percFinanciamento" style="font-weight: bold; width: 90px; text-align: right; color: var(--primary); font-size: 1.1rem;">70,00%</span>
+            <label style="color: var(--primary); font-size: 0.95rem;">Financiamento Bancário (Complemento de 100%):</label>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="number" id="valFinanciamento" value="0" readonly style="background:#e9ecef;">
+                <span id="percFinanciamento" style="font-weight: bold; width: 90px; text-align: right; color: var(--primary); font-size: 1.1rem;">0,00%</span>
             </div>
             <div id="alertaTetoFinanciamento" class="tarja-status tarja-amarelo" style="display:none; margin-top: 6px;"></div>
         </div>
     </div>
 
-    <button class="btn-copy" onclick="copyProposal()">💬 Copiar Simulação para WhatsApp</button>
+    <button class="btn-copy" onclick="copyProposal()">💬 Copiar Proposta Completa para WhatsApp</button>
     <div class="output-box" id="outputBox"></div>
 
     <script>
         let modoAto = 'VALOR';
 
         window.onload = function() {
-            carregarDados();
+            document.getElementById("inputDataProposta").valueAsDate = new Date();
+            carregarDadosLocalStorage();
         };
 
         function setModoAto(modo) {
@@ -189,40 +229,47 @@
 
             if (modo === 'PERC') {
                 const valAtual = parseFloat(inputAto.value) || 0;
-                const percCalculado = total > 0 ? (valAtual / total) * 100 : 30;
+                const percCalculado = total > 0 ? (valAtual / total) * 100 : 20;
                 inputAto.value = percCalculado.toFixed(2);
             } else {
-                const percAtual = parseFloat(inputAto.value) || 30;
+                const percAtual = parseFloat(inputAto.value) || 20;
                 const valCalculado = (total * percAtual) / 100;
                 inputAto.value = valCalculado.toFixed(2);
             }
             recalculateAll();
         }
 
-        function processarInputAto() {
-            recalculateAll();
-        }
-
-        function carregarDados() {
+        function carregarDadosLocalStorage() {
             const dadosStr = localStorage.getItem("UNIDADE_SELECIONADA");
             if (dadosStr) {
                 const item = JSON.parse(dadosStr);
+                if (item.empreendimento) document.getElementById("inputEmpreendimento").value = item.empreendimento;
                 if (item.unidade) document.getElementById("inputUnidade").value = item.unidade;
                 if (item.precoTabela) document.getElementById("valorTotalTabela").value = item.precoTabela;
-                
-                document.getElementById("bannerEmpTitle").innerText = `${item.empreendimento || 'EMPREENDIMENTO'} — UNIDADE ${item.unidade}`;
-                document.getElementById("bannerEmpSub").innerText = `${item.dorms || 'Imóvel'} • ${item.m2 || 0}m²`;
-                
-                const bannerTag = document.getElementById("bannerTagOrigem");
-                bannerTag.innerText = item.origem === 'PRIVADO' ? '🔒 PRIVADO' : '🏷️ GLOBAL';
-                bannerTag.style.display = 'inline-block';
+                if (item.dorms) document.getElementById("inputTipologia").value = item.dorms;
+                if (item.m2) document.getElementById("inputAreaM2").value = item.m2;
             }
+            atualizarHeader();
             recalculateAll();
+        }
+
+        function atualizarHeader() {
+            const emp = document.getElementById("inputEmpreendimento").value.toUpperCase();
+            const uni = document.getElementById("inputUnidade").value;
+            const tipo = document.getElementById("inputTipologia").value;
+            const m2 = document.getElementById("inputAreaM2").value;
+
+            document.getElementById("bannerEmpTitle").innerText = `${emp} — UNIDADE ${uni}`;
+            document.getElementById("bannerEmpSub").innerText = `${tipo} • ${m2}m²`;
         }
 
         function recalculateAll() {
             const total = (parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0);
-            if (total <= 0) return;
+            if (total <= 0) {
+                document.getElementById("txtTotalPropostaSticky").innerText = "R$ 0,00";
+                document.getElementById("txtTabelaSticky").innerText = "R$ 0,00";
+                return;
+            }
 
             const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
             let valAto = 0;
@@ -252,42 +299,48 @@
             const alerta = document.getElementById("alertaTetoFinanciamento");
             if (percFinan > 80.01) {
                 alerta.style.display = "block";
-                alerta.innerHTML = `⚠️ <strong>Atenção:</strong> Financiamento bancário em <strong>${percFinan.toFixed(1)}%</strong>. Limite padrão dos bancos é 80%. Operações acima de 80% dependem de análise de exceção.`;
+                alerta.innerHTML = `⚠️ <strong>Atenção:</strong> Financiamento em <strong>${percFinan.toFixed(1)}%</strong>. O limite padrão dos bancos é de 80%. Operações acima deste valor necessitam de análise especial de crédito.`;
             } else {
                 alerta.style.display = "none";
             }
         }
 
         function copyProposal() {
-            const cliente = document.getElementById("inputCliente").value.trim();
-            const corretor = document.getElementById("inputCorretor").value.trim();
-            const unidade = document.getElementById("inputUnidade").value.trim();
-            const empTitle = document.getElementById("bannerEmpTitle").innerText;
+            const emp = document.getElementById("inputEmpreendimento").value;
+            const torre = document.getElementById("inputTorre").value;
+            const unidade = document.getElementById("inputUnidade").value;
+            const cliente = document.getElementById("inputCliente").value;
+            const cpf = document.getElementById("inputCPF").value;
+            const corretor = document.getElementById("inputCorretor").value;
+            const creci = document.getElementById("inputCreci").value;
+            const dataProp = document.getElementById("inputDataProposta").value;
+            const validade = document.getElementById("selectValidade").value;
+
             const total = (parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0);
-            
             const valFinan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
             const valAto = total - valFinan;
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            const texto = `*SIMULAÇÃO DE FLUXO - SUPERCALC*\n` +
-                          `🏢 ${empTitle}\n` +
-                          (cliente ? `A/C Cliente: ${cliente}\n` : '') +
-                          `Responsável: ${corretor}\n` +
+            const texto = `📌 *PROPOSTA COMERCIAL DE COMPRA - SUPERCALC*\n` +
+                          `🏢 *Empreendimento:* ${emp} (${torre})\n` +
+                          `🚪 *Unidade:* ${unidade}\n` +
+                          `👤 *Cliente:* ${cliente || 'Não Informado'} ${cpf ? `(CPF: ${cpf})` : ''}\n` +
+                          `👔 *Corretor:* ${corretor} (CRECI: ${creci})\n` +
+                          `📅 *Data:* ${dataProp} | *Validade:* ${validade}\n` +
                           `------------------------------------\n` +
-                          `• Unidade: ${unidade}\n` +
-                          `• Valor Total: ${fmt(total)}\n\n` +
-                          `*Condições de Pagamento:*\n` +
-                          `• Entrada / Ato: ${fmt(valAto)} (${((valAto/total)*100).toFixed(1)}%)\n` +
-                          `• Financiamento Bancário: ${fmt(valFinan)} (${((valFinan/total)*100).toFixed(1)}%)\n` +
+                          `💰 *VALOR TOTAL DA PROPOSTA:* ${fmt(total)}\n\n` +
+                          `*FLUXO DE PAGAMENTO:* \n` +
+                          `• *Entrada / Ato:* ${fmt(valAto)} (${((valAto/total)*100).toFixed(1)}%)\n` +
+                          `• *Financiamento Bancário:* ${fmt(valFinan)} (${((valFinan/total)*100).toFixed(1)}%)\n` +
                           `------------------------------------\n` +
-                          `_Simulação sujeita a aprovação de crédito bancário._`;
+                          `_Proposta sujeita a análise de crédito bancário e disponibilidade da unidade._`;
 
             navigator.clipboard.writeText(texto);
             const box = document.getElementById("outputBox");
             box.innerText = texto;
             box.style.display = "block";
-            alert("Simulação copiada com sucesso para o WhatsApp!");
+            alert("Proposta copiada com sucesso para o WhatsApp!");
         }
     </script>
 </body>
