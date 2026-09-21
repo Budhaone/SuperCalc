@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prateleira de Unidades - SuperCalc</title>
+    <title>SuperCalc — Prateleira de Imóveis</title>
     <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
     <style>
         :root {
@@ -22,11 +22,15 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #fff; padding: 16px 20px; border-radius: 12px; margin-bottom: 16px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 3px solid var(--accent);
+            border-bottom: 3px solid var(--accent); flex-wrap: wrap; gap: 10px;
         }
 
         h1 { margin: 0; font-size: 1.4rem; color: var(--accent); }
         p.sub { margin: 4px 0 0 0; font-size: 0.85rem; color: #cbd5e1; }
+
+        .view-toggle { display: flex; gap: 6px; background: rgba(255,255,255,0.1); padding: 4px; border-radius: 8px; }
+        .view-btn { border: none; background: transparent; color: #fff; padding: 6px 12px; font-size: 0.8rem; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .view-btn.active { background: var(--accent); color: #000; }
 
         .filters-card {
             background: var(--card-bg); padding: 14px; border-radius: 12px;
@@ -37,30 +41,32 @@
         label { display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: #475569; }
         select, input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
 
-        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-
+        /* VISTA EM CARDS */
+        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
         .unit-card {
             background: var(--card-bg); border-radius: 10px; padding: 14px;
             border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
             display: flex; flex-direction: column; justify-content: space-between;
         }
-
-        .unit-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--accent); }
-
+        .unit-card:hover { border-color: var(--accent); }
         .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
         .unit-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
         .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-
         .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.4; }
-        .unit-price { font-size: 1.25rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
+        .unit-price { font-size: 1.2rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
+
+        /* VISTA EM TABELA */
+        .table-container { background: #fff; border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; display: none; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+        th { background: #f8fafc; padding: 10px 12px; font-weight: bold; color: #475569; border-bottom: 2px solid var(--border); }
+        td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+        tr:hover { background: #f1f5f9; }
 
         .btn-select {
-            width: 100%; background: var(--primary); color: #fff; border: none;
-            padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            transition: background 0.2s; text-align: center; text-decoration: none; display: block;
+            background: var(--primary); color: #fff; border: none;
+            padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
+            text-align: center; text-decoration: none; display: inline-block; font-size: 0.82rem;
         }
-
         .btn-select:hover { background: #334155; color: var(--accent); }
     </style>
 </head>
@@ -69,7 +75,11 @@
     <header>
         <div>
             <h1>SuperCalc — Prateleira de Imóveis</h1>
-            <p class="sub">Selecione uma unidade para carregar o simulador de fluxo</p>
+            <p class="sub" id="txtContador">Carregando inventário...</p>
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn active" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
+            <button class="view-btn" id="btnViewTable" onclick="setMode('table')">📊 Tabela / Lista</button>
         </div>
     </header>
 
@@ -78,8 +88,6 @@
             <label>Empreendimento:</label>
             <select id="filterEmp" onchange="renderUnits()">
                 <option value="TODOS">Todos os Empreendimentos</option>
-                <option value="POEMA LIBERDADE">POEMA LIBERDADE</option>
-                <option value="NOW BUTANTA">NOW BUTANTÃ</option>
             </select>
         </div>
         <div>
@@ -98,82 +106,146 @@
         </div>
     </div>
 
-    <div class="grid-units" id="containerUnidades">
-        <!-- Unidades renderizadas via JS -->
+    <!-- VISTA CARDS -->
+    <div class="grid-units" id="containerCards"></div>
+
+    <!-- VISTA TABELA -->
+    <div class="table-container" id="containerTable">
+        <table>
+            <thead>
+                <tr>
+                    <th>Empreendimento</th>
+                    <th>Unidade</th>
+                    <th>Andar</th>
+                    <th>Tipologia</th>
+                    <th>Área</th>
+                    <th>Preço Tabela</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyUnits"></tbody>
+        </table>
     </div>
 
     <script>
-        const estoqueMock = [
-            // NOW BUTANTÃ
-            { emp: 'NOW BUTANTÃ', unidade: '1706', andar: 17, tipo: 'Studio (NOW)', m2: 25.56, preco: 485359.00 },
-            { emp: 'NOW BUTANTÃ', unidade: '2404', andar: 24, tipo: 'Studio (NOW)', m2: 25.40, preco: 505433.00 },
-            { emp: 'NOW BUTANTÃ', unidade: '2513', andar: 25, tipo: 'Studio (NOW)', m2: 27.76, preco: 540323.00 },
-            
-            // POEMA NR
-            { emp: 'POEMA LIBERDADE', unidade: '501', andar: 5, tipo: '1 Dorm (NR)', m2: 54.83, preco: 820978.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '506', andar: 5, tipo: 'Studio (NR)', m2: 34.77, preco: 520154.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '601', andar: 6, tipo: '1 Dorm (NR)', m2: 40.19, preco: 613721.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '626', andar: 6, tipo: 'Studio (NR)', m2: 28.14, preco: 429605.00 },
+        // CONFIGURAÇÃO DO SUPABASE
+        const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
+        const SUPABASE_KEY = "SUA_CHAVE_ANONIMA_SUPABASE";
 
-            // POEMA HIS
-            { emp: 'POEMA LIBERDADE', unidade: '706', andar: 7, tipo: 'Studio (HIS)', m2: 26.48, preco: 337000.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '1215', andar: 12, tipo: 'Studio (HIS)', m2: 33.57, preco: 398500.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '2217', andar: 22, tipo: 'Studio (HIS)', m2: 27.99, preco: 373000.00 },
+        let todasAsUnidades = [];
+        let currentMode = 'cards';
 
-            // POEMA HMP
-            { emp: 'POEMA LIBERDADE', unidade: '801', andar: 8, tipo: '1 Dorm (HMP)', m2: 34.31, preco: 477800.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '1913', andar: 19, tipo: '1 Dorm (HMP)', m2: 36.67, preco: 545000.00 },
+        async function fetchUnidades() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/units?select=*,developments(title)&order=unit_number.asc`, {
+                    headers: {
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": `Bearer ${SUPABASE_KEY}`
+                    }
+                });
 
-            // POEMA R2V
-            { emp: 'POEMA LIBERDADE', unidade: '704', andar: 7, tipo: '2 Dorm (R2V)', m2: 61.18, preco: 934164.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '2003', andar: 20, tipo: '3 Dorm (R2V)', m2: 124.39, preco: 1936239.00 },
-            { emp: 'POEMA LIBERDADE', unidade: '3702', andar: 37, tipo: '3 Dorm (R2V)', m2: 81.94, preco: 1448281.00 }
-        ];
+                if (!response.ok) throw new Error("Erro ao consultar Supabase");
+                
+                const data = await response.json();
+                todasAsUnidades = data.map(u => ({
+                    emp: u.developments ? u.developments.title : 'NÃO INFORMADO',
+                    unidade: u.unit_number,
+                    andar: u.floor,
+                    tipo: u.typology,
+                    m2: u.private_area_m2,
+                    preco: parseFloat(u.list_price)
+                }));
+
+                populateEmpFilter();
+                renderUnits();
+            } catch (err) {
+                console.error("Erro na comunicação com a base de dados:", err);
+                document.getElementById("txtContador").innerText = "Erro ao carregar os dados. Verifique as credenciais do Supabase.";
+            }
+        }
+
+        function populateEmpFilter() {
+            const select = document.getElementById("filterEmp");
+            const emps = [...new Set(todasAsUnidades.map(u => u.emp))];
+            select.innerHTML = '<option value="TODOS">Todos os Empreendimentos</option>';
+            emps.forEach(e => {
+                select.innerHTML += `<option value="${e}">${e}</option>`;
+            });
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById("btnViewCards").className = mode === 'cards' ? 'view-btn active' : 'view-btn';
+            document.getElementById("btnViewTable").className = mode === 'table' ? 'view-btn active' : 'view-btn';
+            document.getElementById("containerCards").style.display = mode === 'cards' ? 'grid' : 'none';
+            document.getElementById("containerTable").style.display = mode === 'table' ? 'block' : 'none';
+            renderUnits();
+        }
 
         function renderUnits() {
             const empFiltro = document.getElementById("filterEmp").value;
             const tipoFiltro = document.getElementById("filterTipo").value;
             const busca = document.getElementById("filterBusca").value.toLowerCase().trim();
 
-            const container = document.getElementById("containerUnidades");
-            container.innerHTML = "";
-
-            const filtrados = estoqueMock.filter(u => {
+            const filtrados = todasAsUnidades.filter(u => {
                 const matchEmp = empFiltro === "TODOS" || u.emp === empFiltro;
                 const matchTipo = tipoFiltro === "TODOS" || u.tipo.includes(tipoFiltro);
                 const matchBusca = !busca || u.unidade.toLowerCase().includes(busca);
                 return matchEmp && matchTipo && matchBusca;
             });
 
-            if (filtrados.length === 0) {
-                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada com os filtros selecionados.</div>`;
-                return;
-            }
-
+            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas`;
             const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            filtrados.forEach(u => {
-                const card = document.createElement("div");
-                card.className = "unit-card";
-                card.innerHTML = `
-                    <div>
-                        <div class="unit-header">
-                            <span class="unit-title">Apto ${u.unidade}</span>
-                            <span class="unit-badge">${u.emp}</span>
+            if (currentMode === 'cards') {
+                const container = document.getElementById("containerCards");
+                container.innerHTML = "";
+                if (filtrados.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada.</div>`;
+                    return;
+                }
+                filtrados.forEach(u => {
+                    container.innerHTML += `
+                        <div class="unit-card">
+                            <div>
+                                <div class="unit-header">
+                                    <span class="unit-title">Apto ${u.unidade}</span>
+                                    <span class="unit-badge">${u.emp}</span>
+                                </div>
+                                <div class="unit-details">
+                                    • Andar: <strong>${u.andar}º Pavimento</strong><br>
+                                    • Tipologia: <strong>${u.tipo}</strong><br>
+                                    • Área Privativa: <strong>${u.m2} m²</strong>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="unit-price">${fmt(u.preco)}</div>
+                                <button class="btn-select" style="width:100%" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular no SuperCalc →</button>
+                            </div>
                         </div>
-                        <div class="unit-details">
-                            • Andar: <strong>${u.andar}º Pavimento</strong><br>
-                            • Tipologia: <strong>${u.tipo}</strong><br>
-                            • Área Privativa: <strong>${u.m2} m²</strong>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="unit-price">${fmt(u.preco)}</div>
-                        <button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular no SuperCalc →</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+                    `;
+                });
+            } else {
+                const tbody = document.getElementById("tbodyUnits");
+                tbody.innerHTML = "";
+                if (filtrados.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma unidade encontrada.</td></tr>`;
+                    return;
+                }
+                filtrados.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${u.emp}</strong></td>
+                            <td>Apto ${u.unidade}</td>
+                            <td>${u.andar}º</td>
+                            <td>${u.tipo}</td>
+                            <td>${u.m2} m²</td>
+                            <td style="color:var(--success); font-weight:bold;">${fmt(u.preco)}</td>
+                            <td><button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular</button></td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
         function selecionarUnidade(emp, unidade, preco, tipo, m2) {
@@ -189,7 +261,7 @@
             window.location.href = "supercalc.html";
         }
 
-        window.onload = renderUnits;
+        window.onload = fetchUnidades;
     </script>
 </body>
 </html>
