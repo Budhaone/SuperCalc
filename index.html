@@ -3,471 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCalc - Prateleira de Imóveis</title>
-    
-    <!-- FAVICON SUPERCALC -->
+    <title>Prateleira de Unidades - SuperCalc</title>
     <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
-        .badge-global { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
-        .badge-privado { background-color: #faf5ff; color: #6b21a8; border: 1px solid #e9d5ff; }
-        .badge-pronto { background-color: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
-        .badge-obra { background-color: #fffaf0; color: #7b341e; border: 1px solid #feebc8; }
-        
-        .list-row:nth-child(even) { background-color: #f8fafc; }
-        .list-row:hover { background-color: #f1f5f9; }
+        :root {
+            --primary: #1a252f;
+            --accent: #f1c40f;
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --success: #27ae60;
+        }
+
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg); margin: 0; padding: 16px; color: #333; }
+
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff; padding: 16px 20px; border-radius: 12px; margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        h1 { margin: 0; font-size: 1.4rem; color: var(--accent); }
+        p.sub { margin: 4px 0 0 0; font-size: 0.85rem; color: #cbd5e1; }
+
+        .filters-card {
+            background: var(--card-bg); padding: 14px; border-radius: 12px;
+            margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;
+        }
+
+        label { display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: #475569; }
+        select, input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+
+        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+        .unit-card {
+            background: var(--card-bg); border-radius: 10px; padding: 14px;
+            border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+
+        .unit-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--accent); }
+
+        .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
+        .unit-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
+        .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
+
+        .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.4; }
+        .unit-price { font-size: 1.25rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
+
+        .btn-select {
+            width: 100%; background: var(--primary); color: #fff; border: none;
+            padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            transition: background 0.2s; text-align: center; text-decoration: none; display: block;
+        }
+
+        .btn-select:hover { background: #334155; color: var(--accent); }
     </style>
 </head>
-<body class="bg-slate-100 font-sans p-2 md:p-5 text-slate-800">
+<body>
 
-    <div class="max-w-7xl mx-auto space-y-4">
+    <header>
+        <div>
+            <h1>SuperCalc — Prateleira de Imóveis</h1>
+            <p class="sub">Selecione uma unidade para carregar o simulador de fluxo</p>
+        </div>
+    </header>
 
-        <!-- CABEÇALHO DA PRATELEIRA PRINCIPAL -->
-        <header class="bg-slate-900 text-white p-4 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b-4 border-yellow-400">
-            <div>
-                <h1 class="text-lg md:text-xl font-black tracking-tight flex items-center gap-2">
-                    PRATELEIRA DE IMÓVEIS
-                </h1>
-                <p class="text-[11px] text-yellow-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
-            </div>
+    <div class="filters-card">
+        <div>
+            <label>Empreendimento:</label>
+            <select id="filterEmp" onchange="renderUnits()">
+                <option value="TODOS">Todos os Empreendimentos</option>
+                <option value="POEMA LIBERDADE">POEMA LIBERDADE</option>
+                <option value="NOW BUTANTA">NOW BUTANTÃ</option>
+            </select>
+        </div>
+        <div>
+            <label>Tipologia:</label>
+            <select id="filterTipo" onchange="renderUnits()">
+                <option value="TODOS">Todas as Tipologias</option>
+                <option value="Studio">Studio</option>
+                <option value="1 Dorm">1 Dormitório</option>
+                <option value="2 Dorm">2 Dormitórios</option>
+                <option value="3 Dorm">3 Dormitórios</option>
+            </select>
+        </div>
+        <div>
+            <label>Buscar Unidade:</label>
+            <input type="text" id="filterBusca" placeholder="Ex: 501, 706..." oninput="renderUnits()">
+        </div>
+    </div>
 
-            <!-- FILTRO DE ORIGEM (GLOBAL VS PRIVADO) E VISUALIZAÇÃO -->
-            <div class="flex flex-wrap items-center gap-2 text-xs font-bold w-full md:w-auto">
-                <button onclick="setFiltroOrigem('TODOS', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-900 shadow-sm font-black">
-                    Todos
-                </button>
-                <button onclick="setFiltroOrigem('GLOBAL', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700">
-                    🏷️ Globais
-                </button>
-                <button onclick="setFiltroOrigem('PRIVADO', this)" class="btn-origem px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-300 border border-slate-700">
-                    🔒 Privados / Terceiros
-                </button>
-
-                <div class="h-5 w-[1px] bg-slate-700 hidden md:block"></div>
-
-                <!-- ALTERNADOR DE VISÃO (LISTA COMPACTA VS CARDS) -->
-                <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
-                    <button id="btnViewLista" onclick="setModoVisao('LISTA')" class="px-2.5 py-1 rounded-md bg-yellow-400 text-slate-900 font-black">
-                        📋 Lista Densa
-                    </button>
-                    <button id="btnViewCards" onclick="setModoVisao('CARDS')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-bold">
-                        🎴 Cards
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- FILTROS COMBINADOS -->
-        <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Filtros Avançados de Busca</h2>
-                <button onclick="limparFiltros()" class="text-[11px] font-bold text-blue-600 hover:underline">Limpar Filtros</button>
-            </div>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                <!-- 1. Incorporadora -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Incorporadora / Origem</label>
-                    <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                        <option value="TODAS">Todas as Construtoras</option>
-                        <option value="AAM Incorporadora">AAM Incorporadora</option>
-                        <option value="Marquês Construtora">Marquês Construtora</option>
-                        <option value="Imóveis de Terceiros">🔒 Terceiros / Avulsos</option>
-                    </select>
-                </div>
-
-                <!-- 2. Empreendimento -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Empreendimento</label>
-                    <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                        <option value="TODOS">Todos os Edifícios</option>
-                    </select>
-                </div>
-
-                <!-- 3. Status da Entrega -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Status da Entrega</label>
-                    <select id="filtroStatusEntrega" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                        <option value="TODOS">Todos os Status</option>
-                        <option value="PRONTO">🏡 Prontos / Terceiros</option>
-                        <option value="OBRA">🏗️ Em Obras / Lançamento</option>
-                    </select>
-                </div>
-
-                <!-- 4. Dormitórios -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Dormitórios</label>
-                    <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                        <option value="TODOS">Qualquer dormitório</option>
-                        <option value="0">Estúdio / Loft</option>
-                        <option value="1">1 Dormitório</option>
-                        <option value="2">2 Dormitórios</option>
-                        <option value="3">3 Dormitórios</option>
-                        <option value="4+">4+ Dormitórios</option>
-                    </select>
-                </div>
-
-                <!-- 5. Vagas -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Vagas de Garagem</label>
-                    <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                        <option value="TODOS">Qualquer quantidade</option>
-                        <option value="0">Sem Vaga</option>
-                        <option value="1">1 Vaga</option>
-                        <option value="2">2 Vagas</option>
-                        <option value="3+">3+ Vagas</option>
-                    </select>
-                </div>
-
-                <!-- 6. Preço Máximo -->
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Preço Máximo (R$)</label>
-                    <input type="number" id="filtroPrecoMax" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold bg-slate-50 focus:bg-white outline-none">
-                </div>
-            </div>
-        </section>
-
-        <!-- CONTAINER DE RESULTADOS (LISTA OU CARDS) -->
-        <main class="space-y-2">
-            <div class="flex justify-between items-center px-1">
-                <span class="text-xs font-black text-slate-600 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades...</span>
-            </div>
-
-            <!-- MODO LISTA COMPACTA (PADRÃO PARA CELULAR E DESKTOP) -->
-            <div id="containerLista" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-900 text-yellow-400 text-[11px] font-black uppercase tracking-wider border-b border-slate-800">
-                                <th class="p-2.5">Empreendimento / Unidade</th>
-                                <th class="p-2.5">Construtora / Origem</th>
-                                <th class="p-2.5">Tipologia / Área</th>
-                                <th class="p-2.5">Vagas</th>
-                                <th class="p-2.5">Status</th>
-                                <th class="p-2.5">Preço Tabela</th>
-                                <th class="p-2.5 text-center">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbodyLista" class="text-xs font-medium text-slate-700 divide-y divide-slate-100">
-                            <!-- Inserido dinamicamente via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- MODO CARDS -->
-            <div id="containerCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 hidden">
-                <!-- Inserido dinamicamente via JS -->
-            </div>
-        </main>
+    <div class="grid-units" id="containerUnidades">
+        <!-- Unidades renderizadas via JS -->
     </div>
 
     <script>
-        // CONFIGURAÇÃO SUPABASE
-        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-        const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC_AQUI';
-        let supabaseClient = null;
+        const estoqueMock = [
+            // NOW BUTANTÃ
+            { emp: 'NOW BUTANTÃ', unidade: '1706', andar: 17, tipo: 'Studio (NOW)', m2: 25.56, preco: 485359.00 },
+            { emp: 'NOW BUTANTÃ', unidade: '2404', andar: 24, tipo: 'Studio (NOW)', m2: 25.40, preco: 505433.00 },
+            { emp: 'NOW BUTANTÃ', unidade: '2513', andar: 25, tipo: 'Studio (NOW)', m2: 27.76, preco: 540323.00 },
+            
+            // POEMA NR
+            { emp: 'POEMA LIBERDADE', unidade: '501', andar: 5, tipo: '1 Dorm (NR)', m2: 54.83, preco: 820978.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '506', andar: 5, tipo: 'Studio (NR)', m2: 34.77, preco: 520154.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '601', andar: 6, tipo: '1 Dorm (NR)', m2: 40.19, preco: 613721.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '626', andar: 6, tipo: 'Studio (NR)', m2: 28.14, preco: 429605.00 },
 
-        if (typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('SEU_PROJETO') === -1) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
+            // POEMA HIS
+            { emp: 'POEMA LIBERDADE', unidade: '706', andar: 7, tipo: 'Studio (HIS)', m2: 26.48, preco: 337000.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '1215', andar: 12, tipo: 'Studio (HIS)', m2: 33.57, preco: 398500.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '2217', andar: 22, tipo: 'Studio (HIS)', m2: 27.99, preco: 373000.00 },
 
-        // MOCK DE FALLBACK LOCAL
-        const ESTOQUE_MOCK = [
-            { id: "u1", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2001", pavimento: 20, dorms: 0, vagas: 0, m2: 27.12, precoTabela: 667599, is_ready: true },
-            { id: "u2", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Sky Pinheiros", unidade: "2006", pavimento: 20, dorms: 0, vagas: 0, m2: 28.52, precoTabela: 695110, is_ready: true },
-            { id: "u3", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "101", pavimento: 1, dorms: 1, vagas: 0, m2: 28.50, precoTabela: 251400, is_ready: false },
-            { id: "u4", is_global: true, construtora: "AAM Incorporadora", empreendimento: "Poema Liberdade", unidade: "1204", pavimento: 12, dorms: 2, vagas: 1, m2: 48.00, precoTabela: 525900, is_ready: false },
-            { id: "u5", is_global: false, construtora: "Imóveis de Terceiros", empreendimento: "Residencial Avulso Pinheiros", unidade: "81", pavimento: 8, dorms: 2, vagas: 1, m2: 55.00, precoTabela: 590000, is_ready: true }
+            // POEMA HMP
+            { emp: 'POEMA LIBERDADE', unidade: '801', andar: 8, tipo: '1 Dorm (HMP)', m2: 34.31, preco: 477800.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '1913', andar: 19, tipo: '1 Dorm (HMP)', m2: 36.67, preco: 545000.00 },
+
+            // POEMA R2V
+            { emp: 'POEMA LIBERDADE', unidade: '704', andar: 7, tipo: '2 Dorm (R2V)', m2: 61.18, preco: 934164.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '2003', andar: 20, tipo: '3 Dorm (R2V)', m2: 124.39, preco: 1936239.00 },
+            { emp: 'POEMA LIBERDADE', unidade: '3702', andar: 37, tipo: '3 Dorm (R2V)', m2: 81.94, preco: 1448281.00 }
         ];
 
-        let unidadesCarregadas = [];
-        let modoVisaoAtual = 'LISTA';
-        let filtroOrigemAtual = 'TODOS';
+        function renderUnits() {
+            const empFiltro = document.getElementById("filterEmp").value;
+            const tipoFiltro = document.getElementById("filterTipo").value;
+            const busca = document.getElementById("filterBusca").value.toLowerCase().trim();
 
-        window.onload = async function() {
-            await carregarEstoqueGeral();
-            atualizarEmpreendimentos();
-            filtrarEstoque();
-        };
+            const container = document.getElementById("containerUnidades");
+            container.innerHTML = "";
 
-        async function carregarEstoqueGeral() {
-            unidadesCarregadas = [];
-
-            if (supabaseClient) {
-                try {
-                    const { data: units, error } = await supabaseClient
-                        .from('units')
-                        .select('*, developments(title, developer_name, is_ready, is_global)')
-                        .eq('status', 'DISPONIVEL');
-
-                    if (!error && data && data.length > 0) {
-                        unidadesCarregadas = data.map(u => {
-                            const isThird = u.developments?.developer_name === 'Imóveis de Terceiros' || u.developments?.is_third_party;
-                            // Se for imóvel de terceiros/avulso, is_global é estritamente FALSE
-                            const flagGlobal = isThird ? false : (u.developments?.is_global ?? true);
-
-                            return {
-                                id: u.id,
-                                is_global: flagGlobal,
-                                construtora: u.developments?.developer_name || 'Desconhecida',
-                                empreendimento: u.developments?.title || 'Edifício',
-                                unidade: String(u.unit_number),
-                                pavimento: u.floor,
-                                dorms: u.typology?.includes('HIS') ? 1 : (u.typology?.includes('R2V') ? 2 : 0),
-                                vagas: u.parking_spaces || 0,
-                                m2: u.private_area_m2 || 0,
-                                precoTabela: u.list_price || 0,
-                                is_ready: u.developments?.is_ready || false
-                            };
-                        });
-                    }
-                } catch(e) {}
-            }
-
-            if (unidadesCarregadas.length === 0) {
-                unidadesCarregadas = ESTOQUE_MOCK;
-            }
-        }
-
-        function setModoVisao(modo) {
-            modoVisaoAtual = modo;
-            const btnL = document.getElementById("btnViewLista");
-            const btnC = document.getElementById("btnViewCards");
-            const contL = document.getElementById("containerLista");
-            const contC = document.getElementById("containerCards");
-
-            if (modo === 'LISTA') {
-                btnL.className = "px-2.5 py-1 rounded-md bg-yellow-400 text-slate-900 font-black";
-                btnC.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-bold";
-                contL.classList.remove("hidden");
-                contC.classList.add("hidden");
-            } else {
-                btnC.className = "px-2.5 py-1 rounded-md bg-yellow-400 text-slate-900 font-black";
-                btnL.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-bold";
-                contC.classList.remove("hidden");
-                contL.classList.add("hidden");
-            }
-            filtrarEstoque();
-        }
-
-        function setFiltroOrigem(origem, btn) {
-            filtroOrigemAtual = origem;
-            document.querySelectorAll(".btn-origem").forEach(b => {
-                b.className = "btn-origem px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold";
-            });
-            btn.className = "btn-origem px-3 py-1.5 rounded-lg bg-yellow-400 text-slate-900 shadow-sm font-black";
-            filtrarEstoque();
-        }
-
-        function atualizarEmpreendimentos() {
-            const construtora = document.getElementById("filtroConstrutora").value;
-            const selectEmp = document.getElementById("filtroEmpreendimento");
-            selectEmp.innerHTML = '<option value="TODOS">Todos os Edifícios</option>';
-
-            const empreendimentosUnicos = [...new Set(
-                unidadesCarregadas
-                    .filter(i => construtora === "TODAS" || (construtora === "PRIVADO" ? !i.is_global : i.construtora === construtora))
-                    .map(i => i.empreendimento)
-            )];
-
-            empreendimentosUnicos.forEach(emp => {
-                const opt = document.createElement("option");
-                opt.value = emp;
-                opt.innerText = emp;
-                selectEmp.appendChild(opt);
-            });
-        }
-
-        function filtrarEstoque() {
-            const construtora = document.getElementById("filtroConstrutora").value;
-            const empreendimento = document.getElementById("filtroEmpreendimento").value;
-            const statusEntrega = document.getElementById("filtroStatusEntrega").value;
-            const dormsSel = document.getElementById("filtroDorms").value;
-            const vagasSel = document.getElementById("filtroVagas").value;
-            const precoMax = parseFloat(document.getElementById("filtroPrecoMax").value) || Infinity;
-
-            const filtrados = unidadesCarregadas.filter(item => {
-                // Origem Global vs Privado
-                let bateOrigem = true;
-                if (filtroOrigemAtual === 'GLOBAL') bateOrigem = item.is_global === true;
-                if (filtroOrigemAtual === 'PRIVADO') bateOrigem = item.is_global === false;
-
-                // Construtora
-                const bateConstrutora = construtora === "TODAS" || (construtora === "PRIVADO" ? !item.is_global : item.construtora === construtora);
-                
-                // Empreendimento
-                const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
-                
-                // Status Entrega (Pronto x Obra)
-                let bateStatus = true;
-                if (statusEntrega === "PRONTO") bateStatus = item.is_ready;
-                if (statusEntrega === "OBRA") bateStatus = !item.is_ready;
-
-                // Dormitórios
-                let bateDorms = true;
-                if (dormsSel === "0") bateDorms = (item.dorms === 0);
-                else if (dormsSel === "1") bateDorms = (item.dorms === 1);
-                else if (dormsSel === "2") bateDorms = (item.dorms === 2);
-                else if (dormsSel === "3") bateDorms = (item.dorms === 3);
-                else if (dormsSel === "4+") bateDorms = (item.dorms >= 4);
-
-                // Vagas
-                let bateVagas = true;
-                if (vagasSel === "0") bateVagas = (item.vagas === 0);
-                else if (vagasSel === "1") bateVagas = (item.vagas === 1);
-                else if (vagasSel === "2") bateVagas = (item.vagas === 2);
-                else if (vagasSel === "3+") bateVagas = (item.vagas >= 3);
-
-                // Preço
-                const batePreco = item.precoTabela <= precoMax;
-
-                return bateOrigem && bateConstrutora && bateEmpreendimento && bateStatus && bateDorms && bateVagas && batePreco;
+            const filtrados = estoqueMock.filter(u => {
+                const matchEmp = empFiltro === "TODOS" || u.emp === empFiltro;
+                const matchTipo = tipoFiltro === "TODOS" || u.tipo.includes(tipoFiltro);
+                const matchBusca = !busca || u.unidade.toLowerCase().includes(busca);
+                return matchEmp && matchTipo && matchBusca;
             });
 
-            renderizarResultados(filtrados);
-        }
+            if (filtrados.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada com os filtros selecionados.</div>`;
+                return;
+            }
 
-        function renderizarResultados(lista) {
-            const lblContagem = document.getElementById("lblResultadoContagem");
-            lblContagem.innerText = `${lista.length} UNIDADE(S) ENCONTRADA(S)`;
+            const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            if (modoVisaoAtual === 'LISTA') {
-                const tbody = document.getElementById("tbodyLista");
-                tbody.innerHTML = "";
-
-                if (lista.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center font-bold text-slate-400">Nenhum imóvel atende aos filtros selecionados.</td></tr>`;
-                    return;
-                }
-
-                lista.forEach(item => {
-                    const isGlobal = item.is_global;
-                    const isReady = item.is_ready;
-
-                    const tr = document.createElement("tr");
-                    tr.className = "list-row border-b border-slate-100 hover:bg-slate-50 transition";
-                    tr.innerHTML = `
-                        <td class="p-2.5 font-black text-slate-900">
-                            ${item.empreendimento}
-                            <span class="block text-[10px] font-bold text-slate-500">Unidade ${item.unidade} (${item.pavimento}º Andar)</span>
-                        </td>
-                        <td class="p-2.5">
-                            <span class="text-[10px] font-black px-2 py-0.5 rounded ${isGlobal ? 'badge-global' : 'badge-privado'}">
-                                ${isGlobal ? '🏷️ GLOBAL' : '🔒 PRIVADO'}
-                            </span>
-                            <span class="block text-[10px] font-semibold text-slate-500 mt-0.5">${item.construtora}</span>
-                        </td>
-                        <td class="p-2.5 font-bold">
-                            ${item.dorms === 0 ? 'Studio / Loft' : item.dorms + ' dorm(s)'}
-                            <span class="block text-[10px] font-normal text-slate-500">${item.m2} m² privativos</span>
-                        </td>
-                        <td class="p-2.5 font-bold text-slate-700">
-                            ${item.vagas === 0 ? 'Sem vaga' : item.vagas + ' vaga(s)'}
-                        </td>
-                        <td class="p-2.5">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isReady ? 'badge-pronto' : 'badge-obra'}">
-                                ${isReady ? '🏡 Pronto' : '🏗️ Em Obras'}
-                            </span>
-                        </td>
-                        <td class="p-2.5 font-black text-slate-900 text-sm">
-                            ${fmt(item.precoTabela)}
-                        </td>
-                        <td class="p-2.5 text-center">
-                            <button onclick="enviarParaSuperCalc('${item.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm">
-                                ⚡ Simular
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            } else {
-                const container = document.getElementById("containerCards");
-                container.innerHTML = "";
-
-                if (lista.length === 0) {
-                    container.innerHTML = `<div class="col-span-full bg-white p-6 text-center rounded-xl font-bold text-slate-400">Nenhum imóvel atende aos filtros.</div>`;
-                    return;
-                }
-
-                lista.forEach(item => {
-                    const isGlobal = item.is_global;
-                    const isReady = item.is_ready;
-
-                    const card = document.createElement("div");
-                    card.className = "bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between";
-                    card.innerHTML = `
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] font-black px-2 py-0.5 rounded ${isGlobal ? 'badge-global' : 'badge-privado'}">
-                                    ${isGlobal ? '🏷️ GLOBAL' : '🔒 PRIVADO'}
-                                </span>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isReady ? 'badge-pronto' : 'badge-obra'}">
-                                    ${isReady ? '🏡 Pronto' : '🏗️ Em Obras'}
-                                </span>
-                            </div>
-                            <div>
-                                <h3 class="font-black text-slate-900 text-sm">${item.empreendimento}</h3>
-                                <p class="text-xs text-slate-500 font-semibold">${item.construtora}</p>
-                            </div>
-                            <div class="bg-slate-50 p-2 rounded-lg grid grid-cols-2 gap-1 text-xs text-slate-700">
-                                <div><strong>Unidade:</strong> ${item.unidade}</div>
-                                <div><strong>Área:</strong> ${item.m2} m²</div>
-                                <div><strong>Tipologia:</strong> ${item.dorms === 0 ? 'Studio' : item.dorms + ' Dorms'}</div>
-                                <div><strong>Vagas:</strong> ${item.vagas} v</div>
-                            </div>
-                            <div>
-                                <span class="text-[10px] font-bold text-slate-400 uppercase">Preço Tabela</span>
-                                <span class="block text-lg font-black text-slate-900">${fmt(item.precoTabela)}</span>
-                            </div>
+            filtrados.forEach(u => {
+                const card = document.createElement("div");
+                card.className = "unit-card";
+                card.innerHTML = `
+                    <div>
+                        <div class="unit-header">
+                            <span class="unit-title">Apto ${u.unidade}</span>
+                            <span class="unit-badge">${u.emp}</span>
                         </div>
-                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition">
-                            ⚡ Simular na SuperCalc
-                        </button>
-                    `;
-                    container.appendChild(card);
-                });
-            }
+                        <div class="unit-details">
+                            • Andar: <strong>${u.andar}º Pavimento</strong><br>
+                            • Tipologia: <strong>${u.tipo}</strong><br>
+                            • Área Privativa: <strong>${u.m2} m²</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="unit-price">${fmt(u.preco)}</div>
+                        <button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular no SuperCalc →</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
         }
 
-        function limparFiltros() {
-            document.getElementById("filtroConstrutora").value = "TODAS";
-            document.getElementById("filtroEmpreendimento").value = "TODOS";
-            document.getElementById("filtroStatusEntrega").value = "TODOS";
-            document.getElementById("filtroDorms").value = "TODOS";
-            document.getElementById("filtroVagas").value = "TODOS";
-            document.getElementById("filtroPrecoMax").value = "";
-            filtroOrigemAtual = "TODOS";
-            atualizarEmpreendimentos();
-            filtrarEstoque();
-        }
-
-        function enviarParaSuperCalc(id) {
-            const item = unidadesCarregadas.find(i => i.id === id);
-            if (!item) return;
-
-            const payload = {
-                empreendimento: item.empreendimento,
-                unidade: item.unidade,
-                precoTabela: item.precoTabela,
-                m2: item.m2,
-                dorms: item.dorms === 0 ? 'Studio / Loft' : `${item.dorms} Dormitório(s)`,
-                vagas: item.vagas,
-                is_ready: item.is_ready,
-                origem: item.is_global ? 'GLOBAL' : 'PRIVADO'
+        function selecionarUnidade(emp, unidade, preco, tipo, m2) {
+            const obj = {
+                empreendimento: emp,
+                unidade: unidade,
+                precoTabela: preco,
+                dorms: tipo,
+                m2: m2,
+                origem: 'GLOBAL'
             };
-
-            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(payload));
+            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(obj));
             window.location.href = "supercalc.html";
         }
+
+        window.onload = renderUnits;
     </script>
 </body>
 </html>
