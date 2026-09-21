@@ -75,7 +75,7 @@
     <header>
         <div>
             <h1>SuperCalc — Prateleira de Imóveis</h1>
-            <p class="sub" id="txtContador">Carregando inventário...</p>
+            <p class="sub" id="txtContador">Carregando inventário diretamente do Supabase...</p>
         </div>
         <div class="view-toggle">
             <button class="view-btn active" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
@@ -128,9 +128,9 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE
-        const SUPABASE_URL = "https://SEU_PROJETO.supabase.co";
-        const SUPABASE_KEY = "SUA_CHAVE_ANONIMA_SUPABASE";
+        // CONFIGURAÇÃO DO SUPABASE (Sua URL e Key Reais)
+        const SUPABASE_URL = "https://blzhzrctahvwaakxygzn.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
 
         let todasAsUnidades = [];
         let currentMode = 'cards';
@@ -144,7 +144,7 @@
                     }
                 });
 
-                if (!response.ok) throw new Error("Erro ao consultar Supabase");
+                if (!response.ok) throw new Error("Erro ao consultar o Supabase");
                 
                 const data = await response.json();
                 todasAsUnidades = data.map(u => ({
@@ -159,8 +159,8 @@
                 populateEmpFilter();
                 renderUnits();
             } catch (err) {
-                console.error("Erro na comunicação com a base de dados:", err);
-                document.getElementById("txtContador").innerText = "Erro ao carregar os dados. Verifique as credenciais do Supabase.";
+                console.error("Erro na comunicação com o Supabase:", err);
+                document.getElementById("txtContador").innerText = "Erro ao carregar dados do Supabase. Verifique a conexão.";
             }
         }
 
@@ -194,7 +194,7 @@
                 return matchEmp && matchTipo && matchBusca;
             });
 
-            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas`;
+            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas na base de dados`;
             const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             if (currentMode === 'cards') {
