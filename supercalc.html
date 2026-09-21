@@ -46,7 +46,7 @@
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; font-size: 0.82rem; margin-bottom: 4px; color: #475569; }
         
-        input[type="text"], input[type="date"], input[type="month"], select { 
+        input[type="text"], input[type="date"], select { 
             width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: #fff; 
         }
         input[type="number"] { 
@@ -78,7 +78,6 @@
 
     <button class="btn-voltar" onclick="window.location.href='index.html'">← Voltar para a Prateleira de Imóveis</button>
 
-    <!-- PAINEL FIXO DE COMUNICAÇÃO DO TOTAL -->
     <div class="sticky-summary">
         <div class="unit-info-row">
             <div>
@@ -86,7 +85,7 @@
                 <div class="emp-sub-compact" id="bannerEmpSub">Aguardando dados...</div>
             </div>
             <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.65rem; font-weight:800; padding:3px 6px; border-radius:4px; border:1px solid var(--accent);">
-                FLUXO DADOS DA TABELA
+                SIMULADOR DE PROPOSTA
             </span>
         </div>
         
@@ -162,9 +161,9 @@
         </div>
     </div>
 
-    <!-- VALORES BASE E ESPECIFICAÇÕES -->
+    <!-- VALORES BASE -->
     <div class="card">
-        <h3>1. Linha de Tabela & Especificações da Unidade</h3>
+        <h3>1. Especificações & Valor Tabela Base</h3>
         <div class="grid-4">
             <div>
                 <label>Tipologia:</label>
@@ -189,9 +188,9 @@
         </div>
     </div>
 
-    <!-- ENGENHARIA FINANCEIRA COMPLETA E COMUNICANTE -->
+    <!-- ESTRUTURA DA PROPOSTA DE PAGAMENTO -->
     <div class="card">
-        <h3>2. Engenharia Financeira da Proposta (Comunicação em Tempo Real)</h3>
+        <h3>2. Condições de Pagamento da Proposta</h3>
 
         <!-- SINAL / ATO -->
         <div class="form-group">
@@ -212,7 +211,7 @@
             <div class="grid-2">
                 <div>
                     <label>Qtd. Parcelas:</label>
-                    <input type="number" id="qtdMensais" value="36" oninput="recalculateAll()">
+                    <input type="number" id="qtdMensais" value="0" oninput="recalculateAll()">
                 </div>
                 <div>
                     <label>Valor Unitário (R$):</label>
@@ -228,7 +227,7 @@
             <div class="grid-2">
                 <div>
                     <label>Qtd. Parcelas:</label>
-                    <input type="number" id="qtdAnuais" value="3" oninput="recalculateAll()">
+                    <input type="number" id="qtdAnuais" value="0" oninput="recalculateAll()">
                 </div>
                 <div>
                     <label>Valor Unitário (R$):</label>
@@ -255,7 +254,7 @@
             <div class="calculated-badge" id="badgeFinan">Financiamento: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- PAINEL COMPARATIVO TOTAL DA PROPOSTA X TABELA BASE -->
+        <!-- COMPARATIVO DA PROPOSTA X TABELA -->
         <div class="comparador-box">
             <div>
                 <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">SOMA DA PROPOSTA:</span>
@@ -263,7 +262,7 @@
             </div>
             <div>
                 <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">DIFERENÇA X TABELA:</span>
-                <strong id="txtDiferencaBox" style="font-size:1.1rem; color:var(--success);">R$ 0,00 (100% Tabela)</strong>
+                <strong id="txtDiferencaBox" style="font-size:1.1rem; color:var(--primary);">R$ 0,00 (100% Tabela)</strong>
             </div>
         </div>
     </div>
@@ -273,6 +272,9 @@
 
     <script>
         let modoAto = 'VALOR';
+
+        // ARREDONDAMENTO RIGOROSO DE CASAS DECIMAIS CONTRA ERROS DE CENTAVOS
+        const round2 = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
         window.onload = function() {
             document.getElementById("inputDataProposta").valueAsDate = new Date();
@@ -284,17 +286,17 @@
             document.getElementById("btnModoAtoVal").className = modo === 'VALOR' ? 'toggle-btn active' : 'toggle-btn';
             document.getElementById("btnModoAtoPerc").className = modo === 'PERC' ? 'toggle-btn active' : 'toggle-btn';
             
-            const total = (parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0);
+            const total = round2((parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0));
             const inputAto = document.getElementById("inputAtoEntrada");
 
             if (modo === 'PERC') {
                 const valAtual = parseFloat(inputAto.value) || 0;
-                const percCalculado = total > 0 ? (valAtual / total) * 100 : 10;
-                inputAto.value = percCalculado.toFixed(2);
+                const percCalculado = total > 0 ? (valAtual / total) * 100 : 20;
+                inputAto.value = round2(percCalculado);
             } else {
-                const percAtual = parseFloat(inputAto.value) || 10;
+                const percAtual = parseFloat(inputAto.value) || 20;
                 const valCalculado = (total * percAtual) / 100;
-                inputAto.value = valCalculado.toFixed(2);
+                inputAto.value = round2(valCalculado);
             }
             recalculateAll();
         }
@@ -312,20 +314,19 @@
                 if (item.vagas !== undefined) document.getElementById("inputVagas").value = item.vagas > 0 ? item.vagas + " Vaga(s)" : "Sem Vaga";
             }
 
-            // PRÉ-PREENCHIMENTO AUTOMÁTICO PADRÃO DE TABELA (100% FECHADO):
-            const tabVal = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
+            // PADRÃO LIMPO E EXATO (20% ATO / 80% FINANCIAMENTO)
+            const tabVal = round2(parseFloat(document.getElementById("valorTotalTabela").value) || 0);
             if (tabVal > 0) {
-                document.getElementById("inputAtoEntrada").value = (tabVal * 0.10).toFixed(2); // 10% Ato
-                
-                document.getElementById("qtdMensais").value = 36;
-                document.getElementById("valMensalUnit").value = ((tabVal * 0.15) / 36).toFixed(2); // 15% Mensais em 36x
-                
-                document.getElementById("qtdAnuais").value = 3;
-                document.getElementById("valAnualUnit").value = ((tabVal * 0.10) / 3).toFixed(2); // 10% Anuais em 3x
-                
-                document.getElementById("valChaves").value = (tabVal * 0.05).toFixed(2); // 5% Chaves
-                
-                document.getElementById("valFinanciamento").value = (tabVal * 0.60).toFixed(2); // 60% Financiamento
+                const ato20 = round2(tabVal * 0.20);
+                const finan80 = round2(tabVal - ato20);
+
+                document.getElementById("inputAtoEntrada").value = ato20;
+                document.getElementById("qtdMensais").value = 0;
+                document.getElementById("valMensalUnit").value = 0;
+                document.getElementById("qtdAnuais").value = 0;
+                document.getElementById("valAnualUnit").value = 0;
+                document.getElementById("valChaves").value = 0;
+                document.getElementById("valFinanciamento").value = finan80;
             }
 
             atualizarHeader();
@@ -345,52 +346,50 @@
         }
 
         function recalculateAll() {
-            const valorTabelaBase = parseFloat(document.getElementById("valorTotalTabela").value) || 0;
-            const valOpcionais = parseFloat(document.getElementById("valOpcionais").value) || 0;
-            const totalAlvoTabela = valorTabelaBase + valOpcionais;
+            const valorTabelaBase = round2(parseFloat(document.getElementById("valorTotalTabela").value) || 0);
+            const valOpcionais = round2(parseFloat(document.getElementById("valOpcionais").value) || 0);
+            const totalAlvoTabela = round2(valorTabelaBase + valOpcionais);
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             if (totalAlvoTabela <= 0) return;
 
-            // 1. Entrada / Sinal (Ato)
+            // 1. Sinal (Ato)
             const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
-            let valAto = modoAto === 'PERC' ? (totalAlvoTabela * inputAto) / 100 : inputAto;
+            let valAto = modoAto === 'PERC' ? round2((totalAlvoTabela * inputAto) / 100) : round2(inputAto);
             let percAto = (valAto / totalAlvoTabela) * 100;
             document.getElementById("badgeAto").innerText = `Sinal: ${fmt(valAto)} (${percAto.toFixed(2)}%)`;
 
             // 2. Mensais
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
-            const valMensalUnit = parseFloat(document.getElementById("valMensalUnit").value) || 0;
-            const totalMensais = qtdMensais * valMensalUnit;
+            const valMensalUnit = round2(parseFloat(document.getElementById("valMensalUnit").value) || 0);
+            const totalMensais = round2(qtdMensais * valMensalUnit);
             const percMensais = (totalMensais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totalMensais)} (${percMensais.toFixed(2)}%)`;
 
             // 3. Anuais
             const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnualUnit = parseFloat(document.getElementById("valAnualUnit").value) || 0;
-            const totalAnuais = qtdAnuais * valAnualUnit;
+            const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
+            const totalAnuais = round2(qtdAnuais * valAnualUnit);
             const percAnuais = (totalAnuais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalAnuais").innerText = `Total Anuais (${qtdAnuais}x): ${fmt(totalAnuais)} (${percAnuais.toFixed(2)}%)`;
 
             // 4. Chaves
-            const valChaves = parseFloat(document.getElementById("valChaves").value) || 0;
+            const valChaves = round2(parseFloat(document.getElementById("valChaves").value) || 0);
             const percChaves = (valChaves / totalAlvoTabela) * 100;
             document.getElementById("badgeChaves").innerText = `Chaves: ${fmt(valChaves)} (${percChaves.toFixed(2)}%)`;
 
             // 5. Financiamento
-            const valFinan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+            const valFinan = round2(parseFloat(document.getElementById("valFinanciamento").value) || 0);
             const percFinan = (valFinan / totalAlvoTabela) * 100;
-            document.getElementById("valFinanciamento").value = valFinan.toFixed(2);
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2).replace('.', ',') + '%';
             document.getElementById("badgeFinan").innerText = `Financiamento: ${fmt(valFinan)} (${percFinan.toFixed(2)}%)`;
 
-            // SOMA TOTAL DA PROPOSTA
-            const totalProposta = valAto + totalMensais + totalAnuais + valChaves + valFinan;
-            const diferenca = totalProposta - totalAlvoTabela;
+            // SOMA TOTAL RIGOROSA E EXATA
+            const totalProposta = round2(valAto + totalMensais + totalAnuais + valChaves + valFinan);
+            const diferenca = round2(totalProposta - totalAlvoTabela);
             const percDiferenca = (diferenca / totalAlvoTabela) * 100;
 
-            // ATUALIZAÇÃO DA INTERFACE EM TEMPO REAL
             document.getElementById("txtTotalPropostaSticky").innerText = fmt(totalProposta);
             document.getElementById("txtTabelaSticky").innerText = fmt(totalAlvoTabela);
             document.getElementById("txtSomaPropostaBox").innerText = fmt(totalProposta);
@@ -398,7 +397,7 @@
             const txtDiffBox = document.getElementById("txtDiferencaBox");
             const badgeHeader = document.getElementById("badgeVariacaoTotal");
 
-            if (Math.abs(diferenca) < 1) {
+            if (Math.abs(diferenca) < 0.01) {
                 txtDiffBox.innerText = `R$ 0,00 (100% Tabela)`;
                 txtDiffBox.style.color = "var(--primary)";
                 badgeHeader.innerText = "100,00% TABELA";
@@ -428,21 +427,21 @@
             const dataProp = document.getElementById("inputDataProposta").value;
             const validade = document.getElementById("selectValidade").value;
 
-            const totalTabela = (parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0);
+            const totalTabela = round2((parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0));
             
             const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
-            const valAto = modoAto === 'PERC' ? (totalTabela * inputAto) / 100 : inputAto;
+            const valAto = modoAto === 'PERC' ? round2((totalTabela * inputAto) / 100) : round2(inputAto);
 
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
-            const valMensalUnit = parseFloat(document.getElementById("valMensalUnit").value) || 0;
+            const valMensalUnit = round2(parseFloat(document.getElementById("valMensalUnit").value) || 0);
 
             const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnualUnit = parseFloat(document.getElementById("valAnualUnit").value) || 0;
+            const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
 
-            const valChaves = parseFloat(document.getElementById("valChaves").value) || 0;
-            const valFinan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+            const valChaves = round2(parseFloat(document.getElementById("valChaves").value) || 0);
+            const valFinan = round2(parseFloat(document.getElementById("valFinanciamento").value) || 0);
 
-            const totalProposta = valAto + (qtdMensais * valMensalUnit) + (qtdAnuais * valAnualUnit) + valChaves + valFinan;
+            const totalProposta = round2(valAto + (qtdMensais * valMensalUnit) + (qtdAnuais * valAnualUnit) + valChaves + valFinan);
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             const texto = `📌 *PROPOSTA COMERCIAL DE COMPRA - SUPERCALC*\n` +
@@ -454,7 +453,7 @@
                           `------------------------------------\n` +
                           `💵 *Valor de Tabela:* ${fmt(totalTabela)}\n` +
                           `💰 *VALOR TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n\n` +
-                          `*ENGENHARIA FINANCEIRA DE PAGAMENTO:*\n` +
+                          `*CONDIÇÕES DE PAGAMENTO:*\n` +
                           `• *Entrada / Ato:* ${fmt(valAto)}\n` +
                           (qtdMensais > 0 ? `• *Mensais:* ${qtdMensais}x de ${fmt(valMensalUnit)} (${fmt(qtdMensais * valMensalUnit)})\n` : '') +
                           (qtdAnuais > 0 ? `• *Intermediárias/Anuais:* ${qtdAnuais}x de ${fmt(valAnualUnit)} (${fmt(qtdAnuais * valAnualUnit)})\n` : '') +
@@ -467,7 +466,7 @@
             const box = document.getElementById("outputBox");
             box.innerText = texto;
             box.style.display = "block";
-            alert("Proposta com engenharia financeira e linha de tabela copiada com sucesso para o WhatsApp!");
+            alert("Proposta copiada com sucesso para o WhatsApp!");
         }
     </script>
 </body>
