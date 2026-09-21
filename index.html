@@ -35,7 +35,7 @@
         .filters-card {
             background: var(--card-bg); padding: 14px; border-radius: 12px;
             margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
         }
 
         label { display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: #475569; }
@@ -52,7 +52,7 @@
         .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
         .unit-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
         .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-        .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.4; }
+        .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
         .unit-price { font-size: 1.2rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
 
         /* VISTA EM TABELA */
@@ -75,7 +75,7 @@
     <header>
         <div>
             <h1>SuperCalc — Prateleira de Imóveis</h1>
-            <p class="sub" id="txtContador">Carregando inventário diretamente do Supabase...</p>
+            <p class="sub" id="txtContador">Carregando inventário do Supabase...</p>
         </div>
         <div class="view-toggle">
             <button class="view-btn active" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
@@ -83,6 +83,7 @@
         </div>
     </header>
 
+    <!-- PAINEL DE FILTROS COMPLETOS -->
     <div class="filters-card">
         <div>
             <label>Empreendimento:</label>
@@ -101,8 +102,16 @@
             </select>
         </div>
         <div>
-            <label>Buscar Unidade:</label>
-            <input type="text" id="filterBusca" placeholder="Ex: 501, 706..." oninput="renderUnits()">
+            <label>Vagas de Garagem:</label>
+            <select id="filterVagas" onchange="renderUnits()">
+                <option value="TODOS">Todas as Opções</option>
+                <option value="SEM">Sem Vaga (0)</option>
+                <option value="COM">Com Vaga (1+)</option>
+            </select>
+        </div>
+        <div>
+            <label>Buscar por Unidade / M²:</label>
+            <input type="text" id="filterBusca" placeholder="Ex: 501, 35m²..." oninput="renderUnits()">
         </div>
     </div>
 
@@ -119,6 +128,7 @@
                     <th>Andar</th>
                     <th>Tipologia</th>
                     <th>Área</th>
+                    <th>Vagas</th>
                     <th>Preço Tabela</th>
                     <th>Ação</th>
                 </tr>
@@ -128,7 +138,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO SUPABASE (Sua URL e Key Reais)
         const SUPABASE_URL = "https://blzhzrctahvwaakxygzn.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
 
@@ -153,6 +162,7 @@
                     andar: u.floor,
                     tipo: u.typology,
                     m2: u.private_area_m2,
+                    vagas: u.parking_spaces || 0,
                     preco: parseFloat(u.list_price)
                 }));
 
@@ -185,16 +195,18 @@
         function renderUnits() {
             const empFiltro = document.getElementById("filterEmp").value;
             const tipoFiltro = document.getElementById("filterTipo").value;
+            const vagasFiltro = document.getElementById("filterVagas").value;
             const busca = document.getElementById("filterBusca").value.toLowerCase().trim();
 
             const filtrados = todasAsUnidades.filter(u => {
                 const matchEmp = empFiltro === "TODOS" || u.emp === empFiltro;
                 const matchTipo = tipoFiltro === "TODOS" || u.tipo.includes(tipoFiltro);
-                const matchBusca = !busca || u.unidade.toLowerCase().includes(busca);
-                return matchEmp && matchTipo && matchBusca;
+                const matchVagas = vagasFiltro === "TODOS" || (vagasFiltro === "COM" ? u.vagas > 0 : u.vagas === 0);
+                const matchBusca = !busca || u.unidade.toLowerCase().includes(busca) || u.m2.toString().includes(busca);
+                return matchEmp && matchTipo && matchVagas && matchBusca;
             });
 
-            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas na base de dados`;
+            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas na base`;
             const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             if (currentMode === 'cards') {
@@ -215,12 +227,13 @@
                                 <div class="unit-details">
                                     • Andar: <strong>${u.andar}º Pavimento</strong><br>
                                     • Tipologia: <strong>${u.tipo}</strong><br>
-                                    • Área Privativa: <strong>${u.m2} m²</strong>
+                                    • Área Privativa: <strong>${u.m2} m²</strong><br>
+                                    • Vagas: <strong>${u.vagas > 0 ? u.vagas + ' Vaga(s)' : 'Sem Vaga'}</strong>
                                 </div>
                             </div>
                             <div>
                                 <div class="unit-price">${fmt(u.preco)}</div>
-                                <button class="btn-select" style="width:100%" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular no SuperCalc →</button>
+                                <button class="btn-select" style="width:100%" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.andar}, ${u.preco}, '${u.tipo}', ${u.m2}, ${u.vagas})">Simular no SuperCalc →</button>
                             </div>
                         </div>
                     `;
@@ -229,7 +242,7 @@
                 const tbody = document.getElementById("tbodyUnits");
                 tbody.innerHTML = "";
                 if (filtrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma unidade encontrada.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Nenhuma unidade encontrada.</td></tr>`;
                     return;
                 }
                 filtrados.forEach(u => {
@@ -240,21 +253,24 @@
                             <td>${u.andar}º</td>
                             <td>${u.tipo}</td>
                             <td>${u.m2} m²</td>
+                            <td>${u.vagas > 0 ? u.vagas : '0'}</td>
                             <td style="color:var(--success); font-weight:bold;">${fmt(u.preco)}</td>
-                            <td><button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.preco}, '${u.tipo}', ${u.m2})">Simular</button></td>
+                            <td><button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.andar}, ${u.preco}, '${u.tipo}', ${u.m2}, ${u.vagas})">Simular</button></td>
                         </tr>
                     `;
                 });
             }
         }
 
-        function selecionarUnidade(emp, unidade, preco, tipo, m2) {
+        function selecionarUnidade(emp, unidade, andar, preco, tipo, m2, vagas) {
             const obj = {
                 empreendimento: emp,
                 unidade: unidade,
+                andar: andar,
                 precoTabela: preco,
                 dorms: tipo,
                 m2: m2,
+                vagas: vagas,
                 origem: 'GLOBAL'
             };
             localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(obj));
