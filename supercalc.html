@@ -18,60 +18,56 @@
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg); margin: 0; padding: 10px; font-size: 15px; color: #333; }
+        body { background-color: var(--bg); margin: 0; padding: 6px; font-size: 13px; color: #333; }
 
         .sticky-summary {
-            position: sticky; top: 8px; z-index: 1000;
+            position: sticky; top: 2px; z-index: 1000;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #fff; padding: 12px 16px; border-radius: 12px;
-            margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            color: #fff; padding: 8px 10px; border-radius: 6px;
+            margin-bottom: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             border: 1px solid var(--accent);
         }
 
         .sticky-summary .unit-info-row {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 6px; margin-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 3px; margin-bottom: 3px;
         }
 
-        .sticky-summary .emp-title-compact { font-size: 1rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
-        .sticky-summary .emp-sub-compact { font-size: 0.8rem; font-weight: 600; color: #cbd5e1; }
+        .sticky-summary .emp-title-compact { font-size: 0.85rem; font-weight: 900; color: var(--accent); text-transform: uppercase; }
+        .sticky-summary .emp-sub-compact { font-size: 0.72rem; font-weight: 600; color: #cbd5e1; }
 
-        .sticky-summary .proposal-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .sticky-summary .total-bar { font-size: 1.35rem; font-weight: 900; color: var(--accent); }
-        .sticky-summary .tabela-bar { font-size: 0.82rem; color: #94a3b8; font-weight: 600; }
+        .sticky-summary .proposal-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+        .sticky-summary .total-bar { font-size: 1.15rem; font-weight: 900; color: var(--accent); }
+        .sticky-summary .tabela-bar { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
 
-        .card { background: var(--card-bg); padding: 14px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-        .card h3 { margin: 0 0 10px 0; font-size: 1.05rem; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+        .card { background: var(--card-bg); padding: 8px; border-radius: 6px; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card h3 { margin: 0 0 4px 0; font-size: 0.88rem; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 2px; }
 
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: bold; font-size: 0.82rem; margin-bottom: 4px; color: #475569; }
+        .form-group { margin-bottom: 6px; }
+        label { display: block; font-weight: bold; font-size: 0.72rem; margin-bottom: 1px; color: #475569; }
         
         input[type="text"], input[type="date"], select { 
-            width: 100%; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; background: #fff; 
+            width: 100%; padding: 5px 6px; border: 1.5px solid var(--border); border-radius: 4px; font-size: 0.8rem; background: #fff; 
         }
         input[type="number"] { 
-            width: 100%; padding: 6px 8px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.1rem; font-weight: 800; color: #1a252f; background: #fff; 
+            width: 100%; padding: 5px 6px; border: 2px solid var(--border); border-radius: 4px; font-size: 0.95rem; font-weight: 800; color: #1a252f; background: #fff; 
         }
 
-        .toggle-group { display: flex; background: #e2e8f0; border-radius: 8px; padding: 2px; gap: 2px; width: 120px; }
-        .toggle-btn { flex: 1; border: none; background: transparent; padding: 6px 4px; font-size: 0.75rem; font-weight: bold; color: #64748b; border-radius: 6px; cursor: pointer; text-align: center; }
-        .toggle-btn.active { background: var(--primary); color: #fff; border: 1px solid var(--accent); }
+        .calculated-badge { font-size: 0.72rem; font-weight: 700; color: #1e8449; background: #e8f8f5; padding: 2px 5px; border-radius: 4px; display: block; margin-top: 2px; border: 1px solid #a3e4d7; text-align: center; }
 
-        .calculated-badge { font-size: 0.85rem; font-weight: 700; color: #1e8449; background: #e8f8f5; padding: 4px 8px; border-radius: 6px; display: block; margin-top: 4px; border: 1px solid #a3e4d7; text-align: center; }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
         @media (max-width: 650px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
         .comparador-box {
-            background: #f1f5f9; border: 2px dashed #94a3b8; padding: 12px; border-radius: 10px; margin-top: 10px;
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+            background: #f1f5f9; border: 1.5px dashed #94a3b8; padding: 6px; border-radius: 6px; margin-top: 4px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;
         }
 
-        .btn-copy { width: 100%; background: var(--success); color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 0.95rem; font-weight: bold; cursor: pointer; margin-top: 6px; }
-        .btn-voltar { width: 100%; background: #64748b; color: #fff; border: none; padding: 8px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
-        .output-box { white-space: pre-wrap; background: #222; color: #00ff66; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; margin-top: 8px; display: none; }
+        .btn-copy { width: 100%; background: var(--success); color: #fff; border: none; padding: 8px; border-radius: 5px; font-size: 0.85rem; font-weight: bold; cursor: pointer; margin-top: 4px; }
+        .btn-voltar { width: 100%; background: #64748b; color: #fff; border: none; padding: 5px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 4px; }
+        .output-box { white-space: pre-wrap; background: #222; color: #00ff66; padding: 6px; border-radius: 4px; font-family: monospace; font-size: 0.72rem; margin-top: 4px; display: none; }
     </style>
 </head>
 <body>
@@ -84,23 +80,22 @@
                 <div class="emp-title-compact" id="bannerEmpTitle">SELECIONE UMA UNIDADE</div>
                 <div class="emp-sub-compact" id="bannerEmpSub">Aguardando dados...</div>
             </div>
-            <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.65rem; font-weight:800; padding:3px 6px; border-radius:4px; border:1px solid var(--accent);">
-                SIMULADOR DE PROPOSTA
+            <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.6rem; font-weight:800; padding:1px 4px; border-radius:3px; border:1px solid var(--accent);">
+                MESA DE NEGOCIAÇÃO
             </span>
         </div>
         
         <div class="proposal-row">
             <div>
                 <div class="total-bar" id="txtTotalPropostaSticky">R$ 0,00</div>
-                <div class="tabela-bar">Tabela Base: <strong id="txtTabelaSticky" style="color:#fff;">R$ 0,00</strong></div>
+                <div class="tabela-bar">Tabela Oficial: <strong id="txtTabelaSticky" style="color:#fff;">R$ 0,00</strong></div>
             </div>
-            <span id="badgeVariacaoTotal" style="background: var(--info); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 900;">
+            <span id="badgeVariacaoTotal" style="background: var(--info); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 900;">
                 100,00% TABELA
             </span>
         </div>
     </div>
 
-    <!-- IDENTIFICAÇÃO -->
     <div class="card">
         <h3>Identificação Completa da Proposta</h3>
         <div class="grid-4">
@@ -122,7 +117,7 @@
             </div>
         </div>
 
-        <div class="grid-3" style="margin-top: 8px;">
+        <div class="grid-3" style="margin-top: 4px;">
             <div>
                 <label>Nome do Cliente:</label>
                 <input type="text" id="inputCliente" placeholder="Ex: Carlos Eduardo Silva">
@@ -132,12 +127,12 @@
                 <input type="text" id="inputCPF" placeholder="000.000.000-00">
             </div>
             <div>
-                <label>Contacto / Telefone:</label>
+                <label>Contato / Telefone:</label>
                 <input type="text" id="inputTelefoneCliente" placeholder="(11) 99999-9999">
             </div>
         </div>
 
-        <div class="grid-4" style="margin-top: 8px;">
+        <div class="grid-4" style="margin-top: 4px;">
             <div>
                 <label>Corretor Responsável:</label>
                 <input type="text" id="inputCorretor" value="Wilson Wong">
@@ -161,9 +156,8 @@
         </div>
     </div>
 
-    <!-- VALORES BASE -->
     <div class="card">
-        <h3>1. Especificações & Valor Tabela Base</h3>
+        <h3>1. Especificações & Preço Oficial de Tabela</h3>
         <div class="grid-4">
             <div>
                 <label>Tipologia:</label>
@@ -178,39 +172,36 @@
                 <input type="text" id="inputVagas" value="0" oninput="atualizarHeader()">
             </div>
             <div>
-                <label style="color:var(--success);">Preço Tabela (R$):</label>
+                <label style="color:var(--success);">Preço Tabela Oficial (R$):</label>
                 <input type="number" id="valorTotalTabela" value="0" step="1000" oninput="recalculateAll()">
             </div>
         </div>
-        <div style="margin-top: 8px;">
+        <div style="margin-top: 4px;">
             <label style="color: #2980b9;">Opcionais / Acabamentos / Extras (R$):</label>
             <input type="number" id="valOpcionais" value="0" step="1000" oninput="recalculateAll()">
         </div>
     </div>
 
-    <!-- ESTRUTURA DA PROPOSTA DE PAGAMENTO -->
     <div class="card">
-        <h3>2. Condições de Pagamento da Proposta</h3>
+        <h3>2. Condições de Pagamento (Carregadas da Tabela Física)</h3>
 
-        <!-- SINAL / ATO -->
         <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="margin:0; font-weight:bold;">1. Entrada / Sinal (Ato):</label>
-                <div class="toggle-group">
-                    <button id="btnModoAtoVal" class="toggle-btn active" onclick="setModoAto('VALOR')">R$ Valor</button>
-                    <button id="btnModoAtoPerc" class="toggle-btn" onclick="setModoAto('PERC')">% Porc.</button>
-                </div>
-            </div>
+            <label style="font-weight:bold;">1. Entrada / Sinal (Ato) (R$):</label>
             <input type="number" id="inputAtoEntrada" value="0" oninput="recalculateAll()">
             <div class="calculated-badge" id="badgeAto">Sinal: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- MENSEIS -->
-        <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-            <label style="font-weight:bold; color:#1e293b;">2. Parcelas Mensais durante a Obra:</label>
+        <div class="form-group">
+            <label style="font-weight:bold;">2. Parcelas 30 / 60 / 90 dias do Contrato (3x Unitárias R$):</label>
+            <input type="number" id="val306090Unit" value="0" oninput="recalculateAll()">
+            <div class="calculated-badge" id="badge306090">Total 30/60/90 (3x): R$ 0,00 (0,00%)</div>
+        </div>
+
+        <div class="form-group" style="background:#f8fafc; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
+            <label style="font-weight:bold; color:#1e293b;">3. Parcelas Mensais durante a Obra:</label>
             <div class="grid-2">
                 <div>
-                    <label>Qtd. Parcelas:</label>
+                    <label>Qtd. Parcelas Mensais:</label>
                     <input type="number" id="qtdMensais" value="0" oninput="recalculateAll()">
                 </div>
                 <div>
@@ -221,12 +212,11 @@
             <div class="calculated-badge" id="badgeTotalMensais">Total Mensais: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- INTERMEDIÁRIAS / ANUAIS -->
-        <div class="form-group" style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0;">
-            <label style="font-weight:bold; color:#1e293b;">3. Intermediárias / Anuais:</label>
+        <div class="form-group" style="background:#f8fafc; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
+            <label style="font-weight:bold; color:#1e293b;">4. Intermediárias / Semestrais:</label>
             <div class="grid-2">
                 <div>
-                    <label>Qtd. Parcelas:</label>
+                    <label>Qtd. Parcelas Semestrais:</label>
                     <input type="number" id="qtdAnuais" value="0" oninput="recalculateAll()">
                 </div>
                 <div>
@@ -234,46 +224,40 @@
                     <input type="number" id="valAnualUnit" value="0" oninput="recalculateAll()">
                 </div>
             </div>
-            <div class="calculated-badge" id="badgeTotalAnuais">Total Anuais: R$ 0,00 (0,00%)</div>
+            <div class="calculated-badge" id="badgeTotalAnuais">Total Semestrais: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- CHAVES / ENTREGA -->
         <div class="form-group">
-            <label style="font-weight:bold;">4. Parcela das Chaves / Entrega (R$):</label>
+            <label style="font-weight:bold;">5. Parcela Única / Chaves / Entrega (R$):</label>
             <input type="number" id="valChaves" value="0" oninput="recalculateAll()">
             <div class="calculated-badge" id="badgeChaves">Chaves: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- FINANCIAMENTO BANCÁRIO -->
-        <div class="form-group" style="border-top: 2px solid var(--accent); padding-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
-            <label style="color: var(--primary); font-size: 0.95rem; font-weight:bold;">5. Financiamento Bancário / Saldo Devedor:</label>
-            <div style="display:flex; gap:8px; align-items:center;">
+        <div class="form-group" style="border-top: 2px solid var(--accent); padding-top: 6px; background: #f8f9fa; padding: 6px; border-radius: 4px;">
+            <label style="color: var(--primary); font-size: 0.85rem; font-weight:bold;">6. Financiamento Bancário / Saldo Devedor:</label>
+            <div style="display:flex; gap:4px; align-items:center;">
                 <input type="number" id="valFinanciamento" value="0" oninput="recalculateAll()">
-                <span id="percFinanciamento" style="font-weight: bold; width: 100px; text-align: right; color: var(--primary); font-size: 1.1rem;">0,00%</span>
+                <span id="percFinanciamento" style="font-weight: bold; width: 80px; text-align: right; color: var(--primary); font-size: 0.95rem;">0,00%</span>
             </div>
             <div class="calculated-badge" id="badgeFinan">Financiamento: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- COMPARATIVO DA PROPOSTA X TABELA -->
         <div class="comparador-box">
             <div>
-                <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">SOMA DA PROPOSTA:</span>
-                <strong id="txtSomaPropostaBox" style="font-size:1.1rem; color:var(--primary);">R$ 0,00</strong>
+                <span style="font-size:0.7rem; font-weight:bold; color:#64748b; display:block;">SOMA DA PROPOSTA:</span>
+                <strong id="txtSomaPropostaBox" style="font-size:0.95rem; color:var(--primary);">R$ 0,00</strong>
             </div>
             <div>
-                <span style="font-size:0.8rem; font-weight:bold; color:#64748b; display:block;">DIFERENÇA X TABELA:</span>
-                <strong id="txtDiferencaBox" style="font-size:1.1rem; color:var(--primary);">R$ 0,00 (100% Tabela)</strong>
+                <span style="font-size:0.7rem; font-weight:bold; color:#64748b; display:block;">DIFERENÇA X TABELA:</span>
+                <strong id="txtDiferencaBox" style="font-size:0.95rem; color:var(--primary);">R$ 0,00 (100% Tabela)</strong>
             </div>
         </div>
     </div>
 
-    <button class="btn-copy" onclick="copyProposal()">💬 Copiar Proposta Completa para WhatsApp</button>
+    <button class="btn-copy" onclick="copyProposal()">💬 Copiar Proposta Comercial para WhatsApp</button>
     <div class="output-box" id="outputBox"></div>
 
     <script>
-        let modoAto = 'VALOR';
-
-        // ARREDONDAMENTO RIGOROSO DE CASAS DECIMAIS CONTRA ERROS DE CENTAVOS
         const round2 = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
 
         window.onload = function() {
@@ -281,52 +265,26 @@
             carregarDadosEInicializarFluxo();
         };
 
-        function setModoAto(modo) {
-            modoAto = modo;
-            document.getElementById("btnModoAtoVal").className = modo === 'VALOR' ? 'toggle-btn active' : 'toggle-btn';
-            document.getElementById("btnModoAtoPerc").className = modo === 'PERC' ? 'toggle-btn active' : 'toggle-btn';
-            
-            const total = round2((parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0));
-            const inputAto = document.getElementById("inputAtoEntrada");
-
-            if (modo === 'PERC') {
-                const valAtual = parseFloat(inputAto.value) || 0;
-                const percCalculado = total > 0 ? (valAtual / total) * 100 : 20;
-                inputAto.value = round2(percCalculado);
-            } else {
-                const percAtual = parseFloat(inputAto.value) || 20;
-                const valCalculado = (total * percAtual) / 100;
-                inputAto.value = round2(valCalculado);
-            }
-            recalculateAll();
-        }
-
         function carregarDadosEInicializarFluxo() {
             const dadosStr = localStorage.getItem("UNIDADE_SELECIONADA");
             if (dadosStr) {
                 const item = JSON.parse(dadosStr);
-                if (item.empreendimento) document.getElementById("inputEmpreendimento").value = item.empreendimento;
+                if (item.emp) document.getElementById("inputEmpreendimento").value = item.emp;
                 if (item.unidade) document.getElementById("inputUnidade").value = item.unidade;
                 if (item.andar) document.getElementById("inputAndar").value = item.andar;
-                if (item.precoTabela) document.getElementById("valorTotalTabela").value = item.precoTabela;
-                if (item.dorms) document.getElementById("inputTipologia").value = item.dorms;
+                if (item.preco) document.getElementById("valorTotalTabela").value = item.preco;
+                if (item.tipo) document.getElementById("inputTipologia").value = item.tipo;
                 if (item.m2) document.getElementById("inputAreaM2").value = item.m2;
                 if (item.vagas !== undefined) document.getElementById("inputVagas").value = item.vagas > 0 ? item.vagas + " Vaga(s)" : "Sem Vaga";
-            }
 
-            // PADRÃO LIMPO E EXATO (20% ATO / 80% FINANCIAMENTO)
-            const tabVal = round2(parseFloat(document.getElementById("valorTotalTabela").value) || 0);
-            if (tabVal > 0) {
-                const ato20 = round2(tabVal * 0.20);
-                const finan80 = round2(tabVal - ato20);
-
-                document.getElementById("inputAtoEntrada").value = ato20;
-                document.getElementById("qtdMensais").value = 0;
-                document.getElementById("valMensalUnit").value = 0;
-                document.getElementById("qtdAnuais").value = 0;
-                document.getElementById("valAnualUnit").value = 0;
-                document.getElementById("valChaves").value = 0;
-                document.getElementById("valFinanciamento").value = finan80;
+                document.getElementById("inputAtoEntrada").value = item.valAto || 0;
+                document.getElementById("val306090Unit").value = item.val306090 || 0;
+                document.getElementById("qtdMensais").value = item.qtdMensais || 0;
+                document.getElementById("valMensalUnit").value = item.valMensalUnit || 0;
+                document.getElementById("qtdAnuais").value = item.qtdSemestrais || 0;
+                document.getElementById("valAnualUnit").value = item.valSemestralUnit || 0;
+                document.getElementById("valChaves").value = item.valChavesUnica || 0;
+                document.getElementById("valFinanciamento").value = item.valFinanciamento || 0;
             }
 
             atualizarHeader();
@@ -354,39 +312,37 @@
 
             if (totalAlvoTabela <= 0) return;
 
-            // 1. Sinal (Ato)
-            const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
-            let valAto = modoAto === 'PERC' ? round2((totalAlvoTabela * inputAto) / 100) : round2(inputAto);
-            let percAto = (valAto / totalAlvoTabela) * 100;
+            const valAto = round2(parseFloat(document.getElementById("inputAtoEntrada").value) || 0);
+            const percAto = (valAto / totalAlvoTabela) * 100;
             document.getElementById("badgeAto").innerText = `Sinal: ${fmt(valAto)} (${percAto.toFixed(2)}%)`;
 
-            // 2. Mensais
+            const val306090Unit = round2(parseFloat(document.getElementById("val306090Unit").value) || 0);
+            const total306090 = round2(val306090Unit * 3);
+            const perc306090 = (total306090 / totalAlvoTabela) * 100;
+            document.getElementById("badge306090").innerText = `Total 30/60/90 (3x ${fmt(val306090Unit)}): ${fmt(total306090)} (${perc306090.toFixed(2)}%)`;
+
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
             const valMensalUnit = round2(parseFloat(document.getElementById("valMensalUnit").value) || 0);
             const totalMensais = round2(qtdMensais * valMensalUnit);
             const percMensais = (totalMensais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totalMensais)} (${percMensais.toFixed(2)}%)`;
 
-            // 3. Anuais
             const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
             const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
             const totalAnuais = round2(qtdAnuais * valAnualUnit);
             const percAnuais = (totalAnuais / totalAlvoTabela) * 100;
-            document.getElementById("badgeTotalAnuais").innerText = `Total Anuais (${qtdAnuais}x): ${fmt(totalAnuais)} (${percAnuais.toFixed(2)}%)`;
+            document.getElementById("badgeTotalAnuais").innerText = `Total Semestrais (${qtdAnuais}x): ${fmt(totalAnuais)} (${percAnuais.toFixed(2)}%)`;
 
-            // 4. Chaves
             const valChaves = round2(parseFloat(document.getElementById("valChaves").value) || 0);
             const percChaves = (valChaves / totalAlvoTabela) * 100;
-            document.getElementById("badgeChaves").innerText = `Chaves: ${fmt(valChaves)} (${percChaves.toFixed(2)}%)`;
+            document.getElementById("badgeChaves").innerText = `Chaves / Única: ${fmt(valChaves)} (${percChaves.toFixed(2)}%)`;
 
-            // 5. Financiamento
             const valFinan = round2(parseFloat(document.getElementById("valFinanciamento").value) || 0);
             const percFinan = (valFinan / totalAlvoTabela) * 100;
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2).replace('.', ',') + '%';
             document.getElementById("badgeFinan").innerText = `Financiamento: ${fmt(valFinan)} (${percFinan.toFixed(2)}%)`;
 
-            // SOMA TOTAL RIGOROSA E EXATA
-            const totalProposta = round2(valAto + totalMensais + totalAnuais + valChaves + valFinan);
+            const totalProposta = round2(valAto + total306090 + totalMensais + totalAnuais + valChaves + valFinan);
             const diferenca = round2(totalProposta - totalAlvoTabela);
             const percDiferenca = (diferenca / totalAlvoTabela) * 100;
 
@@ -398,7 +354,7 @@
             const badgeHeader = document.getElementById("badgeVariacaoTotal");
 
             if (Math.abs(diferenca) < 0.01) {
-                txtDiffBox.innerText = `R$ 0,00 (100% Tabela)`;
+                txtDiffBox.innerText = `R$ 0,00 (100% Tabela Oficial)`;
                 txtDiffBox.style.color = "var(--primary)";
                 badgeHeader.innerText = "100,00% TABELA";
                 badgeHeader.style.background = "var(--info)";
@@ -429,19 +385,16 @@
 
             const totalTabela = round2((parseFloat(document.getElementById("valorTotalTabela").value) || 0) + (parseFloat(document.getElementById("valOpcionais").value) || 0));
             
-            const inputAto = parseFloat(document.getElementById("inputAtoEntrada").value) || 0;
-            const valAto = modoAto === 'PERC' ? round2((totalTabela * inputAto) / 100) : round2(inputAto);
-
+            const valAto = round2(parseFloat(document.getElementById("inputAtoEntrada").value) || 0);
+            const val306090Unit = round2(parseFloat(document.getElementById("val306090Unit").value) || 0);
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
             const valMensalUnit = round2(parseFloat(document.getElementById("valMensalUnit").value) || 0);
-
             const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
             const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
-
             const valChaves = round2(parseFloat(document.getElementById("valChaves").value) || 0);
             const valFinan = round2(parseFloat(document.getElementById("valFinanciamento").value) || 0);
 
-            const totalProposta = round2(valAto + (qtdMensais * valMensalUnit) + (qtdAnuais * valAnualUnit) + valChaves + valFinan);
+            const totalProposta = round2(valAto + (val306090Unit * 3) + (qtdMensais * valMensalUnit) + (qtdAnuais * valAnualUnit) + valChaves + valFinan);
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             const texto = `📌 *PROPOSTA COMERCIAL DE COMPRA - SUPERCALC*\n` +
@@ -451,16 +404,17 @@
                           `👔 *Corretor:* ${corretor} (CRECI: ${creci})\n` +
                           `📅 *Data:* ${dataProp} | *Validade:* ${validade}\n` +
                           `------------------------------------\n` +
-                          `💵 *Valor de Tabela:* ${fmt(totalTabela)}\n` +
-                          `💰 *VALOR TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n\n` +
+                          `💵 *Valor Tabela Oficial:* ${fmt(totalTabela)}\n` +
+                          `💰 *VALOR TOTAL PROPOSTO:* ${fmt(totalProposta)}\n\n` +
                           `*CONDIÇÕES DE PAGAMENTO:*\n` +
-                          `• *Entrada / Ato:* ${fmt(valAto)}\n` +
+                          (valAto > 0 ? `• *Entrada / Ato:* ${fmt(valAto)}\n` : '') +
+                          (val306090Unit > 0 ? `• *30/60/90 Dias:* 3x de ${fmt(val306090Unit)} (${fmt(val306090Unit * 3)})\n` : '') +
                           (qtdMensais > 0 ? `• *Mensais:* ${qtdMensais}x de ${fmt(valMensalUnit)} (${fmt(qtdMensais * valMensalUnit)})\n` : '') +
-                          (qtdAnuais > 0 ? `• *Intermediárias/Anuais:* ${qtdAnuais}x de ${fmt(valAnualUnit)} (${fmt(qtdAnuais * valAnualUnit)})\n` : '') +
-                          (valChaves > 0 ? `• *Chaves / Entrega:* ${fmt(valChaves)}\n` : '') +
-                          `• *Financiamento Bancário:* ${fmt(valFinan)}\n` +
+                          (qtdAnuais > 0 ? `• *Semestrais:* ${qtdAnuais}x de ${fmt(valAnualUnit)} (${fmt(qtdAnuais * valAnualUnit)})\n` : '') +
+                          (valChaves > 0 ? `• *Única / Chaves:* ${fmt(valChaves)}\n` : '') +
+                          (valFinan > 0 ? `• *Financiamento Bancário:* ${fmt(valFinan)}\n` : '') +
                           `------------------------------------\n` +
-                          `_Proposta sujeita a análise de crédito e aprovação de tabela pela incorporadora._`;
+                          `_Proposta gerada para análise de crédito e aprovação de tabela pela incorporadora._`;
 
             navigator.clipboard.writeText(texto);
             const box = document.getElementById("outputBox");
