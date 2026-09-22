@@ -133,7 +133,7 @@
             </div>
         </section>
 
-        <!-- RESULTADOS DA BUSCA (TABELA/LISTA OTIMIZADA PARA CELULAR) -->
+        <!-- RESULTADOS DA BUSCA -->
         <main class="space-y-2">
             <div class="flex justify-between items-center px-1">
                 <span class="text-xs font-bold text-slate-600 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades na nuvem...</span>
@@ -264,36 +264,62 @@
                         const entregaObra = u.data_entrega || (u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12");
                         const isReadyDb = u.developments?.is_ready || false;
                         const ePronto = isReadyDb || (entregaObra && entregaObra <= mesAtual);
+                        const preco = parseFloat(u.list_price) || 0;
+
+                        // GARANTIA DE VALORES FINANCEIROS REAIS OU CALCULADOS
+                        let valAto = parseFloat(u.val_ato) || 0;
+                        let val306090 = parseFloat(u.val_30_60_90) || 0;
+                        let qtdMensais = parseInt(u.qtd_mensais) || 0;
+                        let valMensal = parseFloat(u.val_mensal_unit) || 0;
+                        let qtdSemestrais = parseInt(u.qtd_semestrais) || parseInt(u.qtd_anuais) || 0;
+                        let valSemestral = parseFloat(u.val_semestral_unit) || parseFloat(u.val_anual_unit) || 0;
+                        let valChaves = parseFloat(u.val_chaves_unica) || 0;
+                        let valFinanciamento = parseFloat(u.val_financiamento) || 0;
+
+                        // SE O BANCO NÃO POSSUIR AS COLUNAS DETALHADAS PREENCHIDAS, GERA O FLUXO AUTOMÁTICO SOBRE O PREÇO
+                        if (valAto === 0 && valFinanciamento === 0 && preco > 0) {
+                            if (ePronto) {
+                                valAto = preco * 0.20;
+                                valFinanciamento = preco * 0.80;
+                            } else {
+                                valAto = preco * 0.10;
+                                val306090 = (preco * 0.05) / 3;
+                                qtdMensais = 36;
+                                valMensal = (preco * 0.10) / 36;
+                                qtdSemestrais = 3;
+                                valSemestral = (preco * 0.05) / 3;
+                                valFinanciamento = preco * 0.70;
+                            }
+                        }
 
                         return {
                             id: u.id,
                             origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
                             construtora: u.developments?.builder || u.developments?.developer_name || "Incorporadora",
                             empreendimento: u.developments?.title || u.developments?.name || "Empreendimento",
-                            bairro: u.developments?.address || "São Paulo - SP",
                             unidade: u.unit_number || "101",
                             pavimento: parseInt(u.floor) || 1,
                             dorms: u.typology || "Studio",
                             typologyRaw: u.typology || "",
                             vagas: parseInt(u.parking_spaces) || 0,
                             m2: parseFloat(u.private_area_m2) || 0,
-                            precoTabela: parseFloat(u.list_price) || 0,
+                            precoTabela: preco,
                             entregaObra: entregaObra,
                             is_ready: ePronto,
                             
-                            // DADOS FINANCEIROS COMPLETOS PARA O SUPERCALC
-                            val_ato: parseFloat(u.val_ato) || 0,
-                            val_30_60_90: parseFloat(u.val_30_60_90) || 0,
-                            qtd_mensais: parseInt(u.qtd_mensais) || 0,
-                            val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
-                            qtd_semestrais: parseInt(u.qtd_semestrais) || parseInt(u.qtd_anuais) || 0,
-                            val_semestral_unit: parseFloat(u.val_semestral_unit) || parseFloat(u.val_anual_unit) || 0,
-                            val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
-                            val_financiamento: parseFloat(u.val_financiamento) || 0
+                            // DADOS FINANCEIROS BLINDADOS
+                            val_ato: valAto,
+                            val_30_60_90: val306090,
+                            qtd_mensais: qtdMensais,
+                            val_mensal_unit: valMensal,
+                            qtd_semestrais: qtdSemestrais,
+                            val_semestral_unit: valSemestral,
+                            val_chaves_unica: valChaves,
+                            val_financiamento: valFinanciamento
                         };
                     });
 
-                    // ORDENAÇÃO NATURAL HUMANA (POR ANDAR E NÚMERO DE UNIDADE)
+                    // ORDENAÇÃO NATURAL (POR ANDAR E NÚMERO DE UNIDADE)
                     ESTOQUE_MOCK.sort((a, b) => {
                         if (a.pavimento !== b.pavimento) return a.pavimento - b.pavimento;
                         return a.unidade.localeCompare(b.unidade, undefined, { numeric: true });
@@ -310,12 +336,11 @@
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados do Supabase:", err);
-            } font-medium {
+            } finally {
                 mostrarLoader(false);
             }
         }
 
-        // POPULA O FILTRO DE METRAGENS EM ORDEM CRESCENTE NUMÉRICA
         function atualizarOpcoesMetragens() {
             const selectM2 = document.getElementById("filtroMetragem");
             const metragensUnicas = [...new Set(ESTOQUE_MOCK.map(i => i.m2))].sort((a, b) => a - b);
@@ -396,10 +421,12 @@
 
                 const tr = document.createElement("tr");
                 tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
+                
+                // EXIBIÇÃO LIMPA: REMOVIDA A DESCRIÇÃO DO ENDEREÇO DA RUA
                 tr.innerHTML = `
                     <td class="p-2.5 sm:p-3">
                         <div class="font-black text-slate-900 text-xs sm:text-sm">${item.empreendimento} — <span class="text-purple-700">Apto ${item.unidade}</span></div>
-                        <div class="text-[10px] text-slate-500 font-semibold">${item.construtora} • ${item.bairro} (${item.pavimento}º Andar)</div>
+                        <div class="text-[10px] text-slate-500 font-semibold">${item.construtora} • ${item.pavimento}º Andar</div>
                         <div class="flex items-center gap-1 mt-1">
                             <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${isGlobal ? 'badge-global' : 'badge-privado'}">${isGlobal ? 'GLOBAL' : 'PRIVADO'}</span>
                             <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${isPronto ? 'badge-pronto' : 'badge-obra'}">${isPronto ? 'PRONTO' : 'EM OBRA'}</span>
@@ -469,14 +496,14 @@
 
             const ficha = `*FICHA TÉCNICA DA UNIDADE*\n` +
                           `🏢 Empreendimento: ${item.empreendimento}\n` +
-                          `📍 Localização: ${item.bairro} (${item.construtora})\n` +
+                          `📍 Incorporadora: ${item.construtora}\n` +
                           `------------------------------------\n` +
                           `• Unidade: ${item.unidade} (${item.pavimento}º Pavimento)\n` +
                           `• Metragem: ${item.m2.toFixed(2).replace('.', ',')} m² de área privativa\n` +
                           `• Tipologia: ${item.dorms}\n` +
                           `• Garagem: ${item.vagas} vaga(s)\n` +
                           `• Preço de Tabela: ${fmt(item.precoTabela)}\n` +
-                          `• Status: ${item.is_ready ? 'PRONTO PARA MORAR' : 'Previsão Entrega ' + item.entregaObra}\n` +
+                          `• Status: ${item.is_ready ? 'PRONTO PARA MORAR' : 'EM OBRA'}\n` +
                           `------------------------------------\n` +
                           `_Solicite uma simulação personalizada de fluxo de pagamento!_`;
 
@@ -518,24 +545,24 @@
 
             const isReady = document.getElementById("addIsReady").value === "true";
             const entregaDate = document.getElementById("addEntrega").value;
+            const preco = parseFloat(document.getElementById("addPrecoTabela").value) || 0;
 
             const novoImovel = {
                 id: "PRIV_" + Date.now(),
                 origem: "PRIVADO",
                 construtora: document.getElementById("addConstrutora").value.trim(),
                 empreendimento: document.getElementById("addEmpreendimento").value.trim(),
-                bairro: document.getElementById("addBairro").value.trim(),
                 unidade: document.getElementById("addUnidade").value.trim(),
                 pavimento: parseInt(document.getElementById("addPavimento").value) || 0,
                 dorms: document.getElementById("addDorms").value.trim(),
                 typologyRaw: document.getElementById("addDorms").value.trim(),
                 vagas: parseInt(document.getElementById("addVagas").value) || 0,
                 m2: parseFloat(document.getElementById("addM2").value) || 0,
-                precoTabela: parseFloat(document.getElementById("addPrecoTabela").value) || 0,
+                precoTabela: preco,
                 entregaObra: entregaDate,
                 is_ready: isReady,
-                val_ato: parseFloat(document.getElementById("addPrecoTabela").value) * 0.20,
-                val_financiamento: parseFloat(document.getElementById("addPrecoTabela").value) * 0.80
+                val_ato: preco * 0.20,
+                val_financiamento: preco * 0.80
             };
 
             ESTOQUE_MOCK.unshift(novoImovel);
