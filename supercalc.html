@@ -223,23 +223,32 @@
             <div class="calculated-badge" id="badgeTotalMensais">Total Mensais: R$ 0,00 (0,00%)</div>
         </div>
 
-        <!-- ANUAIS COM TRAVA DINÂMICA -->
+        <!-- INTERMEDIÁRIAS COM SELETOR DE FREQUÊNCIA (ANUAIS / SEMESTRAIS) -->
         <div class="form-group" style="background:#f8fafc; padding:6px; border-radius:4px; border:1px solid #e2e8f0;">
-            <label style="font-weight:bold; color:#1e293b;">
-                4. Intermediárias ANUAIS (1x ao ano)
-                <span class="lock-badge" id="txtLockAnual">Máx: 0 anuais</span>
-            </label>
-            <div class="grid-2">
-                <div>
-                    <label>Qtd. Parcelas Anuais:</label>
-                    <input type="number" id="qtdAnuais" value="0" oninput="validarETravaInput('qtdAnuais')">
-                </div>
-                <div>
-                    <label>Valor Unitário Anual (R$):</label>
-                    <input type="number" id="valAnualUnit" value="0" oninput="recalculateAll()">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                <label style="font-weight:bold; color:#1e293b; margin:0;">
+                    4. Parcelas Intermediárias
+                    <span class="lock-badge" id="txtLockIntermediaria">Máx: 0 parcelas</span>
+                </label>
+                <div style="display:flex; align-items:center; gap:4px;">
+                    <span style="font-size:0.68rem; font-weight:bold; color:#64748b;">Periodicidade:</span>
+                    <select id="selectFreqIntermediaria" style="width:110px; height:22px; padding:1px 4px; font-size:0.72rem; font-weight:bold; color:#1a252f;" onchange="alternarFrequenciaIntermediaria()">
+                        <option value="ANUAL">Anuais (1x/ano)</option>
+                        <option value="SEMESTRAL">Semestrais (2x/ano)</option>
+                    </select>
                 </div>
             </div>
-            <div class="calculated-badge" id="badgeTotalAnuais">Total Anuais: R$ 0,00 (0,00%)</div>
+            <div class="grid-2">
+                <div>
+                    <label id="lblQtdIntermediaria">Qtd. Parcelas Anuais:</label>
+                    <input type="number" id="qtdIntermediarias" value="0" oninput="validarETravaInput('qtdIntermediarias')">
+                </div>
+                <div>
+                    <label id="lblValUnitIntermediaria">Valor Unitário Anual (R$):</label>
+                    <input type="number" id="valIntermediariaUnit" value="0" oninput="recalculateAll()">
+                </div>
+            </div>
+            <div class="calculated-badge" id="badgeTotalIntermediarias">Total Intermediárias: R$ 0,00 (0,00%)</div>
         </div>
 
         <!-- PARCELA DE PERIODICIDADE (> 36 MESES / REAJUSTES) -->
@@ -286,6 +295,7 @@
 
         let maxMesesObra = 36;
         let maxAnuaisObra = 3;
+        let maxSemestraisObra = 6;
 
         window.onload = function() {
             document.getElementById("inputDataProposta").valueAsDate = new Date();
@@ -318,8 +328,18 @@
                 document.getElementById("val306090Unit").value = item.val306090 || 0;
                 document.getElementById("qtdMensais").value = item.qtdMensais || 0;
                 document.getElementById("valMensalUnit").value = item.valMensalUnit || 0;
-                document.getElementById("qtdAnuais").value = item.qtdAnuais || 0;
-                document.getElementById("valAnualUnit").value = item.valAnualUnit || 0;
+                
+                // Mapeia se o banco veio em anuais ou semestrais
+                if (item.qtdSemestrais > 0) {
+                    document.getElementById("selectFreqIntermediaria").value = "SEMESTRAL";
+                    document.getElementById("qtdIntermediarias").value = item.qtdSemestrais;
+                    document.getElementById("valIntermediariaUnit").value = item.valSemestralUnit;
+                } else {
+                    document.getElementById("selectFreqIntermediaria").value = "ANUAL";
+                    document.getElementById("qtdIntermediarias").value = item.qtdAnuais || 0;
+                    document.getElementById("valIntermediariaUnit").value = item.valAnualUnit || 0;
+                }
+
                 document.getElementById("valPeriodicidade").value = item.valPeriodicidade || 0;
                 document.getElementById("valChaves").value = item.valChavesUnica || 0;
                 document.getElementById("valFinanciamento").value = item.valFinanciamento || 0;
@@ -338,21 +358,52 @@
                 const [anoE, mesE] = strEntrega.split('-');
                 const dEntrega = new Date(parseInt(anoE), parseInt(mesE) - 1, 1);
 
-                // Cálculo de diferença exata de meses
                 let mesesDiferenca = (dEntrega.getFullYear() - dProp.getFullYear()) * 12 + (dEntrega.getMonth() - dProp.getMonth());
                 
-                // REGRA: Mês do Financiamento - 1 (Até o mês anterior ao financiamento)
                 maxMesesObra = Math.max(0, mesesDiferenca - 1);
                 maxAnuaisObra = Math.floor(mesesDiferenca / 12);
+                maxSemestraisObra = Math.floor(mesesDiferenca / 6);
 
-                document.getElementById("txtLockMensal").innerText = `Máx: ${maxMesesObra} mensais (até o mês anterior às chaves)`;
-                document.getElementById("txtLockAnual").innerText = `Máx: ${maxAnuaisObra} anuais`;
-
+                document.getElementById("txtLockMensal").innerText = `Máx: ${maxMesesObra} mensais`;
+                
+                atualizarLabelsETravasIntermediarias();
                 validarETravaInput('qtdMensais');
-                validarETravaInput('qtdAnuais');
+                validarETravaInput('qtdIntermediarias');
             } else {
                 recalculateAll();
             }
+        }
+
+        function alternarFrequenciaIntermediaria() {
+            const freq = document.getElementById("selectFreqIntermediaria").value;
+            const inputQtd = document.getElementById("qtdIntermediarias");
+            const inputVal = document.getElementById("valIntermediariaUnit");
+            
+            let qtdAtual = parseInt(inputQtd.value) || 0;
+            let valAtual = parseFloat(inputVal.value) || 0;
+
+            if (freq === "SEMESTRAL") {
+                // Ao mudar para Semestral: dobra as parcelas e reduz o valor à metade
+                inputQtd.value = qtdAtual * 2;
+                inputVal.value = round2(valAtual / 2);
+            } else {
+                // Ao mudar para Anual: divide parcelas por 2 e dobra o valor
+                inputQtd.value = Math.max(1, Math.floor(qtdAtual / 2));
+                inputVal.value = round2(valAtual * 2);
+            }
+
+            atualizarLabelsETravasIntermediarias();
+            validarETravaInput('qtdIntermediarias');
+        }
+
+        function atualizarLabelsETravasIntermediarias() {
+            const freq = document.getElementById("selectFreqIntermediaria").value;
+            const isSemestral = freq === "SEMESTRAL";
+            const maxPermitido = isSemestral ? maxSemestraisObra : maxAnuaisObra;
+
+            document.getElementById("txtLockIntermediaria").innerText = `Máx: ${maxPermitido} ${isSemestral ? 'semestrais' : 'anuais'}`;
+            document.getElementById("lblQtdIntermediaria").innerText = `Qtd. Parcelas ${isSemestral ? 'Semestrais' : 'Anuais'}:`;
+            document.getElementById("lblValUnitIntermediaria").innerText = `Valor Unitário ${isSemestral ? 'Semestral' : 'Anual'} (R$):`;
         }
 
         function validarETravaInput(id) {
@@ -362,9 +413,14 @@
             if (id === 'qtdMensais' && val > maxMesesObra) {
                 alert(`Atenção: A data de financiamento é no mês ${document.getElementById("inputDataEntrega").value}. O limite máximo de mensais até o mês anterior é de ${maxMesesObra} parcelas.`);
                 input.value = maxMesesObra;
-            } else if (id === 'qtdAnuais' && val > maxAnuaisObra) {
-                alert(`Atenção: O prazo até o financiamento permite no máximo ${maxAnuaisObra} parcelas anuais.`);
-                input.value = maxAnuaisObra;
+            } else if (id === 'qtdIntermediarias') {
+                const freq = document.getElementById("selectFreqIntermediaria").value;
+                const maxPermitido = freq === "SEMESTRAL" ? maxSemestraisObra : maxAnuaisObra;
+
+                if (val > maxPermitido) {
+                    alert(`Atenção: O prazo até o financiamento permite no máximo ${maxPermitido} parcelas ${freq === "SEMESTRAL" ? 'semestrais' : 'anuais'}.`);
+                    input.value = maxPermitido;
+                }
             }
 
             recalculateAll();
@@ -406,11 +462,13 @@
             const percMensais = (totalMensais / totalAlvoTabela) * 100;
             document.getElementById("badgeTotalMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totalMensais)} (${percMensais.toFixed(2)}%)`;
 
-            const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
-            const totalAnuais = round2(qtdAnuais * valAnualUnit);
-            const percAnuais = (totalAnuais / totalAlvoTabela) * 100;
-            document.getElementById("badgeTotalAnuais").innerText = `Total Anuais (${qtdAnuais}x): ${fmt(totalAnuais)} (${percAnuais.toFixed(2)}%)`;
+            // CÁLCULO DINÂMICO DAS INTERMEDIÁRIAS (ANUAIS OU SEMESTRAIS)
+            const freq = document.getElementById("selectFreqIntermediaria").value;
+            const qtdIntermediarias = parseInt(document.getElementById("qtdIntermediarias").value) || 0;
+            const valIntermediariaUnit = round2(parseFloat(document.getElementById("valIntermediariaUnit").value) || 0);
+            const totalIntermediarias = round2(qtdIntermediarias * valIntermediariaUnit);
+            const percIntermediarias = (totalIntermediarias / totalAlvoTabela) * 100;
+            document.getElementById("badgeTotalIntermediarias").innerText = `Total ${freq === 'SEMESTRAL' ? 'Semestrais' : 'Anuais'} (${qtdIntermediarias}x): ${fmt(totalIntermediarias)} (${percIntermediarias.toFixed(2)}%)`;
 
             const valPeriodicidade = round2(parseFloat(document.getElementById("valPeriodicidade").value) || 0);
             const percPeriodicidade = (valPeriodicidade / totalAlvoTabela) * 100;
@@ -425,7 +483,7 @@
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2).replace('.', ',') + '%';
             document.getElementById("badgeFinan").innerText = `Financiamento: ${fmt(valFinan)} (${percFinan.toFixed(2)}%)`;
 
-            const totalProposta = round2(valAto + total306090 + totalMensais + totalAnuais + valPeriodicidade + valChaves + valFinan);
+            const totalProposta = round2(valAto + total306090 + totalMensais + totalIntermediarias + valPeriodicidade + valChaves + valFinan);
             const diferenca = round2(totalProposta - totalAlvoTabela);
             const percDiferenca = (diferenca / totalAlvoTabela) * 100;
 
@@ -473,13 +531,16 @@
             const val306090Unit = round2(parseFloat(document.getElementById("val306090Unit").value) || 0);
             const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
             const valMensalUnit = round2(parseFloat(document.getElementById("valMensalUnit").value) || 0);
-            const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-            const valAnualUnit = round2(parseFloat(document.getElementById("valAnualUnit").value) || 0);
+            
+            const freq = document.getElementById("selectFreqIntermediaria").value;
+            const qtdIntermediarias = parseInt(document.getElementById("qtdIntermediarias").value) || 0;
+            const valIntermediariaUnit = round2(parseFloat(document.getElementById("valIntermediariaUnit").value) || 0);
+            
             const valPeriodicidade = round2(parseFloat(document.getElementById("valPeriodicidade").value) || 0);
             const valChaves = round2(parseFloat(document.getElementById("valChaves").value) || 0);
             const valFinan = round2(parseFloat(document.getElementById("valFinanciamento").value) || 0);
 
-            const totalProposta = round2(valAto + (val306090Unit * 3) + (qtdMensais * valMensalUnit) + (qtdAnuais * valAnualUnit) + valPeriodicidade + valChaves + valFinan);
+            const totalProposta = round2(valAto + (val306090Unit * 3) + (qtdMensais * valMensalUnit) + (qtdIntermediarias * valIntermediariaUnit) + valPeriodicidade + valChaves + valFinan);
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             const texto = `📌 *PROPOSTA COMERCIAL DE COMPRA - SUPERCALC*\n` +
@@ -496,7 +557,7 @@
                           (valAto > 0 ? `• *Entrada / Ato:* ${fmt(valAto)}\n` : '') +
                           (val306090Unit > 0 ? `• *30/60/90 Dias:* 3x de ${fmt(val306090Unit)} (${fmt(val306090Unit * 3)})\n` : '') +
                           (qtdMensais > 0 ? `• *Mensais:* ${qtdMensais}x de ${fmt(valMensalUnit)} (${fmt(qtdMensais * valMensalUnit)})\n` : '') +
-                          (qtdAnuais > 0 ? `• *Anuais:* ${qtdAnuais}x de ${fmt(valAnualUnit)} (${fmt(qtdAnuais * valAnualUnit)})\n` : '') +
+                          (qtdIntermediarias > 0 ? `• *${freq === 'SEMESTRAL' ? 'Semestrais' : 'Anuais'}:* ${qtdIntermediarias}x de ${fmt(valIntermediariaUnit)} (${fmt(qtdIntermediarias * valIntermediariaUnit)})\n` : '') +
                           (valPeriodicidade > 0 ? `• *Periodicidade:* ${fmt(valPeriodicidade)}\n` : '') +
                           (valChaves > 0 ? `• *Única / Chaves:* ${fmt(valChaves)}\n` : '') +
                           (valFinan > 0 ? `• *Financiamento Bancário:* ${fmt(valFinan)}\n` : '') +
