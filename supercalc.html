@@ -6,12 +6,6 @@
     <title>SuperCalc - Motor Financeiro & Simulação</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .status-valid { background-color: #00b894; color: #fff; }
-        .status-danger { background-color: #d63031; color: #fff; }
-        .status-info { background-color: #0984e3; color: #fff; }
-        .status-warning { background-color: #d97706; color: #fff; }
-    </style>
 </head>
 <body class="bg-slate-100 font-sans p-2 md:p-6 text-slate-800">
 
@@ -38,10 +32,10 @@
             </div>
         </header>
 
-        <!-- IDENTIFICAÇÃO DO CLIENTE -->
+        <!-- IDENTIFICAÇÃO DO CLIENTE E CONTRATO -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
             <div class="flex justify-between items-center border-b pb-1">
-                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Imóvel</h2>
+                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Ficha do Imóvel</h2>
                 <span id="badgeTipoModalidade" class="text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
                     🏗️ EM CONSTRUÇÃO
                 </span>
@@ -55,10 +49,13 @@
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-700">
                 <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Empreendimento</span><strong id="lockEmpreendimento" class="text-slate-900 font-black">---</strong></div>
                 <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Unidade / Metragem</span><strong id="lockUnidadeM2" class="text-slate-900">---</strong></div>
-                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Construtora</span><strong id="lockConstrutora" class="text-slate-900">---</strong></div>
+                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Data Financiamento</span><strong id="lockDataEntrega" class="text-purple-700 font-black">---</strong></div>
                 <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Valor de Tabela</span><strong id="lockValorTabela" class="text-emerald-600 font-black">R$ 0,00</strong></div>
             </div>
         </section>
+
+        <!-- TARJAS DE VALIDAÇÃO DE PRAZO DA OBRA -->
+        <div id="painelAlertaPrazos" class="hidden space-y-2"></div>
 
         <!-- FLUXO DE ENTRADA -->
         <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 text-xs">
@@ -79,7 +76,7 @@
 
             <!-- SEÇÕES DE OBRA -->
             <div id="secaoParcelasObra" class="space-y-4">
-                <!-- 2. ENTRADA FACILITADA -->
+                <!-- 2. ENTRADA FACILITADA (30/60/90) -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <label class="font-bold text-slate-800 block">2. Parcelas 30 / 60 / 90 dias do Contrato (3x Unitárias R$):</label>
                     <div class="grid grid-cols-3 gap-2">
@@ -103,7 +100,10 @@
 
                 <!-- 3. MENSAIS -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">3. Parcelas Mensais durante a Obra:</label>
+                    <div class="flex justify-between items-center">
+                        <label class="font-bold text-slate-800">3. Parcelas Mensais durante a Obra:</label>
+                        <span id="txtLimiteMensais" class="text-[10px] font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Máx: 0 parcelas</span>
+                    </div>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nº Mensais</span>
@@ -123,14 +123,17 @@
                     <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total Mensais: R$ 0,00</div>
                 </div>
 
-                <!-- 4. INTERMEDIÁRIAS (SELETOR ANUAL X SEMESTRAL) -->
+                <!-- 4. INTERMEDIÁRIAS ANUAIS / SEMESTRAIS -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="font-bold text-slate-800">4. Parcelas Intermediárias:</label>
-                        <select id="tipoFrequenciaIntermediaria" onchange="alternarFrequenciaIntermediaria()" class="border border-slate-300 p-1 rounded-lg font-bold text-[10px] bg-white text-purple-900">
-                            <option value="ANUAL">ANUAIS (1x / ano)</option>
-                            <option value="SEMESTRAL">SEMESTRAIS (2x / ano)</option>
-                        </select>
+                        <div class="flex items-center gap-2">
+                            <span id="txtLimiteIntermediarias" class="text-[10px] font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded">Máx: 0x</span>
+                            <select id="tipoFrequenciaIntermediaria" onchange="alternarFrequenciaIntermediaria()" class="border border-slate-300 p-1 rounded-lg font-bold text-[10px] bg-white text-purple-900">
+                                <option value="ANUAL">ANUAIS (1x / ano)</option>
+                                <option value="SEMESTRAL">SEMESTRAIS (2x / ano)</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
@@ -151,9 +154,16 @@
                     <div id="badgeAnuais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total Intermediárias: R$ 0,00</div>
                 </div>
 
-                <!-- 5. CHAVES -->
+                <!-- 5. PERIODICIDADE (>36 MESES) -->
+                <div id="boxPeriodicidade" class="bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-2">
+                    <label class="font-bold text-amber-900 block">5. Parcela de Periodicidade / Resíduo (Obras ≥ 36 meses):</label>
+                    <input type="number" id="valPeriodicidade" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                    <div id="badgePeriodicidade" class="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-md text-[11px] font-bold">Resíduo Periódico: R$ 0,00</div>
+                </div>
+
+                <!-- 6. CHAVES -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">5. Parcela Única / Chaves / Entrega (R$):</label>
+                    <label class="font-bold text-slate-800 block">6. Parcela Única / Chaves / Entrega (R$):</label>
                     <div class="flex gap-2">
                         <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                         <select id="modeChaves" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
@@ -166,9 +176,9 @@
             </div>
         </section>
 
-        <!-- FINANCIAMENTO BANCÁRIO & ALERTA -->
+        <!-- FINANCIAMENTO BANCÁRIO & TETO -->
         <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">3. Saldo a Financiar e Teto Bancário</h2>
+            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">3. Saldo a Financiar / Quitação no Mês da Entrega</h2>
 
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                 <label class="font-bold text-slate-800 block">Saldo Financiamento Bancário / Quitação (R$):</label>
@@ -178,28 +188,34 @@
                 </div>
             </div>
 
-            <!-- CAIXA DE ALERTA DE FINANCIAMENTO > 80% -->
+            <!-- ALERTA FINANCIAMENTO > 80% -->
             <div id="alertaFinanciamentoBancario" class="hidden p-3 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl text-amber-900 font-semibold text-xs space-y-0.5">
                 <div class="font-black text-amber-900 flex items-center gap-1">
-                    <span>⚠️ ALERTA DE COMPATIBILIDADE BANCÁRIA:</span>
+                    <span>⚠️ ALERTA DE BANCO:</span>
                     <span id="txtPercAlertaFinan" class="text-rose-700 font-black">0.00%</span>
                 </div>
                 <p class="text-[11px] text-amber-800">
-                    A maioria das instituições financeiras concede crédito até o limite de <strong>80,00%</strong> do valor de avaliação. Financiamentos entre <strong>81% e 90%</strong> dependem de perfil de alta renda e exceção de alçada do banco.
+                    A maioria dos bancos concede crédito até 80,00%. Operações entre 81% e 90% exigem perfil de alta renda e aprovação especial de alçada.
                 </p>
             </div>
         </section>
 
-        <!-- RESUMO DA BALANÇA DE VALOR -->
+        <!-- RESUMO DA BALANÇA DE VALOR EM TEMPO REAL -->
         <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">4. Balança de Valor Proposta vs Tabela</h2>
+            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">4. Balança de Valor Proposta vs Tabela Oficial</h2>
+
+            <!-- SEMÁFORO DE STATUS DA MESA DE NEGOCIAÇÃO -->
+            <div id="tarjaStatusSemaforo" class="p-3 rounded-xl font-bold text-xs flex justify-between items-center transition-all duration-200">
+                <span id="txtStatusSemaforoMsg">Avaliando proposta...</span>
+                <span id="txtStatusSemaforoVal" class="font-black text-sm">R$ 0,00</span>
+            </div>
 
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 font-medium">
                 <div class="flex justify-between"><span>(+) Soma do Fluxo de Entrada:</span><strong id="txtSomaEntradas">R$ 0,00</strong></div>
                 <div class="flex justify-between"><span>(+) Saldo Financiado Digitado:</span><strong id="txtFinanciadoDigitado">R$ 0,00</strong></div>
                 <div class="flex justify-between border-t pt-2 text-slate-900 font-bold"><span>(=) Total Geral da Proposta:</span><strong id="txtTotalProposta">R$ 0,00</strong></div>
                 <div class="flex justify-between text-slate-400 text-[11px]"><span>(vs) Valor de Tabela Oficial:</span><span id="txtTabelaComparacao">R$ 0,00</span></div>
-                <div class="flex justify-between border-t pt-2 text-sm font-black"><span class="text-slate-900">Balança / Diferença:</span><strong id="txtDiferencaBalanca" class="text-emerald-600">R$ 0,00</strong></div>
+                <div class="flex justify-between border-t pt-2 text-sm font-black"><span class="text-slate-900">Balança / Diferença:</span><strong id="txtDiferencaBalanca">R$ 0,00</strong></div>
             </div>
 
             <button onclick="copyProposal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2 mt-2">
@@ -208,10 +224,13 @@
         </section>
     </div>
 
-    <!-- SCRIPTS E LÓGICA DO MOTOR FINANCEIRO -->
+    <!-- SCRIPTS E MOTOR FINANCEIRO -->
     <script>
         let unidadeAtual = null;
         let ePronto = false;
+        let maxMesesObra = 36;
+        let maxAnuaisPermitidas = 3;
+        let maxSemestraisPermitidas = 6;
 
         function lerUnidadeDoStorage() {
             const raw = localStorage.getItem("UNIDADE_SELECIONADA") || 
@@ -219,13 +238,36 @@
                         localStorage.getItem("imovelSelecionado");
 
             if (raw) {
-                try {
-                    return JSON.parse(raw);
-                } catch (e) {
-                    console.error("Erro ao ler LocalStorage:", e);
-                }
+                try { return JSON.parse(raw); } catch (e) { console.error("Erro no JSON:", e); }
             }
             return null;
+        }
+
+        function calcularLimitesDataEntrega(dataEntregaStr) {
+            if (!dataEntregaStr) return { mesesObra: 36, maxMensais: 35, maxAnuais: 3, maxSemestrais: 6 };
+
+            const hoje = new Date();
+            const partes = dataEntregaStr.split('-');
+            const anoE = parseInt(partes[0]) || hoje.getFullYear();
+            const mesE = parseInt(partes[1]) || (hoje.getMonth() + 1);
+
+            const anoH = hoje.getFullYear();
+            const mesH = hoje.getMonth() + 1;
+
+            let mesesTotais = (anoE - anoH) * 12 + (mesE - mesH);
+            if (mesesTotais < 1) mesesTotais = 1;
+
+            // REGRA RÍGIDA: Mês da Entrega é do Financiamento. Mensais vão até o mês ANTERIOR (mesesTotais - 1)
+            let maxMensais = Math.max(0, mesesTotais - 1);
+            let maxAnuais = Math.floor(mesesTotais / 12);
+            let maxSemestrais = Math.floor(mesesTotais / 6);
+
+            return {
+                mesesObra: mesesTotais,
+                maxMensais: maxMensais,
+                maxAnuais: maxAnuais,
+                maxSemestrais: maxSemestrais
+            };
         }
 
         function inicializarDadosUnidade() {
@@ -235,35 +277,49 @@
                 unidadeAtual = {
                     empreendimento: "Poema Liberdade",
                     construtora: "AAM Incorporadora",
-                    unidade: "3711",
-                    m2: 48.25,
-                    dorms: "2 Dorms (R2V)",
-                    vagas: 1,
-                    precoTabela: 937685,
+                    unidade: "626",
+                    m2: 28.14,
+                    dorms: "Studio (NR)",
+                    vagas: 0,
+                    precoTabela: 429605,
                     entregaObra: "2029-12",
-                    is_ready: false
+                    is_ready: false,
+                    val_ato: 25776,
+                    val_30_60_90: 8592,
+                    qtd_mensais: 36,
+                    val_mensal_unit: 1313,
+                    qtd_anuais: 3,
+                    val_anual_unit: 12888,
+                    val_chaves_unica: 12888,
+                    val_financiamento: 279243
                 };
             }
 
             const preco = unidadeAtual.precoTabela || 0;
+            const dataStr = unidadeAtual.entregaObra || "2029-12";
             const mesAtual = new Date().toISOString().substring(0, 7);
             
-            // CONDIÇÃO DE IMÓVEL PRONTO / TERCEIROS
-            ePronto = unidadeAtual.is_ready || 
-                     (unidadeAtual.entregaObra && unidadeAtual.entregaObra <= mesAtual) ||
-                     unidadeAtual.origem === 'PRIVADO';
+            ePronto = unidadeAtual.is_ready || (dataStr <= mesAtual) || unidadeAtual.origem === 'PRIVADO';
+
+            const limites = calcularLimitesDataEntrega(dataStr);
+            maxMesesObra = limites.mesesObra;
+            maxAnuaisPermitidas = limites.maxAnuais;
+            maxSemestraisPermitidas = limites.maxSemestrais;
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            // RENDERIZAÇÃO CABEÇALHO E FICHA
+            // CABEÇALHO
             document.getElementById("headerTituloImovel").innerText = `${unidadeAtual.empreendimento} — APTO ${unidadeAtual.unidade}`;
             document.getElementById("headerSubtituloImovel").innerText = `${unidadeAtual.dorms} • ${unidadeAtual.m2.toFixed(2).replace('.', ',')} m² • ${unidadeAtual.vagas > 0 ? unidadeAtual.vagas + ' Vaga(s)' : 'Sem Vaga'}`;
             document.getElementById("headerPrecoTabela").innerText = fmt(preco);
 
             document.getElementById("lockEmpreendimento").innerText = unidadeAtual.empreendimento;
             document.getElementById("lockUnidadeM2").innerText = `Apto ${unidadeAtual.unidade} (${unidadeAtual.m2} m²)`;
-            document.getElementById("lockConstrutora").innerText = unidadeAtual.construtora;
+            document.getElementById("lockDataEntrega").innerText = ePronto ? "PRONTO" : dataStr;
             document.getElementById("lockValorTabela").innerText = fmt(preco);
+
+            document.getElementById("txtLimiteMensais").innerText = `Máx: ${limites.maxMensais} parcelas`;
+            document.getElementById("txtLimiteIntermediarias").innerText = `Máx: ${maxAnuaisPermitidas}x`;
 
             const badgeModalidade = document.getElementById("badgeTipoModalidade");
             const secaoObra = document.getElementById("secaoParcelasObra");
@@ -273,12 +329,9 @@
                 badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
                 secaoObra.style.display = "none";
 
-                // PADRÃO DE PRONTO: 30% ATO E 70% FINANCIAMENTO
                 const atoInicial = unidadeAtual.val_ato > 0 ? unidadeAtual.val_ato : (preco * 0.30);
-                const finanInicial = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : (preco - atoInicial);
-
                 document.getElementById("valAto").value = atoInicial.toFixed(2);
-                document.getElementById("valFinanciamento").value = finanInicial.toFixed(2);
+                document.getElementById("valFinanciamento").value = (preco - atoInicial).toFixed(2);
             } else {
                 badgeModalidade.innerText = "🏗️ EM CONSTRUÇÃO";
                 badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
@@ -286,69 +339,66 @@
 
                 document.getElementById("valAto").value = (unidadeAtual.val_ato || preco * 0.10).toFixed(2);
                 document.getElementById("valEntrada").value = (unidadeAtual.val_30_60_90 || (preco * 0.05 / 3)).toFixed(2);
-                document.getElementById("qtdMensais").value = unidadeAtual.qtd_mensais || 36;
-                document.getElementById("valMensais").value = (unidadeAtual.val_mensal_unit || (preco * 0.10 / 36)).toFixed(2);
-                document.getElementById("qtdAnuais").value = unidadeAtual.qtd_anuais || unidadeAtual.qtd_semestrais || 3;
-                document.getElementById("valAnuais").value = (unidadeAtual.val_anual_unit || unidadeAtual.val_semestral_unit || (preco * 0.05 / 3)).toFixed(2);
+                
+                // AJUSTA SE A QUANTIDADE DO BANCO EXCEDER O MÁXIMO DE MENSAIS
+                let qtdM = unidadeAtual.qtd_mensais || 36;
+                if (qtdM > limites.maxMensais) qtdM = limites.maxMensais;
+                document.getElementById("qtdMensais").value = qtdM;
+                document.getElementById("valMensais").value = (unidadeAtual.val_mensal_unit || (preco * 0.10 / (qtdM || 1))).toFixed(2);
+
+                document.getElementById("qtdAnuais").value = Math.min(unidadeAtual.qtd_anuais || 3, maxAnuaisPermitidas);
+                document.getElementById("valAnuais").value = (unidadeAtual.val_anual_unit || (preco * 0.05 / 3)).toFixed(2);
+                document.getElementById("valPeriodicidade").value = (unidadeAtual.val_periodicidade || 0).toFixed(2);
                 document.getElementById("valChaves").value = (unidadeAtual.val_chaves_unica || 0).toFixed(2);
-                document.getElementById("valFinanciamento").value = (unidadeAtual.val_financiamento || preco * 0.70).toFixed(2);
+                document.getElementById("valFinanciamento").value = (unidadeAtual.val_financiamento || preco * 0.65).toFixed(2);
             }
 
             recalculateAll();
         }
 
-        // EVENTO: ALTERAÇÃO NO ATO (COMPLEMENTA O FINANCIAMENTO EM IMÓVEL PRONTO)
         function onAtoChange() {
             if (ePronto && unidadeAtual) {
                 const totalTabela = unidadeAtual.precoTabela || 0;
                 const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
                 const modeAto = document.getElementById("modeAto").value;
                 let totAto = modeAto === 'PERC_TOT' ? (totalTabela * (valAtoRaw / 100)) : valAtoRaw;
-
                 if (totAto > totalTabela) totAto = totalTabela;
-                const totFinanciamento = Math.max(0, totalTabela - totAto);
-
-                document.getElementById("valFinanciamento").value = totFinanciamento.toFixed(2);
+                document.getElementById("valFinanciamento").value = Math.max(0, totalTabela - totAto).toFixed(2);
             }
             recalculateAll();
         }
 
-        // EVENTO: ALTERAÇÃO NO FINANCIAMENTO (COMPLEMENTA O ATO EM IMÓVEL PRONTO)
         function onFinanciamentoChange() {
             if (ePronto && unidadeAtual) {
                 const totalTabela = unidadeAtual.precoTabela || 0;
-                let totFinanciamento = parseFloat(document.getElementById("valFinanciamento").value) || 0;
-
-                if (totFinanciamento > totalTabela) totFinanciamento = totalTabela;
-                const totAto = Math.max(0, totalTabela - totFinanciamento);
-
+                let totFin = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+                if (totFin > totalTabela) totFin = totalTabela;
+                const totAto = Math.max(0, totalTabela - totFin);
                 const modeAto = document.getElementById("modeAto").value;
-                if (modeAto === 'PERC_TOT') {
-                    document.getElementById("valAto").value = totalTabela > 0 ? ((totAto / totalTabela) * 100).toFixed(2) : 0;
-                } else {
-                    document.getElementById("valAto").value = totAto.toFixed(2);
-                }
+                document.getElementById("valAto").value = modeAto === 'PERC_TOT' ? ((totAto / totalTabela) * 100).toFixed(2) : totAto.toFixed(2);
             }
             recalculateAll();
         }
 
-        // SELETOR INTERMEDIÁRIAS ANUAL / SEMESTRAL
         function alternarFrequenciaIntermediaria() {
             const freq = document.getElementById("tipoFrequenciaIntermediaria").value;
             const lbl = document.getElementById("lblQtdIntermediaria");
+            const txtLim = document.getElementById("txtLimiteIntermediarias");
             const inputQtd = document.getElementById("qtdAnuais");
             const inputVal = document.getElementById("valAnuais");
-            let qtdAtual = parseInt(inputQtd.value) || 0;
-            let valAtual = parseFloat(inputVal.value) || 0;
+            let qtd = parseInt(inputQtd.value) || 0;
+            let val = parseFloat(inputVal.value) || 0;
 
             if (freq === 'SEMESTRAL') {
                 lbl.innerText = "Qtd Semestrais";
-                inputQtd.value = qtdAtual * 2;
-                inputVal.value = (valAtual / 2).toFixed(2);
+                txtLim.innerText = `Máx: ${maxSemestraisPermitidas}x`;
+                inputQtd.value = Math.min(qtd * 2, maxSemestraisPermitidas);
+                inputVal.value = (val / 2).toFixed(2);
             } else {
                 lbl.innerText = "Qtd Anuais";
-                inputQtd.value = Math.max(1, Math.round(qtdAtual / 2));
-                inputVal.value = (valAtual * 2).toFixed(2);
+                txtLim.innerText = `Máx: ${maxAnuaisPermitidas}x`;
+                inputQtd.value = Math.min(Math.max(1, Math.round(qtd / 2)), maxAnuaisPermitidas);
+                inputVal.value = (val * 2).toFixed(2);
             }
             recalculateAll();
         }
@@ -358,6 +408,9 @@
 
             const totalTabela = unidadeAtual.precoTabela || 1;
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const pAlertas = document.getElementById("painelAlertaPrazos");
+            pAlertas.innerHTML = "";
+            let errosPrazos = [];
 
             // 1. ATO
             const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
@@ -366,7 +419,7 @@
             let percAto = (totAto / totalTabela) * 100;
             document.getElementById("badgeAto").innerText = `Total Ato: ${fmt(totAto)} (${percAto.toFixed(2)}%)`;
 
-            let totEntrada = 0, totMensais = 0, totAnuais = 0, totChaves = 0;
+            let totEntrada = 0, totMensais = 0, totAnuais = 0, totPeriodicidade = 0, totChaves = 0;
 
             if (!ePronto) {
                 // 2. ENTRADA FACILITADA
@@ -378,8 +431,14 @@
                 }
                 document.getElementById("badgeEntrada").innerText = `Total 30/60/90 (${qtdEntrada}x): ${fmt(totEntrada)}`;
 
-                // 3. MENSAIS
+                // 3. MENSAIS E TRAVA DE DATA
                 const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
+                const maxMensaisPermitidas = Math.max(0, maxMesesObra - 1);
+                
+                if (qtdMensais > maxMensaisPermitidas) {
+                    errosPrazos.push(`🔴 <strong>Atenção:</strong> O número de parcelas mensais (${qtdMensais}x) ultrapassa o limite até a entrega/financiamento (${maxMensaisPermitidas}x parcelas).`);
+                }
+
                 const valMensaisRaw = parseFloat(document.getElementById("valMensais").value) || 0;
                 const modeMensais = document.getElementById("modeMensais").value;
                 if (qtdMensais > 0) {
@@ -387,8 +446,15 @@
                 }
                 document.getElementById("badgeMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totMensais)}`;
 
-                // 4. INTERMEDIÁRIAS
+                // 4. INTERMEDIÁRIAS E TRAVA DE DATA
+                const freq = document.getElementById("tipoFrequenciaIntermediaria").value;
                 const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
+                const tetoInterm = freq === 'SEMESTRAL' ? maxSemestraisPermitidas : maxAnuaisPermitidas;
+
+                if (qtdAnuais > tetoInterm) {
+                    errosPrazos.push(`🔴 <strong>Atenção:</strong> O número de intermediárias ${freq.toLowerCase()}s (${qtdAnuais}x) excede a data de entrega da obra (Máximo permitido: ${tetoInterm}x).`);
+                }
+
                 const valAnuaisRaw = parseFloat(document.getElementById("valAnuais").value) || 0;
                 const modeAnuais = document.getElementById("modeAnuais").value;
                 if (qtdAnuais > 0) {
@@ -396,31 +462,48 @@
                 }
                 document.getElementById("badgeAnuais").innerText = `Total Intermediárias (${qtdAnuais}x): ${fmt(totAnuais)}`;
 
-                // 5. CHAVES
+                // 5. PERIODICIDADE (EXIBE SE MENSAIS >= 36)
+                const boxPer = document.getElementById("boxPeriodicidade");
+                if (qtdMensais >= 36) {
+                    boxPer.style.display = "block";
+                    totPeriodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
+                    document.getElementById("badgePeriodicidade").innerText = `Resíduo Periódico: ${fmt(totPeriodicidade)}`;
+                } else {
+                    boxPer.style.display = "none";
+                }
+
+                // 6. CHAVES
                 const valChavesRaw = parseFloat(document.getElementById("valChaves").value) || 0;
                 const modeChaves = document.getElementById("modeChaves").value;
                 totChaves = modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw;
                 document.getElementById("badgeChaves").innerText = `Chaves: ${fmt(totChaves)}`;
             }
 
-            const somaEntradas = totAto + totEntrada + totMensais + totAnuais + totChaves;
+            // EXIBIÇÃO DAS TARJAS DE ERRO DE PRAZO
+            if (errosPrazos.length > 0) {
+                pAlertas.classList.remove("hidden");
+                pAlertas.innerHTML = errosPrazos.map(e => `<div class="p-3 bg-rose-50 border-l-4 border-rose-600 rounded-r-xl text-rose-900 font-medium text-xs">${e}</div>`).join("");
+            } else {
+                pAlertas.classList.add("hidden");
+            }
+
+            // SOMA DO FLUXO
+            const somaEntradas = totAto + totEntrada + totMensais + totAnuais + totPeriodicidade + totChaves;
             const totFinanciamentoDigitado = parseFloat(document.getElementById("valFinanciamento").value) || 0;
             const percFinan = (totFinanciamentoDigitado / totalTabela) * 100;
 
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
 
-            // CHECKER DE ALERTA DE BANCO (> 80%)
-            const caixaAlerta = document.getElementById("alertaFinanciamentoBancario");
-            const txtPercAlerta = document.getElementById("txtPercAlertaFinan");
-
+            // CHECKER ALERTA FINANCIAMENTO > 80%
+            const cAlerta = document.getElementById("alertaFinanciamentoBancario");
             if (percFinan > 80.01) {
-                caixaAlerta.classList.remove("hidden");
-                txtPercAlerta.innerText = percFinan.toFixed(2) + "%";
+                cAlerta.classList.remove("hidden");
+                document.getElementById("txtPercAlertaFinan").innerText = percFinan.toFixed(2) + "%";
             } else {
-                caixaAlerta.classList.add("hidden");
+                cAlerta.classList.add("hidden");
             }
 
-            // BALANÇA E RESUMO
+            // BALANÇA FINANCEIRA E SEMÁFORO
             const totalProposta = somaEntradas + totFinanciamentoDigitado;
             const diferencaBalanca = totalProposta - totalTabela;
 
@@ -429,16 +512,38 @@
             document.getElementById("txtTotalProposta").innerText = fmt(totalProposta);
             document.getElementById("txtTabelaComparacao").innerText = fmt(totalTabela);
 
+            const semaforoBox = document.getElementById("tarjaStatusSemaforo");
+            const semaforoMsg = document.getElementById("txtStatusSemaforoMsg");
+            const semaforoVal = document.getElementById("txtStatusSemaforoVal");
             const txtDiff = document.getElementById("txtDiferencaBalanca");
+
+            const percEntradaInicial = ((totAto + totEntrada) / totalTabela) * 100;
+
             if (Math.abs(diferencaBalanca) < 1) {
+                semaforoBox.className = "p-3 rounded-xl font-bold text-xs flex justify-between items-center bg-emerald-600 text-white shadow-sm";
+                semaforoMsg.innerText = "🟢 PROPOSTA APROVADA! Fluxo 100% equilibrado com a tabela";
+                semaforoVal.innerText = fmt(0);
                 txtDiff.innerText = fmt(0) + " (Equilíbrio 100%)";
                 txtDiff.className = "text-emerald-600 font-black";
-            } else if (diferencaBalanca < 0) {
-                txtDiff.innerText = `- ${fmt(Math.abs(diferencaBalanca))} (Abaixo da Tabela)`;
-                txtDiff.className = "text-rose-600 font-black";
-            } else {
+            } else if (diferencaBalanca > 0) {
+                semaforoBox.className = "p-3 rounded-xl font-bold text-xs flex justify-between items-center bg-blue-600 text-white shadow-sm";
+                semaforoMsg.innerText = "🟢 VALOR ACIMA DA TABELA: Dinheiro sobrando na mesa";
+                semaforoVal.innerText = `+ ${fmt(diferencaBalanca)}`;
                 txtDiff.innerText = `+ ${fmt(diferencaBalanca)} (Acima da Tabela)`;
                 txtDiff.className = "text-blue-600 font-black";
+            } else {
+                // DIFERENÇA NEGATIVA (ABAIXO DA TABELA)
+                if (percEntradaInicial >= 25 && Math.abs(diferencaBalanca) <= (totalTabela * 0.03)) {
+                    semaforoBox.className = "p-3 rounded-xl font-bold text-xs flex justify-between items-center bg-amber-500 text-slate-900 shadow-sm";
+                    semaforoMsg.innerText = "🟡 CONDICIONAL COMITE: Condição por alta liquidez inicial (Aporte ≥ 25%)";
+                    semaforoVal.innerText = `- ${fmt(Math.abs(diferencaBalanca))}`;
+                } else {
+                    semaforoBox.className = "p-3 rounded-xl font-bold text-xs flex justify-between items-center bg-rose-600 text-white shadow-sm";
+                    semaforoMsg.innerText = "🔴 FLUXO ABAIXO DA TABELA: Sujeito à aprovação do Comitê de Negociação";
+                    semaforoVal.innerText = `- ${fmt(Math.abs(diferencaBalanca))}`;
+                }
+                txtDiff.innerText = `- ${fmt(Math.abs(diferencaBalanca))} (Abaixo da Tabela)`;
+                txtDiff.className = "text-rose-600 font-black";
             }
         }
 
@@ -453,6 +558,12 @@
             const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
             const modeAto = document.getElementById("modeAto").value;
             let totAto = modeAto === 'PERC_TOT' ? (totalTabela * (valAtoRaw / 100)) : valAtoRaw;
+
+            const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
+            const valEntradaRaw = parseFloat(document.getElementById("valEntrada").value) || 0;
+            const modeEntrada = document.getElementById("modeEntrada").value;
+            let totEntrada = (qtdEntrada > 0) ? (modeEntrada === 'PERC_TOT' ? (totalTabela * (valEntradaRaw / 100)) : valEntradaRaw * qtdEntrada) : 0;
+
             const totFin = parseFloat(document.getElementById("valFinanciamento").value) || 0;
 
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
@@ -461,14 +572,15 @@
             texto += `📍 Status: ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
             texto += `👔 Corretor: ${nomeCorretor}\n`;
             texto += `------------------------------------\n`;
-            texto += `💰 Valor de Tabela: ${fmt(totalTabela)}\n\n`;
+            texto += `💰 Preço de Tabela Oficial: ${fmt(totalTabela)}\n\n`;
             texto += `*CONDIÇÕES PROPOSTAS:*\n`;
-            texto += `• Entrada / Sinal: ${fmt(totAto)} (${((totAto/totalTabela)*100).toFixed(2)}%)\n`;
+            texto += `• Entrada / Sinal: ${fmt(totAto)} ("${((totAto/totalTabela)*100).toFixed(2)}%")\n`;
 
             if (!ePronto) {
-                const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
-                const valEntrada = parseFloat(document.getElementById("valEntrada").value) || 0;
-                if (qtdEntrada > 0 && valEntrada > 0) texto += `• 30/60/90 dias (${qtdEntrada}x): ${fmt(valEntrada)} /cada\n`;
+                if (qtdEntrada > 0 && totEntrada > 0) {
+                    texto += `• Entrada Facilitada (${qtdEntrada}x 30/60/90): ${fmt(totEntrada / qtdEntrada)} /cada\n`;
+                    texto += `  └─> TOTAL (ATO + ENTRADA): "${(((totAto + totEntrada)/totalTabela)*100).toFixed(2)}%"\n`;
+                }
 
                 const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
                 const valMensais = parseFloat(document.getElementById("valMensais").value) || 0;
@@ -479,14 +591,27 @@
                 const freq = document.getElementById("tipoFrequenciaIntermediaria").value;
                 if (qtdAnuais > 0 && valAnuais > 0) texto += `• Intermediárias ${freq}s (${qtdAnuais}x): ${fmt(valAnuais)} /cada\n`;
 
+                const valPeriodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
+                if (qtdMensais >= 36 && valPeriodicidade > 0) texto += `• Parcela de Periodicidade: ${fmt(valPeriodicidade)}\n`;
+
                 const valChaves = parseFloat(document.getElementById("valChaves").value) || 0;
                 if (valChaves > 0) texto += `• Parcela de Chaves: ${fmt(valChaves)}\n`;
             }
 
             texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} (${((totFin/totalTabela)*100).toFixed(2)}%)\n`;
             texto += `------------------------------------\n`;
-            texto += `*TOTAL DA PROPOSTA:* ${fmt(totAto + totFin)}\n\n`;
-            texto += `_Obs: Proposta sujeita a aprovação de crédito bancário._`;
+            
+            const somaEntradas = totAto + totEntrada + (parseFloat(document.getElementById("valMensais").value)*parseInt(document.getElementById("qtdMensais").value)||0) + (parseFloat(document.getElementById("valAnuais").value)*parseInt(document.getElementById("qtdAnuais").value)||0) + (parseFloat(document.getElementById("valPeriodicidade").value)||0) + (parseFloat(document.getElementById("valChaves").value)||0);
+            const totalProposta = ePronto ? (totAto + totFin) : (somaEntradas + totFin);
+            const diff = totalProposta - totalTabela;
+
+            texto += `• TOTAL DA PROPOSTA: ${fmt(totalProposta)}\n`;
+            if (Math.abs(diff) >= 1) {
+                texto += `• AJUSTE / BALANÇA: ${diff > 0 ? '+' : ''}${fmt(diff)} (Sujeito à aprovação)\n`;
+            } else {
+                texto += `• STATUS: 100% Aderente à Tabela Oficial\n`;
+            }
+            texto += `\n_Obs: Proposta sujeita à análise de crédito e aprovação do Comitê._`;
 
             navigator.clipboard.writeText(texto);
             alert("Proposta copiada para a área de transferência!");
