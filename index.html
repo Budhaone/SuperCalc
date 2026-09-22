@@ -20,6 +20,7 @@
 
         .app-wrapper { width: 100%; padding: 4px; margin: 0 auto; }
 
+        /* HEADER COMPACTO */
         header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #fff; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px;
@@ -28,77 +29,86 @@
         }
 
         h1 { margin: 0; font-size: 0.95rem; color: var(--accent); white-space: nowrap; }
-        p.sub { margin: 0; font-size: 0.7rem; color: #cbd5e1; white-space: nowrap; }
+        p.sub { margin: 0; font-size: 0.72rem; color: #cbd5e1; font-weight: bold; white-space: nowrap; }
 
-        .view-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px; }
-        .view-btn { border: none; background: transparent; color: #fff; padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; cursor: pointer; }
-        .view-btn.active { background: var(--accent); color: #000; }
-
+        /* FILTROS COMPACTOS */
         .filters-card {
             background: var(--card-bg); padding: 6px; border-radius: 6px;
             margin-bottom: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 4px; width: 100%;
         }
 
-        label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 1px; color: #475569; text-transform: uppercase; }
-        select, input { width: 100%; padding: 4px 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.75rem; background: #fff; height: 26px; }
+        label { display: block; font-size: 0.68rem; font-weight: 800; margin-bottom: 1px; color: #475569; text-transform: uppercase; }
+        select, input { width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.78rem; background: #fff; height: 28px; }
 
+        /* TABELA DE MÁXIMA DENSIDADE VERTICAL */
         .table-container { width: 100%; background: #fff; border-radius: 6px; border: 1px solid var(--border); overflow-x: auto; margin: 0; padding: 0; }
-        table { width: 100%; min-width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; line-height: 1.1; }
-        th { background: #f1f5f9; padding: 4px 5px; font-weight: 800; color: #334155; border-bottom: 1.5px solid var(--border); white-space: nowrap; font-size: 0.7rem; }
-        td { padding: 3px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; white-space: nowrap; }
+        table { width: 100%; min-width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem; line-height: 1.15; }
+        th { background: #f1f5f9; padding: 5px; font-weight: 800; color: #334155; border-bottom: 1.5px solid var(--border); white-space: nowrap; font-size: 0.72rem; }
+        td { padding: 4px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
-
-        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; width: 100%; }
-        .unit-card {
-            background: var(--card-bg); border-radius: 6px; padding: 8px;
-            border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between;
-        }
-        .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 3px; margin-bottom: 3px; }
-        .unit-title { font-size: 0.88rem; font-weight: 800; color: var(--primary); }
-        .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.62rem; font-weight: 800; padding: 1px 4px; border-radius: 3px; }
-        .unit-details { font-size: 0.72rem; color: #64748b; margin-bottom: 4px; line-height: 1.2; }
-        .unit-price { font-size: 0.95rem; font-weight: 900; color: var(--success); margin-bottom: 4px; }
 
         .btn-select {
             background: var(--primary); color: #fff; border: none;
             padding: 3px 8px; border-radius: 4px; font-weight: bold; cursor: pointer;
-            text-align: center; font-size: 0.7rem; width: 100%; height: 24px; display: flex; align-items: center; justify-content: center;
+            text-align: center; font-size: 0.72rem; width: 100%; height: 24px; display: flex; align-items: center; justify-content: center;
         }
         .btn-select:hover { background: #334155; color: var(--accent); }
 
+        /* TELA DE CARREGAMENTO (POP-UP / OVERLAY) */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(2px);
+            z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #fff; transition: opacity 0.2s ease;
+        }
+        .spinner {
+            width: 42px; height: 42px; border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid var(--accent); border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-title { font-size: 1rem; font-weight: 800; color: var(--accent); margin-bottom: 2px; }
+        .loading-sub { font-size: 0.75rem; color: #cbd5e1; }
+
         @media (max-width: 600px) {
             .app-wrapper { padding: 2px; }
-            th { padding: 3px 4px; font-size: 0.68rem; }
-            td { padding: 2px 4px; font-size: 0.72rem; }
-            .btn-select { padding: 2px 4px; font-size: 0.68rem; height: 22px; }
+            th { padding: 4px 3px; font-size: 0.7rem; }
+            td { padding: 3px 4px; font-size: 0.75rem; }
+            .btn-select { padding: 2px 4px; font-size: 0.7rem; height: 23px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- OVERLAY DE CARREGAMENTO POP-UP -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-title">Carregando Tabela de Imóveis</div>
+        <div class="loading-sub">Aguarde um instante...</div>
+    </div>
+
     <div class="app-wrapper">
         <header>
             <div>
                 <h1>SuperCalc — Imóveis</h1>
-                <p class="sub" id="txtContador">Carregando...</p>
+                <p class="sub" id="txtContador">Aguardando dados...</p>
             </div>
-            <div class="view-toggle">
-                <button class="view-btn active" id="btnViewTable" onclick="setMode('table')">📊 Lista</button>
-                <button class="view-btn" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
-            </div>
+            <span style="background: rgba(241,196,15,0.2); color: var(--accent); font-size: 0.65rem; font-weight:800; padding:2px 6px; border-radius:4px; border:1px solid var(--accent);">
+                PRATELEIRA OFICIAL
+            </span>
         </header>
 
         <div class="filters-card">
             <div>
                 <label>Empreendimento:</label>
-                <select id="filterEmp" onchange="renderUnits()">
+                <select id="filterEmp" onchange="renderUnitsWithLoader()">
                     <option value="TODOS">Todos os Empreendimentos</option>
                 </select>
             </div>
             <div>
                 <label>Tipologia:</label>
-                <select id="filterTipo" onchange="renderUnits()">
+                <select id="filterTipo" onchange="renderUnitsWithLoader()">
                     <option value="TODOS">Todas as Tipologias</option>
                     <option value="Studio">Studio</option>
                     <option value="1 Dorm">1 Dormitório</option>
@@ -108,7 +118,7 @@
             </div>
             <div>
                 <label>Vagas:</label>
-                <select id="filterVagas" onchange="renderUnits()">
+                <select id="filterVagas" onchange="renderUnitsWithLoader()">
                     <option value="TODOS">Todas</option>
                     <option value="SEM">Sem Vaga (0)</option>
                     <option value="COM">Com Vaga (1+)</option>
@@ -116,7 +126,7 @@
             </div>
             <div>
                 <label>Buscar Unidade / M²:</label>
-                <input type="text" id="filterBusca" placeholder="Ex: 501, 35m²..." oninput="renderUnits()">
+                <input type="text" id="filterBusca" placeholder="Ex: 501, 35m²..." oninput="renderUnitsWithLoader()">
             </div>
         </div>
 
@@ -137,8 +147,6 @@
                 <tbody id="tbodyUnits"></tbody>
             </table>
         </div>
-
-        <div class="grid-units" id="containerCards" style="display: none;"></div>
     </div>
 
     <script>
@@ -146,9 +154,17 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
 
         let todasAsUnidades = [];
-        let currentMode = 'table';
+
+        function showLoader() {
+            document.getElementById("loadingOverlay").style.display = "flex";
+        }
+
+        function hideLoader() {
+            document.getElementById("loadingOverlay").style.display = "none";
+        }
 
         async function fetchUnidades() {
+            showLoader();
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/units?select=*,developments(title)&order=floor.asc,unit_number.asc`, {
                     headers: {
@@ -169,7 +185,6 @@
                     vagas: u.parking_spaces || 0,
                     preco: parseFloat(u.list_price),
                     
-                    // PARÂMETROS DO FLUXO COMPLETO
                     valAto: parseFloat(u.val_ato) || 0,
                     val306090: parseFloat(u.val_30_60_90) || 0,
                     qtdMensais: parseInt(u.qtd_mensais) || 0,
@@ -187,6 +202,8 @@
             } catch (err) {
                 console.error("Erro na comunicação com o Supabase:", err);
                 document.getElementById("txtContador").innerText = "Erro no banco de dados.";
+            } finally {
+                hideLoader();
             }
         }
 
@@ -199,13 +216,12 @@
             });
         }
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById("btnViewTable").className = mode === 'table' ? 'view-btn active' : 'view-btn';
-            document.getElementById("btnViewCards").className = mode === 'cards' ? 'view-btn active' : 'view-btn';
-            document.getElementById("containerTable").style.display = mode === 'table' ? 'block' : 'none';
-            document.getElementById("containerCards").style.display = mode === 'cards' ? 'grid' : 'none';
-            renderUnits();
+        function renderUnitsWithLoader() {
+            showLoader();
+            setTimeout(() => {
+                renderUnits();
+                hideLoader();
+            }, 50);
         }
 
         function renderUnits() {
@@ -227,59 +243,32 @@
                 return a.unidade.localeCompare(b.unidade, undefined, { numeric: true, sensitivity: 'base' });
             });
 
-            document.getElementById("txtContador").innerText = `${filtrados.length} uni.`;
+            document.getElementById("txtContador").innerText = `${filtrados.length} uni. encontradas`;
             const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            if (currentMode === 'table') {
-                const tbody = document.getElementById("tbodyUnits");
-                tbody.innerHTML = "";
-                if (filtrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:10px; color:#64748b;">Nenhuma unidade encontrada.</td></tr>`;
-                    return;
-                }
-                filtrados.forEach((u) => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${u.emp}</strong></td>
-                            <td>Apto ${u.unidade}</td>
-                            <td>${u.andar}º</td>
-                            <td>${u.tipo}</td>
-                            <td>${u.m2}m²</td>
-                            <td>${u.vagas > 0 ? u.vagas : '0'}</td>
-                            <td style="color:var(--success); font-weight:bold;">${fmt(u.preco)}</td>
-                            <td><button class="btn-select" onclick="selecionarUnidadeObjeto('${u.emp}', '${u.unidade}')">Simular</button></td>
-                        </tr>
-                    `;
-                });
-            } else {
-                const container = document.getElementById("containerCards");
-                container.innerHTML = "";
-                if (filtrados.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 10px; color:#64748b;">Nenhuma unidade encontrada.</div>`;
-                    return;
-                }
-                filtrados.forEach((u) => {
-                    container.innerHTML += `
-                        <div class="unit-card">
-                            <div>
-                                <div class="unit-header">
-                                    <span class="unit-title">Apto ${u.unidade}</span>
-                                    <span class="unit-badge">${u.emp}</span>
-                                </div>
-                                <div class="unit-details">
-                                    • Andar: <strong>${u.andar}º Pavimento</strong><br>
-                                    • Tipologia: <strong>${u.tipo}</strong><br>
-                                    • Área: <strong>${u.m2} m²</strong> | Vagas: <strong>${u.vagas}</strong>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="unit-price">${fmt(u.preco)}</div>
-                                <button class="btn-select" onclick="selecionarUnidadeObjeto('${u.emp}', '${u.unidade}')">Simular →</button>
-                            </div>
-                        </div>
-                    `;
-                });
+            const tbody = document.getElementById("tbodyUnits");
+            tbody.innerHTML = "";
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:12px; color:#64748b; font-weight:bold;">Nenhuma unidade encontrada para os filtros selecionados.</td></tr>`;
+                return;
             }
+
+            let htmlBuffer = "";
+            filtrados.forEach((u) => {
+                htmlBuffer += `
+                    <tr>
+                        <td><strong>${u.emp}</strong></td>
+                        <td>Apto ${u.unidade}</td>
+                        <td>${u.andar}º</td>
+                        <td>${u.tipo}</td>
+                        <td>${u.m2}m²</td>
+                        <td>${u.vagas > 0 ? u.vagas : '0'}</td>
+                        <td style="color:var(--success); font-weight:800;">${fmt(u.preco)}</td>
+                        <td><button class="btn-select" onclick="selecionarUnidadeObjeto('${u.emp}', '${u.unidade}')">Simular</button></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = htmlBuffer;
         }
 
         function selecionarUnidadeObjeto(emp, unidade) {
