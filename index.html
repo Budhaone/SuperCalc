@@ -20,7 +20,6 @@
 
         .app-wrapper { width: 100%; padding: 4px; margin: 0 auto; }
 
-        /* HEADER ULTRA COMPACTO */
         header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: #fff; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px;
@@ -35,7 +34,6 @@
         .view-btn { border: none; background: transparent; color: #fff; padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; cursor: pointer; }
         .view-btn.active { background: var(--accent); color: #000; }
 
-        /* FILTROS COMPACTOS */
         .filters-card {
             background: var(--card-bg); padding: 6px; border-radius: 6px;
             margin-bottom: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -45,14 +43,12 @@
         label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 1px; color: #475569; text-transform: uppercase; }
         select, input { width: 100%; padding: 4px 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.75rem; background: #fff; height: 26px; }
 
-        /* TABELA DE MÁXIMA DENSIDADE VERTICAL (MUITAS LINHAS NA TELA) */
         .table-container { width: 100%; background: #fff; border-radius: 6px; border: 1px solid var(--border); overflow-x: auto; margin: 0; padding: 0; }
         table { width: 100%; min-width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; line-height: 1.1; }
         th { background: #f1f5f9; padding: 4px 5px; font-weight: 800; color: #334155; border-bottom: 1.5px solid var(--border); white-space: nowrap; font-size: 0.7rem; }
         td { padding: 3px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; white-space: nowrap; }
         tr:nth-child(even) { background-color: #f8fafc; }
 
-        /* CARDS SECUNDÁRIOS */
         .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; width: 100%; }
         .unit-card {
             background: var(--card-bg); border-radius: 6px; padding: 8px;
@@ -124,7 +120,6 @@
             </div>
         </div>
 
-        <!-- VISTA LISTA / TABELA (MÁXIMO APROVEITAMENTO VERTICAL) -->
         <div class="table-container" id="containerTable">
             <table>
                 <thead>
@@ -143,7 +138,6 @@
             </table>
         </div>
 
-        <!-- VISTA CARDS (SECUNDÁRIA) -->
         <div class="grid-units" id="containerCards" style="display: none;"></div>
     </div>
 
@@ -175,14 +169,17 @@
                     vagas: u.parking_spaces || 0,
                     preco: parseFloat(u.list_price),
                     
+                    // PARÂMETROS DO FLUXO COMPLETO
                     valAto: parseFloat(u.val_ato) || 0,
                     val306090: parseFloat(u.val_30_60_90) || 0,
                     qtdMensais: parseInt(u.qtd_mensais) || 0,
                     valMensalUnit: parseFloat(u.val_mensal_unit) || 0,
-                    qtdSemestrais: parseInt(u.qtd_semestrais) || 0,
-                    valSemestralUnit: parseFloat(u.val_semestral_unit) || 0,
+                    qtdAnuais: parseInt(u.qtd_anuais) || 0,
+                    valAnualUnit: parseFloat(u.val_anual_unit) || 0,
+                    valPeriodicidade: parseFloat(u.val_periodicidade) || 0,
                     valChavesUnica: parseFloat(u.val_chaves_unica) || 0,
-                    valFinanciamento: parseFloat(u.val_financiamento) || 0
+                    valFinanciamento: parseFloat(u.val_financiamento) || 0,
+                    dataEntrega: u.data_entrega || ''
                 }));
 
                 populateEmpFilter();
