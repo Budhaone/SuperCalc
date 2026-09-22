@@ -45,11 +45,11 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMBINADOS (GRID RESPONSIVO) -->
+        <!-- BARRA DE FILTROS COMBINADOS (GRID RESPONSIVO DE 9 FILTROS) -->
         <section class="bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
             <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados de Busca</h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-3">
                 <!-- 1. Construtora / Origem -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Incorporadora / Origem</label>
@@ -75,7 +75,19 @@
                     </select>
                 </div>
 
-                <!-- 4. Status da Entrega -->
+                <!-- 4. FILTRO DE TIPO DE RENDA / ENQUADRAMENTO (HIS, HMP, R2V, NR) -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Enquadramento / Tipo de Renda</label>
+                    <select id="filtroTipoRenda" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-amber-900 bg-amber-50 focus:bg-white focus:ring-2 focus:ring-amber-900 outline-none">
+                        <option value="TODOS">Todos os Enquadramentos</option>
+                        <option value="HIS">HIS (Habitação Interesse Social)</option>
+                        <option value="HMP">HMP (Habitação Mercado Popular)</option>
+                        <option value="R2V">R2V (Residencial Livre / Com Vaga)</option>
+                        <option value="NR">NR (Non-Residential / Short Stay)</option>
+                    </select>
+                </div>
+
+                <!-- 5. Status da Entrega -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Status da Entrega</label>
                     <select id="filtroStatusEntrega" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -85,7 +97,7 @@
                     </select>
                 </div>
 
-                <!-- 5. Dormitórios / Tipologia -->
+                <!-- 6. Dormitórios / Tipologia -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Dormitórios / Tipologia</label>
                     <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -97,7 +109,7 @@
                     </select>
                 </div>
 
-                <!-- 6. Vagas de Garagem -->
+                <!-- 7. Vagas de Garagem -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Vagas de Garagem</label>
                     <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -107,13 +119,13 @@
                     </select>
                 </div>
 
-                <!-- 7. Busca por Unidade ou Texto -->
+                <!-- 8. Busca por Unidade ou Texto -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Nº da Unidade</label>
                     <input type="text" id="filtroUnidadeTexto" placeholder="Ex: 2404 ou H1914" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
                 </div>
 
-                <!-- 8. Preço Máximo -->
+                <!-- 9. Preço Máximo -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Preço Máximo (R$)</label>
                     <input type="number" id="filtroPrecoMax" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
@@ -121,13 +133,12 @@
             </div>
         </section>
 
-        <!-- RESULTADOS DA BUSCA -->
+        <!-- RESULTADOS DA BUSCA (TABELA/LISTA OTIMIZADA PARA CELULAR) -->
         <main class="space-y-2">
             <div class="flex justify-between items-center px-1">
                 <span class="text-xs font-bold text-slate-600 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades na nuvem...</span>
             </div>
 
-            <!-- TABELA RESPONSIVA -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -191,7 +202,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-0.5">Tipologia</label>
-                        <input type="text" id="addDorms" required placeholder="Ex: 2 Dorms" class="w-full border p-1.5 rounded-lg font-medium">
+                        <input type="text" id="addDorms" required placeholder="Ex: 2 Dorms (HIS)" class="w-full border p-1.5 rounded-lg font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-0.5">Vagas Garagem</label>
@@ -258,11 +269,12 @@
                             id: u.id,
                             origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
                             construtora: u.developments?.builder || u.developments?.developer_name || "Incorporadora",
-                            empreendimento: u.developments?.title || "Empreendimento",
+                            empreendimento: u.developments?.title || u.developments?.name || "Empreendimento",
                             bairro: u.developments?.address || "São Paulo - SP",
                             unidade: u.unit_number || "101",
                             pavimento: parseInt(u.floor) || 1,
                             dorms: u.typology || "Studio",
+                            typologyRaw: u.typology || "",
                             vagas: parseInt(u.parking_spaces) || 0,
                             m2: parseFloat(u.private_area_m2) || 0,
                             precoTabela: parseFloat(u.list_price) || 0,
@@ -274,8 +286,8 @@
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
                             val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
-                            qtd_semestrais: parseInt(u.qtd_semestrais) || 0,
-                            val_semestral_unit: parseFloat(u.val_semestral_unit) || 0,
+                            qtd_semestrais: parseInt(u.qtd_semestrais) || parseInt(u.qtd_anuais) || 0,
+                            val_semestral_unit: parseFloat(u.val_semestral_unit) || parseFloat(u.val_anual_unit) || 0,
                             val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
                             val_financiamento: parseFloat(u.val_financiamento) || 0
                         };
@@ -298,7 +310,7 @@
                 }
             } catch (err) {
                 console.error("Erro ao carregar dados do Supabase:", err);
-            } finally {
+            } font-medium {
                 mostrarLoader(false);
             }
         }
@@ -422,6 +434,7 @@
             const construtora = document.getElementById("filtroConstrutora").value;
             const empreendimento = document.getElementById("filtroEmpreendimento").value;
             const metragemSel = document.getElementById("filtroMetragem").value;
+            const tipoRenda = document.getElementById("filtroTipoRenda").value;
             const statusEntrega = document.getElementById("filtroStatusEntrega").value;
             const dorms = document.getElementById("filtroDorms").value;
             const vagas = parseInt(document.getElementById("filtroVagas").value) || 0;
@@ -432,6 +445,7 @@
                 const bateConstrutora = construtora === "TODAS" || (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
                 const bateMetragem = metragemSel === "TODAS" || item.m2 === parseFloat(metragemSel);
+                const bateTipoRenda = tipoRenda === "TODOS" || item.typologyRaw.toUpperCase().includes(tipoRenda);
                 
                 let bateStatus = true;
                 if (statusEntrega === "PRONTO") bateStatus = item.is_ready;
@@ -442,7 +456,7 @@
                 const bateTexto = buscaTexto === "" || item.unidade.toLowerCase().includes(buscaTexto) || item.empreendimento.toLowerCase().includes(buscaTexto);
                 const batePreco = item.precoTabela <= precoMax;
 
-                return bateConstrutora && bateEmpreendimento && bateMetragem && bateStatus && bateDorms && bateVagas && bateTexto && batePreco;
+                return bateConstrutora && bateEmpreendimento && bateMetragem && bateTipoRenda && bateStatus && bateDorms && bateVagas && bateTexto && batePreco;
             });
 
             renderizarTabela(filtrados);
@@ -514,6 +528,7 @@
                 unidade: document.getElementById("addUnidade").value.trim(),
                 pavimento: parseInt(document.getElementById("addPavimento").value) || 0,
                 dorms: document.getElementById("addDorms").value.trim(),
+                typologyRaw: document.getElementById("addDorms").value.trim(),
                 vagas: parseInt(document.getElementById("addVagas").value) || 0,
                 m2: parseFloat(document.getElementById("addM2").value) || 0,
                 precoTabela: parseFloat(document.getElementById("addPrecoTabela").value) || 0,
