@@ -72,7 +72,6 @@
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Metragem Privativa (m²)</label>
                     <select id="filtroMetragem" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-purple-900 bg-purple-50 focus:bg-white focus:ring-2 focus:ring-purple-900 outline-none">
                         <option value="TODAS">Todas as Metragens</option>
-                        <!-- Opções populadas dinamicamente via JS -->
                     </select>
                 </div>
 
@@ -122,13 +121,13 @@
             </div>
         </section>
 
-        <!-- RESULTADOS DA BUSCA (TABELA/LISTA OTIMIZADA PARA CELULAR) -->
+        <!-- RESULTADOS DA BUSCA -->
         <main class="space-y-2">
             <div class="flex justify-between items-center px-1">
                 <span class="text-xs font-bold text-slate-600 uppercase tracking-wider" id="lblResultadoContagem">Buscando oportunidades na nuvem...</span>
             </div>
 
-            <!-- TABELA RESPONSIVA EM LARGURA TOTAL -->
+            <!-- TABELA RESPONSIVA -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -270,7 +269,7 @@
                             entregaObra: entregaObra,
                             is_ready: ePronto,
                             
-                            -- DADOS FINANCEIROS COMPLETOS PARA O SUPERCALC
+                            // DADOS FINANCEIROS COMPLETOS PARA O SUPERCALC
                             val_ato: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
