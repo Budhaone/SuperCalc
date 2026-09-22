@@ -54,7 +54,7 @@
             </div>
         </section>
 
-        <!-- TARJAS DE VALIDAÇÃO DE PRAZO DA OBRA -->
+        <!-- TARJAS DE NOTIFICAÇÃO E AVISOS VISUAIS -->
         <div id="painelAlertaPrazos" class="hidden space-y-2"></div>
 
         <!-- FLUXO DE ENTRADA -->
@@ -82,7 +82,7 @@
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Parcelas</span>
-                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="validarETravarLimites(); recalculateAll();" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
@@ -98,7 +98,7 @@
                     <div id="badgeEntrada" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total 30/60/90 (3x): R$ 0,00</div>
                 </div>
 
-                <!-- 3. MENSAIS -->
+                <!-- 3. MENSAIS DE OBRA COM TRAVA RÍGIDA -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="font-bold text-slate-800">3. Parcelas Mensais durante a Obra:</label>
@@ -107,7 +107,8 @@
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nº Mensais</span>
-                            <input type="number" id="qtdMensais" value="36" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <!-- TRAVA RÍGIDA NO ONINPUT -->
+                            <input type="number" id="qtdMensais" value="36" min="0" oninput="validarETravarLimites(); recalculateAll();" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
@@ -123,7 +124,7 @@
                     <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total Mensais: R$ 0,00</div>
                 </div>
 
-                <!-- 4. INTERMEDIÁRIAS ANUAIS / SEMESTRAIS -->
+                <!-- 4. INTERMEDIÁRIAS ANUAIS / SEMESTRAIS COM TRAVA RÍGIDA -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="font-bold text-slate-800">4. Parcelas Intermediárias:</label>
@@ -138,7 +139,8 @@
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1" id="lblQtdIntermediaria">Qtd Anuais</span>
-                            <input type="number" id="qtdAnuais" value="3" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <!-- TRAVA RÍGIDA NO ONINPUT -->
+                            <input type="number" id="qtdAnuais" value="3" min="0" oninput="validarETravarLimites(); recalculateAll();" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
@@ -224,11 +226,12 @@
         </section>
     </div>
 
-    <!-- SCRIPTS E MOTOR FINANCEIRO -->
+    <!-- SCRIPTS E MOTOR FINANCEIRO COM TRAVA FÍSICA -->
     <script>
         let unidadeAtual = null;
         let ePronto = false;
         let maxMesesObra = 36;
+        let maxMensaisPermitidas = 35;
         let maxAnuaisPermitidas = 3;
         let maxSemestraisPermitidas = 6;
 
@@ -258,16 +261,48 @@
             if (mesesTotais < 1) mesesTotais = 1;
 
             // REGRA RÍGIDA: Mês da Entrega é do Financiamento. Mensais vão até o mês ANTERIOR (mesesTotais - 1)
-            let maxMensais = Math.max(0, mesesTotais - 1);
-            let maxAnuais = Math.floor(mesesTotais / 12);
-            let maxSemestrais = Math.floor(mesesTotais / 6);
+            let maxM = Math.max(0, mesesTotais - 1);
+            let maxA = Math.floor(mesesTotais / 12);
+            let maxS = Math.floor(mesesTotais / 6);
 
             return {
                 mesesObra: mesesTotais,
-                maxMensais: maxMensais,
-                maxAnuais: maxAnuais,
-                maxSemestrais: maxSemestrais
+                maxMensais: maxM,
+                maxAnuais: maxA,
+                maxSemestrais: maxS
             };
+        }
+
+        // TRAVA FÍSICA RÍGIDA DE ENTRADA DE DADOS
+        function validarETravarLimites() {
+            const elMensais = document.getElementById("qtdMensais");
+            const elAnuais = document.getElementById("qtdAnuais");
+            const freq = document.getElementById("tipoFrequenciaIntermediaria").value;
+
+            // 1. TRAVA RÍGIDA PARA MENSAIS
+            let valMensais = parseInt(elMensais.value) || 0;
+            if (valMensais > maxMensaisPermitidas) {
+                elMensais.value = maxMensaisPermitidas;
+                exibirAlertaTemporario(`🔴 Trava Ativada: O limite máximo para esta obra é de ${maxMensaisPermitidas} parcelas mensais.`);
+            }
+
+            // 2. TRAVA RÍGIDA PARA INTERMEDIÁRIAS
+            let valAnuais = parseInt(elAnuais.value) || 0;
+            let tetoInterm = freq === 'SEMESTRAL' ? maxSemestraisPermitidas : maxAnuaisPermitidas;
+
+            if (valAnuais > tetoInterm) {
+                elAnuais.value = tetoInterm;
+                exibirAlertaTemporario(`🔴 Trava Ativada: O limite máximo para intermediárias ${freq.toLowerCase()}s é de ${tetoInterm}x.`);
+            }
+        }
+
+        function exibirAlertaTemporario(mensagem) {
+            const pAlertas = document.getElementById("painelAlertaPrazos");
+            pAlertas.classList.remove("hidden");
+            pAlertas.innerHTML = `<div class="p-3 bg-rose-600 text-white font-bold rounded-xl text-xs animate-bounce">${mensagem}</div>`;
+            setTimeout(() => {
+                pAlertas.classList.add("hidden");
+            }, 3500);
         }
 
         function inicializarDadosUnidade() {
@@ -303,8 +338,13 @@
 
             const limites = calcularLimitesDataEntrega(dataStr);
             maxMesesObra = limites.mesesObra;
+            maxMensaisPermitidas = limites.maxMensais;
             maxAnuaisPermitidas = limites.maxAnuais;
             maxSemestraisPermitidas = limites.maxSemestrais;
+
+            // ATRIBUI MAX HTML FÍSICO
+            document.getElementById("qtdMensais").max = maxMensaisPermitidas;
+            document.getElementById("qtdAnuais").max = maxAnuaisPermitidas;
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -318,7 +358,7 @@
             document.getElementById("lockDataEntrega").innerText = ePronto ? "PRONTO" : dataStr;
             document.getElementById("lockValorTabela").innerText = fmt(preco);
 
-            document.getElementById("txtLimiteMensais").innerText = `Máx: ${limites.maxMensais} parcelas`;
+            document.getElementById("txtLimiteMensais").innerText = `Máx: ${maxMensaisPermitidas} parcelas`;
             document.getElementById("txtLimiteIntermediarias").innerText = `Máx: ${maxAnuaisPermitidas}x`;
 
             const badgeModalidade = document.getElementById("badgeTipoModalidade");
@@ -340,9 +380,8 @@
                 document.getElementById("valAto").value = (unidadeAtual.val_ato || preco * 0.10).toFixed(2);
                 document.getElementById("valEntrada").value = (unidadeAtual.val_30_60_90 || (preco * 0.05 / 3)).toFixed(2);
                 
-                // AJUSTA SE A QUANTIDADE DO BANCO EXCEDER O MÁXIMO DE MENSAIS
                 let qtdM = unidadeAtual.qtd_mensais || 36;
-                if (qtdM > limites.maxMensais) qtdM = limites.maxMensais;
+                if (qtdM > maxMensaisPermitidas) qtdM = maxMensaisPermitidas;
                 document.getElementById("qtdMensais").value = qtdM;
                 document.getElementById("valMensais").value = (unidadeAtual.val_mensal_unit || (preco * 0.10 / (qtdM || 1))).toFixed(2);
 
@@ -392,14 +431,17 @@
             if (freq === 'SEMESTRAL') {
                 lbl.innerText = "Qtd Semestrais";
                 txtLim.innerText = `Máx: ${maxSemestraisPermitidas}x`;
+                inputQtd.max = maxSemestraisPermitidas;
                 inputQtd.value = Math.min(qtd * 2, maxSemestraisPermitidas);
                 inputVal.value = (val / 2).toFixed(2);
             } else {
                 lbl.innerText = "Qtd Anuais";
                 txtLim.innerText = `Máx: ${maxAnuaisPermitidas}x`;
+                inputQtd.max = maxAnuaisPermitidas;
                 inputQtd.value = Math.min(Math.max(1, Math.round(qtd / 2)), maxAnuaisPermitidas);
                 inputVal.value = (val * 2).toFixed(2);
             }
+            validarETravarLimites();
             recalculateAll();
         }
 
@@ -408,9 +450,6 @@
 
             const totalTabela = unidadeAtual.precoTabela || 1;
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const pAlertas = document.getElementById("painelAlertaPrazos");
-            pAlertas.innerHTML = "";
-            let errosPrazos = [];
 
             // 1. ATO
             const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
@@ -431,14 +470,8 @@
                 }
                 document.getElementById("badgeEntrada").innerText = `Total 30/60/90 (${qtdEntrada}x): ${fmt(totEntrada)}`;
 
-                // 3. MENSAIS E TRAVA DE DATA
+                // 3. MENSAIS DE OBRA
                 const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
-                const maxMensaisPermitidas = Math.max(0, maxMesesObra - 1);
-                
-                if (qtdMensais > maxMensaisPermitidas) {
-                    errosPrazos.push(`🔴 <strong>Atenção:</strong> O número de parcelas mensais (${qtdMensais}x) ultrapassa o limite até a entrega/financiamento (${maxMensaisPermitidas}x parcelas).`);
-                }
-
                 const valMensaisRaw = parseFloat(document.getElementById("valMensais").value) || 0;
                 const modeMensais = document.getElementById("modeMensais").value;
                 if (qtdMensais > 0) {
@@ -446,15 +479,9 @@
                 }
                 document.getElementById("badgeMensais").innerText = `Total Mensais (${qtdMensais}x): ${fmt(totMensais)}`;
 
-                // 4. INTERMEDIÁRIAS E TRAVA DE DATA
+                // 4. INTERMEDIÁRIAS
                 const freq = document.getElementById("tipoFrequenciaIntermediaria").value;
                 const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
-                const tetoInterm = freq === 'SEMESTRAL' ? maxSemestraisPermitidas : maxAnuaisPermitidas;
-
-                if (qtdAnuais > tetoInterm) {
-                    errosPrazos.push(`🔴 <strong>Atenção:</strong> O número de intermediárias ${freq.toLowerCase()}s (${qtdAnuais}x) excede a data de entrega da obra (Máximo permitido: ${tetoInterm}x).`);
-                }
-
                 const valAnuaisRaw = parseFloat(document.getElementById("valAnuais").value) || 0;
                 const modeAnuais = document.getElementById("modeAnuais").value;
                 if (qtdAnuais > 0) {
@@ -477,14 +504,6 @@
                 const modeChaves = document.getElementById("modeChaves").value;
                 totChaves = modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw;
                 document.getElementById("badgeChaves").innerText = `Chaves: ${fmt(totChaves)}`;
-            }
-
-            // EXIBIÇÃO DAS TARJAS DE ERRO DE PRAZO
-            if (errosPrazos.length > 0) {
-                pAlertas.classList.remove("hidden");
-                pAlertas.innerHTML = errosPrazos.map(e => `<div class="p-3 bg-rose-50 border-l-4 border-rose-600 rounded-r-xl text-rose-900 font-medium text-xs">${e}</div>`).join("");
-            } else {
-                pAlertas.classList.add("hidden");
             }
 
             // SOMA DO FLUXO
