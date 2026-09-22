@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SuperCalc — Prateleira de Imóveis</title>
     <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
     <style>
@@ -11,130 +11,140 @@
             --accent: #f1c40f;
             --bg: #f4f6f9;
             --card-bg: #ffffff;
-            --border: #e2e8f0;
+            --border: #cbd5e1;
             --success: #27ae60;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background-color: var(--bg); margin: 0; padding: 16px; color: #333; }
+        html, body { width: 100%; margin: 0; padding: 0; background-color: var(--bg); color: #333; overflow-x: hidden; }
 
+        .app-wrapper { width: 100%; padding: 4px; margin: 0 auto; }
+
+        /* HEADER ULTRA COMPACTO */
         header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #fff; padding: 16px 20px; border-radius: 12px; margin-bottom: 16px;
+            color: #fff; padding: 6px 8px; border-radius: 6px; margin-bottom: 4px;
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 3px solid var(--accent); flex-wrap: wrap; gap: 10px;
+            border-bottom: 2px solid var(--accent); flex-wrap: nowrap; gap: 4px; width: 100%;
         }
 
-        h1 { margin: 0; font-size: 1.4rem; color: var(--accent); }
-        p.sub { margin: 4px 0 0 0; font-size: 0.85rem; color: #cbd5e1; }
+        h1 { margin: 0; font-size: 0.95rem; color: var(--accent); white-space: nowrap; }
+        p.sub { margin: 0; font-size: 0.7rem; color: #cbd5e1; white-space: nowrap; }
 
-        .view-toggle { display: flex; gap: 6px; background: rgba(255,255,255,0.1); padding: 4px; border-radius: 8px; }
-        .view-btn { border: none; background: transparent; color: #fff; padding: 6px 12px; font-size: 0.8rem; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .view-toggle { display: flex; gap: 2px; background: rgba(255,255,255,0.1); padding: 2px; border-radius: 4px; }
+        .view-btn { border: none; background: transparent; color: #fff; padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-radius: 3px; cursor: pointer; }
         .view-btn.active { background: var(--accent); color: #000; }
 
+        /* FILTROS COMPACTOS */
         .filters-card {
-            background: var(--card-bg); padding: 14px; border-radius: 12px;
-            margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;
+            background: var(--card-bg); padding: 6px; border-radius: 6px;
+            margin-bottom: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 4px; width: 100%;
         }
 
-        label { display: block; font-size: 0.78rem; font-weight: bold; margin-bottom: 4px; color: #475569; }
-        select, input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; }
+        label { display: block; font-size: 0.65rem; font-weight: bold; margin-bottom: 1px; color: #475569; text-transform: uppercase; }
+        select, input { width: 100%; padding: 4px 5px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.75rem; background: #fff; height: 26px; }
 
-        /* VISTA CARDS */
-        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+        /* TABELA DE MÁXIMA DENSIDADE VERTICAL (MUITAS LINHAS NA TELA) */
+        .table-container { width: 100%; background: #fff; border-radius: 6px; border: 1px solid var(--border); overflow-x: auto; margin: 0; padding: 0; }
+        table { width: 100%; min-width: 100%; border-collapse: collapse; text-align: left; font-size: 0.75rem; line-height: 1.1; }
+        th { background: #f1f5f9; padding: 4px 5px; font-weight: 800; color: #334155; border-bottom: 1.5px solid var(--border); white-space: nowrap; font-size: 0.7rem; }
+        td { padding: 3px 5px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; white-space: nowrap; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+
+        /* CARDS SECUNDÁRIOS */
+        .grid-units { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; width: 100%; }
         .unit-card {
-            background: var(--card-bg); border-radius: 10px; padding: 14px;
-            border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-            display: flex; flex-direction: column; justify-content: space-between;
+            background: var(--card-bg); border-radius: 6px; padding: 8px;
+            border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: space-between;
         }
-        .unit-card:hover { border-color: var(--accent); }
-        .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 8px; }
-        .unit-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
-        .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; }
-        .unit-details { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
-        .unit-price { font-size: 1.2rem; font-weight: 900; color: var(--success); margin-bottom: 10px; }
-
-        /* VISTA TABELA */
-        .table-container { background: #fff; border-radius: 10px; border: 1px solid var(--border); overflow-x: auto; display: none; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
-        th { background: #f8fafc; padding: 10px 12px; font-weight: bold; color: #475569; border-bottom: 2px solid var(--border); }
-        td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-        tr:hover { background: #f1f5f9; }
+        .unit-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 3px; margin-bottom: 3px; }
+        .unit-title { font-size: 0.88rem; font-weight: 800; color: var(--primary); }
+        .unit-badge { background: #e2e8f0; color: #334155; font-size: 0.62rem; font-weight: 800; padding: 1px 4px; border-radius: 3px; }
+        .unit-details { font-size: 0.72rem; color: #64748b; margin-bottom: 4px; line-height: 1.2; }
+        .unit-price { font-size: 0.95rem; font-weight: 900; color: var(--success); margin-bottom: 4px; }
 
         .btn-select {
             background: var(--primary); color: #fff; border: none;
-            padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
-            text-align: center; text-decoration: none; display: inline-block; font-size: 0.82rem;
+            padding: 3px 8px; border-radius: 4px; font-weight: bold; cursor: pointer;
+            text-align: center; font-size: 0.7rem; width: 100%; height: 24px; display: flex; align-items: center; justify-content: center;
         }
         .btn-select:hover { background: #334155; color: var(--accent); }
+
+        @media (max-width: 600px) {
+            .app-wrapper { padding: 2px; }
+            th { padding: 3px 4px; font-size: 0.68rem; }
+            td { padding: 2px 4px; font-size: 0.72rem; }
+            .btn-select { padding: 2px 4px; font-size: 0.68rem; height: 22px; }
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div>
-            <h1>SuperCalc — Prateleira de Imóveis</h1>
-            <p class="sub" id="txtContador">Conectando ao banco de dados...</p>
-        </div>
-        <div class="view-toggle">
-            <button class="view-btn active" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
-            <button class="view-btn" id="btnViewTable" onclick="setMode('table')">📊 Tabela / Lista</button>
-        </div>
-    </header>
+    <div class="app-wrapper">
+        <header>
+            <div>
+                <h1>SuperCalc — Imóveis</h1>
+                <p class="sub" id="txtContador">Carregando...</p>
+            </div>
+            <div class="view-toggle">
+                <button class="view-btn active" id="btnViewTable" onclick="setMode('table')">📊 Lista</button>
+                <button class="view-btn" id="btnViewCards" onclick="setMode('cards')">📑 Cartões</button>
+            </div>
+        </header>
 
-    <!-- FILTROS COMPLETOS RESTAURADOS -->
-    <div class="filters-card">
-        <div>
-            <label>Empreendimento / Projeto:</label>
-            <select id="filterEmp" onchange="renderUnits()">
-                <option value="TODOS">Todos os Empreendimentos</option>
-            </select>
+        <div class="filters-card">
+            <div>
+                <label>Empreendimento:</label>
+                <select id="filterEmp" onchange="renderUnits()">
+                    <option value="TODOS">Todos os Empreendimentos</option>
+                </select>
+            </div>
+            <div>
+                <label>Tipologia:</label>
+                <select id="filterTipo" onchange="renderUnits()">
+                    <option value="TODOS">Todas as Tipologias</option>
+                    <option value="Studio">Studio</option>
+                    <option value="1 Dorm">1 Dormitório</option>
+                    <option value="2 Dorm">2 Dormitórios</option>
+                    <option value="3 Dorm">3 Dormitórios</option>
+                </select>
+            </div>
+            <div>
+                <label>Vagas:</label>
+                <select id="filterVagas" onchange="renderUnits()">
+                    <option value="TODOS">Todas</option>
+                    <option value="SEM">Sem Vaga (0)</option>
+                    <option value="COM">Com Vaga (1+)</option>
+                </select>
+            </div>
+            <div>
+                <label>Buscar Unidade / M²:</label>
+                <input type="text" id="filterBusca" placeholder="Ex: 501, 35m²..." oninput="renderUnits()">
+            </div>
         </div>
-        <div>
-            <label>Tipologia:</label>
-            <select id="filterTipo" onchange="renderUnits()">
-                <option value="TODOS">Todas as Tipologias</option>
-                <option value="Studio">Studio</option>
-                <option value="1 Dorm">1 Dormitório</option>
-                <option value="2 Dorm">2 Dormitórios</option>
-                <option value="3 Dorm">3 Dormitórios</option>
-            </select>
-        </div>
-        <div>
-            <label>Vagas de Garagem:</label>
-            <select id="filterVagas" onchange="renderUnits()">
-                <option value="TODOS">Todas as Opções</option>
-                <option value="SEM">Sem Vaga (0)</option>
-                <option value="COM">Com Vaga (1+)</option>
-            </select>
-        </div>
-        <div>
-            <label>Buscar por Unidade / M²:</label>
-            <input type="text" id="filterBusca" placeholder="Ex: 501, 35m²..." oninput="renderUnits()">
-        </div>
-    </div>
 
-    <!-- VISTA CARDS -->
-    <div class="grid-units" id="containerCards"></div>
+        <!-- VISTA LISTA / TABELA (MÁXIMO APROVEITAMENTO VERTICAL) -->
+        <div class="table-container" id="containerTable">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Empreendimento</th>
+                        <th>Unidade</th>
+                        <th>Andar</th>
+                        <th>Tipologia</th>
+                        <th>Área</th>
+                        <th>Vagas</th>
+                        <th>Preço Tabela</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyUnits"></tbody>
+            </table>
+        </div>
 
-    <!-- VISTA TABELA -->
-    <div class="table-container" id="containerTable">
-        <table>
-            <thead>
-                <tr>
-                    <th>Empreendimento</th>
-                    <th>Unidade</th>
-                    <th>Andar</th>
-                    <th>Tipologia</th>
-                    <th>Área</th>
-                    <th>Vagas</th>
-                    <th>Preço Tabela</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyUnits"></tbody>
-        </table>
+        <!-- VISTA CARDS (SECUNDÁRIA) -->
+        <div class="grid-units" id="containerCards" style="display: none;"></div>
     </div>
 
     <script>
@@ -142,7 +152,7 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
 
         let todasAsUnidades = [];
-        let currentMode = 'cards';
+        let currentMode = 'table';
 
         async function fetchUnidades() {
             try {
@@ -163,14 +173,23 @@
                     tipo: u.typology,
                     m2: u.private_area_m2,
                     vagas: u.parking_spaces || 0,
-                    preco: parseFloat(u.list_price)
+                    preco: parseFloat(u.list_price),
+                    
+                    valAto: parseFloat(u.val_ato) || 0,
+                    val306090: parseFloat(u.val_30_60_90) || 0,
+                    qtdMensais: parseInt(u.qtd_mensais) || 0,
+                    valMensalUnit: parseFloat(u.val_mensal_unit) || 0,
+                    qtdSemestrais: parseInt(u.qtd_semestrais) || 0,
+                    valSemestralUnit: parseFloat(u.val_semestral_unit) || 0,
+                    valChavesUnica: parseFloat(u.val_chaves_unica) || 0,
+                    valFinanciamento: parseFloat(u.val_financiamento) || 0
                 }));
 
                 populateEmpFilter();
                 renderUnits();
             } catch (err) {
                 console.error("Erro na comunicação com o Supabase:", err);
-                document.getElementById("txtContador").innerText = "Erro ao carregar dados do Supabase. Verifique a conexão.";
+                document.getElementById("txtContador").innerText = "Erro no banco de dados.";
             }
         }
 
@@ -185,10 +204,10 @@
 
         function setMode(mode) {
             currentMode = mode;
-            document.getElementById("btnViewCards").className = mode === 'cards' ? 'view-btn active' : 'view-btn';
             document.getElementById("btnViewTable").className = mode === 'table' ? 'view-btn active' : 'view-btn';
-            document.getElementById("containerCards").style.display = mode === 'cards' ? 'grid' : 'none';
+            document.getElementById("btnViewCards").className = mode === 'cards' ? 'view-btn active' : 'view-btn';
             document.getElementById("containerTable").style.display = mode === 'table' ? 'block' : 'none';
+            document.getElementById("containerCards").style.display = mode === 'cards' ? 'grid' : 'none';
             renderUnits();
         }
 
@@ -206,23 +225,43 @@
                 return matchEmp && matchTipo && matchVagas && matchBusca;
             });
 
-            // ORDENAÇÃO HUMANA NATURAL (ORDENA PRIMEIRO POR ANDAR NUMÉRICO, DEPOIS POR APTO NUMÉRICO)
             filtrados.sort((a, b) => {
                 if (a.andar !== b.andar) return a.andar - b.andar;
                 return a.unidade.localeCompare(b.unidade, undefined, { numeric: true, sensitivity: 'base' });
             });
 
-            document.getElementById("txtContador").innerText = `${filtrados.length} unidades encontradas na base`;
+            document.getElementById("txtContador").innerText = `${filtrados.length} uni.`;
             const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            if (currentMode === 'cards') {
+            if (currentMode === 'table') {
+                const tbody = document.getElementById("tbodyUnits");
+                tbody.innerHTML = "";
+                if (filtrados.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:10px; color:#64748b;">Nenhuma unidade encontrada.</td></tr>`;
+                    return;
+                }
+                filtrados.forEach((u) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${u.emp}</strong></td>
+                            <td>Apto ${u.unidade}</td>
+                            <td>${u.andar}º</td>
+                            <td>${u.tipo}</td>
+                            <td>${u.m2}m²</td>
+                            <td>${u.vagas > 0 ? u.vagas : '0'}</td>
+                            <td style="color:var(--success); font-weight:bold;">${fmt(u.preco)}</td>
+                            <td><button class="btn-select" onclick="selecionarUnidadeObjeto('${u.emp}', '${u.unidade}')">Simular</button></td>
+                        </tr>
+                    `;
+                });
+            } else {
                 const container = document.getElementById("containerCards");
                 container.innerHTML = "";
                 if (filtrados.length === 0) {
-                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color:#64748b;">Nenhuma unidade encontrada no banco.</div>`;
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 10px; color:#64748b;">Nenhuma unidade encontrada.</div>`;
                     return;
                 }
-                filtrados.forEach(u => {
+                filtrados.forEach((u) => {
                     container.innerHTML += `
                         <div class="unit-card">
                             <div>
@@ -233,54 +272,25 @@
                                 <div class="unit-details">
                                     • Andar: <strong>${u.andar}º Pavimento</strong><br>
                                     • Tipologia: <strong>${u.tipo}</strong><br>
-                                    • Área Privativa: <strong>${u.m2} m²</strong><br>
-                                    • Vagas: <strong>${u.vagas > 0 ? u.vagas + ' Vaga(s)' : 'Sem Vaga'}</strong>
+                                    • Área: <strong>${u.m2} m²</strong> | Vagas: <strong>${u.vagas}</strong>
                                 </div>
                             </div>
                             <div>
                                 <div class="unit-price">${fmt(u.preco)}</div>
-                                <button class="btn-select" style="width:100%" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.andar}, ${u.preco}, '${u.tipo}', ${u.m2}, ${u.vagas})">Simular no SuperCalc →</button>
+                                <button class="btn-select" onclick="selecionarUnidadeObjeto('${u.emp}', '${u.unidade}')">Simular →</button>
                             </div>
                         </div>
-                    `;
-                });
-            } else {
-                const tbody = document.getElementById("tbodyUnits");
-                tbody.innerHTML = "";
-                if (filtrados.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">Nenhuma unidade encontrada no banco.</td></tr>`;
-                    return;
-                }
-                filtrados.forEach(u => {
-                    tbody.innerHTML += `
-                        <tr>
-                            <td><strong>${u.emp}</strong></td>
-                            <td>Apto ${u.unidade}</td>
-                            <td>${u.andar}º</td>
-                            <td>${u.tipo}</td>
-                            <td>${u.m2} m²</td>
-                            <td>${u.vagas > 0 ? u.vagas : '0'}</td>
-                            <td style="color:var(--success); font-weight:bold;">${fmt(u.preco)}</td>
-                            <td><button class="btn-select" onclick="selecionarUnidade('${u.emp}', '${u.unidade}', ${u.andar}, ${u.preco}, '${u.tipo}', ${u.m2}, ${u.vagas})">Simular</button></td>
-                        </tr>
                     `;
                 });
             }
         }
 
-        function selecionarUnidade(emp, unidade, andar, preco, tipo, m2, vagas) {
-            const obj = {
-                empreendimento: emp,
-                unidade: unidade,
-                andar: andar,
-                precoTabela: preco,
-                dorms: tipo,
-                m2: m2,
-                vagas: vagas,
-                origem: 'GLOBAL'
-            };
-            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(obj));
-            window.location.href = "supercalc.html";
+        function selecionarUnidadeObjeto(emp, unidade) {
+            const item = todasAsUnidades.find(u => u.emp === emp && u.unidade === unidade);
+            if (item) {
+                localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(item));
+                window.location.href = "supercalc.html";
+            }
         }
 
         window.onload = fetchUnidades;
