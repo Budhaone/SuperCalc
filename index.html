@@ -12,141 +12,140 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
 </head>
-<body class="bg-slate-100 font-sans p-2 md:p-5 text-slate-800">
+<body class="bg-slate-100 font-sans p-1.5 md:p-4 text-slate-800">
 
     <!-- OVERLAY DE CARREGAMENTO -->
     <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center text-white transition-opacity duration-300">
-        <div class="animate-spin rounded-full h-12 w-12 border-4 border-amber-400 border-t-transparent mb-3"></div>
-        <p class="font-bold text-sm text-amber-300">Carregando Prateleira de Imóveis...</p>
+        <div class="animate-spin rounded-full h-10 w-10 border-4 border-amber-400 border-t-transparent mb-2"></div>
+        <p class="font-bold text-xs md:text-sm text-amber-300">Carregando Prateleira de Imóveis...</p>
     </div>
 
-    <div class="max-w-7xl mx-auto space-y-3">
+    <div class="max-w-7xl mx-auto space-y-2.5">
 
         <!-- CABEÇALHO DO CATÁLOGO -->
-        <header class="bg-slate-900 text-white p-3.5 md:p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b-4 border-amber-400">
+        <header class="bg-slate-900 text-white p-3 md:p-4 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b-4 border-amber-400">
             <div>
-                <h1 class="text-lg md:text-2xl font-black tracking-tight">PRATELEIRA DE IMÓVEIS</h1>
-                <p class="text-[11px] md:text-xs text-amber-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
+                <h1 class="text-base md:text-xl font-black tracking-tight">PRATELEIRA DE IMÓVEIS</h1>
+                <p class="text-[10px] md:text-xs text-amber-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
             </div>
             
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
                 <div class="flex items-center gap-1.5 text-xs font-bold">
-                    <span class="px-2.5 py-1 bg-slate-800 text-slate-200 rounded-lg border border-slate-700" id="badgeCountGlobal">🏷️ 0 Globais</span>
-                    <span class="px-2.5 py-1 bg-amber-400/20 text-amber-300 rounded-lg border border-amber-400/30" id="badgeCountPrivado">🔒 0 Privados</span>
+                    <span class="px-2 py-0.5 bg-slate-800 text-slate-200 rounded-md border border-slate-700" id="badgeCountGlobal">🏷️ 0 Globais</span>
+                    <span class="px-2 py-0.5 bg-amber-400/20 text-amber-300 rounded-md border border-amber-400/30" id="badgeCountPrivado">🔒 0 Privados</span>
                 </div>
-                <!-- BOTÃO RESTAURADO: INSERIR IMÓVEL DE TERCEIROS / AVULSO -->
-                <button onclick="abrirModalCadastro()" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-3.5 rounded-xl text-xs md:text-sm transition flex items-center gap-1 shadow-md">
-                    ➕ Cadastrar Imóvel Terceiros / Avulso
+                <!-- BOTÃO DE CADASTRO DE IMÓVEL TERCEIROS / AVULSO -->
+                <button onclick="abrirModalCadastro()" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center gap-1 shadow-md">
+                    ➕ Cadastrar Terceiros / Avulso
                 </button>
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMBINADOS -->
-        <section class="bg-white p-3 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h2 class="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros de Busca e Seleção</h2>
-                <button onclick="limparFiltros()" class="text-xs text-blue-600 font-bold hover:underline">Limpar Filtros</button>
+        <!-- BARRA DE FILTROS COMPACTA (GRADE DUPLA NO CELULAR) -->
+        <section class="bg-white p-2.5 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
+            <div class="flex justify-between items-center border-b pb-1">
+                <h2 class="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros de Busca</h2>
+                <button onclick="limparFiltros()" class="text-[11px] text-blue-600 font-bold hover:underline">Limpar Filtros</button>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
-                <!-- 1. Origem / Construtora -->
+            <!-- GRADE COMPACTA DE 2 COLUNAS NO CELULAR E 4 NO DESKTOP -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                <!-- 1. Incorporadora -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Incorporadora / Origem</label>
-                    <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODAS">Todas as Construtoras</option>
-                        <option value="PRIVADO">🔒 Inventário Privado (Terceiros)</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Incorporadora</label>
+                    <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODAS">Todas</option>
+                        <option value="PRIVADO">🔒 Terceiros / Privado</option>
                     </select>
                 </div>
 
                 <!-- 2. Empreendimento -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Empreendimento / Edifício</label>
-                    <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODOS">Todos os Empreendimentos</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Empreendimento</label>
+                    <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODOS">Todos</option>
                     </select>
                 </div>
 
                 <!-- 3. Tipo de Renda / Enquadramento -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Tipo de Renda / Enquadramento</label>
-                    <select id="filtroIncomeType" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODOS">Todos os Enquadramentos</option>
-                        <option value="HIS">HIS (Habitação de Interesse Social)</option>
-                        <option value="HMP">HMP (Mercado Popular)</option>
-                        <option value="R2V">R2V (Residencial Livre)</option>
-                        <option value="NR">NR (Não Residencial / Serviços)</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Enquadramento</label>
+                    <select id="filtroIncomeType" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODOS">Todos</option>
+                        <option value="HIS">HIS (Social)</option>
+                        <option value="HMP">HMP (Popular)</option>
+                        <option value="R2V">R2V (Residencial)</option>
+                        <option value="NR">NR (Não Residencial)</option>
                     </select>
                 </div>
 
-                <!-- 4. Metragem (Ordem Crescente) -->
+                <!-- 4. Metragem -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Metragem (m²)</label>
-                    <select id="filtroMetragem" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODAS">Todas as Metragens</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Metragem (m²)</label>
+                    <select id="filtroMetragem" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODAS">Todas</option>
                     </select>
                 </div>
 
                 <!-- 5. Dormitórios -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Dormitórios</label>
-                    <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODOS">Todos os Dormitórios</option>
-                        <option value="0">Studio / Loft (0 dorms)</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Dormitórios</label>
+                    <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODOS">Todos</option>
+                        <option value="0">Studio / Loft</option>
                         <option value="1">1 Dormitório</option>
                         <option value="2">2 Dormitórios</option>
                         <option value="3">3 Dormitórios</option>
-                        <option value="4+">4+ Dormitórios</option>
                     </select>
                 </div>
 
                 <!-- 6. Vagas -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Vagas de Garagem</label>
-                    <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
-                        <option value="TODAS">Todas as Opções</option>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Vagas Garagem</label>
+                    <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                        <option value="TODAS">Todas</option>
                         <option value="0">Sem vaga</option>
                         <option value="1">1 vaga</option>
-                        <option value="2">2 vagas</option>
-                        <option value="3+">3+ vagas</option>
+                        <option value="2">2+ vagas</option>
                     </select>
                 </div>
 
                 <!-- 7. Preço Máximo -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Preço Máximo de Tabela (R$)</label>
-                    <input type="number" id="filtroPrecoMax" step="50000" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Preço Máximo (R$)</label>
+                    <input type="number" id="filtroPrecoMax" step="50000" placeholder="Ex: 600000" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
                 </div>
 
-                <!-- 8. Digitação / Busca por Unidade -->
+                <!-- 8. Busca por Unidade -->
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-500 uppercase mb-0.5">Buscar por Unidade</label>
-                    <input type="text" id="filtroUnidade" placeholder="Ex: 510, 622, 1204..." oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs md:text-sm font-bold bg-amber-50 focus:bg-white focus:ring-2 focus:ring-amber-500 outline-none">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Buscar Unidade</label>
+                    <input type="text" id="filtroUnidade" placeholder="Ex: 510, 622..." oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-1.5 text-xs font-bold bg-amber-50 focus:bg-white outline-none">
                 </div>
             </div>
         </section>
 
-        <!-- LISTA COMPACTA DE UNIDADES EM FORMATO DE CARTÃO SIMPLIFICADO -->
+        <!-- LISTA COMPACTA EM CARTÕES SIMPLIFICADOS -->
         <main class="space-y-2" id="containerEstoque">
-            <!-- Renderizado Dinamicamente pelo JavaScript -->
+            <!-- Renderizado dinamicamente -->
         </main>
     </div>
 
-    <!-- MODAL DE CADASTRO DE IMÓVEIS PRIVADOS / TERCEIROS -->
+    <!-- MODAL DE CADASTRO DE IMÓVEIS TERCEIROS / AVULSO -->
     <div id="modalCadastro" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-4 md:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-4 shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-2">
                 <h3 class="font-black text-slate-900 text-sm md:text-base uppercase">➕ Cadastrar Imóvel Terceiros / Avulso</h3>
                 <button onclick="fecharModalCadastro()" class="text-slate-400 hover:text-slate-700 font-bold text-lg">&times;</button>
             </div>
 
-            <form id="formNovoImovel" onsubmit="salvarImovelPrivado(event)" class="space-y-3 text-xs md:text-sm">
+            <form id="formNovoImovel" onsubmit="salvarImovelPrivado(event)" class="space-y-2.5 text-xs md:text-sm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-0.5">Empreendimento / Edifício *</label>
+                        <label class="block font-bold text-slate-700 mb-0.5">Empreendimento *</label>
                         <input type="text" id="addEmpreendimento" required placeholder="Ex: Poema Liberdade" class="w-full border p-2 rounded-lg font-medium">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-0.5">Nº da Unidade *</label>
+                        <label class="block font-bold text-slate-700 mb-0.5">Nº Unidade *</label>
                         <input type="text" id="addUnidade" required placeholder="Ex: 512" class="w-full border p-2 rounded-lg font-bold">
                     </div>
                 </div>
@@ -157,7 +156,7 @@
                         <input type="number" id="addM2" step="0.1" required placeholder="Ex: 48.25" class="w-full border p-2 rounded-lg font-medium">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-0.5">Andar / Pavimento *</label>
+                        <label class="block font-bold text-slate-700 mb-0.5">Andar *</label>
                         <input type="number" id="addPavimento" required placeholder="Ex: 5" class="w-full border p-2 rounded-lg font-medium">
                     </div>
                     <div>
@@ -172,7 +171,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
-                        <label class="block font-bold text-slate-700 mb-0.5">Tipo de Renda / Enquadramento</label>
+                        <label class="block font-bold text-slate-700 mb-0.5">Enquadramento</label>
                         <select id="addIncomeType" class="w-full border p-2 rounded-lg font-medium bg-white">
                             <option value="R2V">R2V (Residencial Livre)</option>
                             <option value="HMP">HMP (Mercado Popular)</option>
@@ -190,23 +189,23 @@
                 </div>
 
                 <div>
-                    <label class="block font-bold text-slate-700 mb-0.5">Preço Total de Venda / Tabela (R$) *</label>
-                    <input type="number" id="addPrecoTabela" step="1000" required placeholder="Ex: 550000" class="w-full border p-2.5 rounded-lg font-black text-base text-slate-900">
+                    <label class="block font-bold text-slate-700 mb-0.5">Preço Total de Venda (R$) *</label>
+                    <input type="number" id="addPrecoTabela" step="1000" required placeholder="Ex: 550000" class="w-full border p-2 rounded-lg font-black text-base text-slate-900">
                 </div>
 
                 <div class="flex gap-2 pt-2 border-t">
-                    <button type="button" onclick="fecharModalCadastro()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2.5 rounded-xl transition">
+                    <button type="button" onclick="fecharModalCadastro()" class="w-1/2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 rounded-xl transition">
                         Cancelar
                     </button>
-                    <button type="submit" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl transition shadow-md">
-                        💾 Salvar no Inventário Privado
+                    <button type="submit" class="w-1/2 bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 rounded-xl transition shadow-md">
+                        💾 Salvar Terceiro
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPT DE INTELIGÊNCIA E CARGA DE DADOS -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA -->
     <script>
         let ESTOQUE_GLOBAL = [];
 
@@ -214,44 +213,66 @@
             try {
                 exibirLoading(true);
 
-                let query = window.supabaseClient
-                    .from('units')
-                    .select('*');
-
-                const { data, error } = await query;
-
-                if (error) {
-                    console.error("Erro ao buscar dados do Supabase:", error);
-                    alert("Atenção: Não foi possível carregar as unidades do Supabase.");
+                if (!window.supabaseClient) {
+                    console.error("Cliente Supabase não configurado.");
                     exibirLoading(false);
                     return;
                 }
 
-                ESTOQUE_GLOBAL = (data || []).map(u => ({
-                    id: u.id,
-                    empreendimento: u.development_name || u.empreendimento || 'Empreendimento',
-                    construtora: u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'Incorporadora'),
-                    unidade: u.unit_number || u.unidade || '---',
-                    m2: parseFloat(u.private_area_m2 || u.m2 || 0),
-                    pavimento: u.floor || u.pavimento || 1,
-                    dorms: u.dorms !== undefined ? parseInt(u.dorms) : 1,
-                    vagas: u.vagas !== undefined ? parseInt(u.vagas) : 0,
-                    tipologia: u.typology || u.tipologia || `${u.dorms || 1} dorms`,
-                    income_type: u.income_type || u.enquadramento || 'R2V',
-                    precoTabela: parseFloat(u.list_price || u.precoTabela || u.preco || 0),
-                    is_ready: u.is_ready || false,
-                    is_third_party: u.is_third_party || false,
-                    
-                    // Engenharia de Fluxo do Banco
-                    val_ato: parseFloat(u.val_ato || 0),
-                    val_30_60_90: parseFloat(u.val_30_60_90 || 0),
-                    qtd_mensais: parseInt(u.qtd_mensais || 36),
-                    val_mensal_unit: parseFloat(u.val_mensal_unit || 0),
-                    qtd_anuais: parseInt(u.qtd_anuais || 3),
-                    val_anual_unit: parseFloat(u.val_anual_unit || 0),
-                    val_chaves_unica: parseFloat(u.val_chaves_unica || 0),
-                    val_financiamento: parseFloat(u.val_financiamento || 0)
-                }));
+                let data = null;
+                let error = null;
+
+                // Tenta busca combinada de units com developments
+                const resJoin = await window.supabaseClient
+                    .from('units')
+                    .select('*, developments(name, builder)');
+
+                if (!resJoin.error && resJoin.data && resJoin.data.length > 0) {
+                    data = resJoin.data;
+                } else {
+                    // Fallback para busca direta sem dependência de foreign key
+                    const resDirect = await window.supabaseClient.from('units').select('*');
+                    data = resDirect.data;
+                    error = resDirect.error;
+                }
+
+                if (error) {
+                    console.error("Erro ao buscar unidades do Supabase:", error);
+                    alert("Atenção: Não foi possível carregar o estoque do banco de dados.");
+                    exibirLoading(false);
+                    return;
+                }
+
+                ESTOQUE_GLOBAL = (data || []).map(u => {
+                    const empNome = (u.developments && u.developments.name) || u.development_name || u.empreendimento || u.emp || 'Empreendimento';
+                    const construtoraNome = (u.developments && u.developments.builder) || u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
+
+                    return {
+                        id: u.id,
+                        empreendimento: empNome,
+                        construtora: construtoraNome,
+                        unidade: u.unit_number || u.unidade || '---',
+                        m2: parseFloat(u.private_area_m2 || u.m2 || 0),
+                        pavimento: u.floor || u.pavimento || 1,
+                        dorms: u.dorms !== undefined && u.dorms !== null ? parseInt(u.dorms) : 1,
+                        vagas: u.vagas !== undefined && u.vagas !== null ? parseInt(u.vagas) : 0,
+                        tipologia: u.typology || u.tipologia || (u.dorms ? `${u.dorms} dorms` : 'Studio'),
+                        income_type: u.income_type || u.enquadramento || 'R2V',
+                        precoTabela: parseFloat(u.list_price || u.precoTabela || u.preco || 0),
+                        is_ready: u.is_ready || false,
+                        is_third_party: u.is_third_party || false,
+                        
+                        // Campos da Engenharia Financeira
+                        val_ato: parseFloat(u.val_ato || 0),
+                        val_30_60_90: parseFloat(u.val_30_60_90 || 0),
+                        qtd_mensais: parseInt(u.qtd_mensais || 36),
+                        val_mensal_unit: parseFloat(u.val_mensal_unit || 0),
+                        qtd_anuais: parseInt(u.qtd_anuais || 3),
+                        val_anual_unit: parseFloat(u.val_anual_unit || 0),
+                        val_chaves_unica: parseFloat(u.val_chaves_unica || 0),
+                        val_financiamento: parseFloat(u.val_financiamento || 0)
+                    };
+                });
 
                 popularFiltroConstrutora();
                 popularFiltroMetragem();
@@ -259,7 +280,7 @@
                 filtrarEstoque();
 
             } catch (err) {
-                console.error("Erro crítico na execução:", err);
+                console.error("Erro crítico ao carregar banco:", err);
             } finally {
                 exibirLoading(false);
             }
@@ -269,8 +290,8 @@
             const select = document.getElementById("filtroConstrutora");
             const construtoras = [...new Set(ESTOQUE_GLOBAL.map(item => item.construtora))].sort();
 
-            select.innerHTML = `<option value="TODAS">Todas as Construtoras</option>`;
-            select.innerHTML += `<option value="PRIVADO">🔒 Inventário Privado (Terceiros)</option>`;
+            select.innerHTML = `<option value="TODAS">Todas</option>`;
+            select.innerHTML += `<option value="PRIVADO">🔒 Terceiros / Privado</option>`;
 
             construtoras.forEach(c => {
                 if (c !== 'PRIVADO / TERCEIROS') {
@@ -283,7 +304,7 @@
             const select = document.getElementById("filtroMetragem");
             const metragens = [...new Set(ESTOQUE_GLOBAL.map(item => item.m2).filter(m => m > 0))].sort((a, b) => a - b);
 
-            select.innerHTML = `<option value="TODAS">Todas as Metragens</option>`;
+            select.innerHTML = `<option value="TODAS">Todas</option>`;
             metragens.forEach(m => {
                 select.innerHTML += `<option value="${m}">${m.toFixed(2)} m²</option>`;
             });
@@ -302,7 +323,7 @@
 
             const empreendimentos = [...new Set(filtrados.map(item => item.empreendimento))].sort();
 
-            selectEmp.innerHTML = `<option value="TODOS">Todos os Empreendimentos</option>`;
+            selectEmp.innerHTML = `<option value="TODOS">Todos</option>`;
             empreendimentos.forEach(e => {
                 selectEmp.innerHTML += `<option value="${e}">${e}</option>`;
             });
@@ -328,14 +349,12 @@
                 if (dormsSel === '0') matchDorms = (item.dorms === 0);
                 else if (dormsSel === '1') matchDorms = (item.dorms === 1);
                 else if (dormsSel === '2') matchDorms = (item.dorms === 2);
-                else if (dormsSel === '3') matchDorms = (item.dorms === 3);
-                else if (dormsSel === '4+') matchDorms = (item.dorms >= 4);
+                else if (dormsSel === '3') matchDorms = (item.dorms >= 3);
 
                 let matchVagas = true;
                 if (vagasSel === '0') matchVagas = (item.vagas === 0);
                 else if (vagasSel === '1') matchVagas = (item.vagas === 1);
-                else if (vagasSel === '2') matchVagas = (item.vagas === 2);
-                else if (vagasSel === '3+') matchVagas = (item.vagas >= 3);
+                else if (vagasSel === '2') matchVagas = (item.vagas >= 2);
 
                 let matchPreco = item.precoTabela <= precoMax;
                 let matchUnidade = !unidadeDigitada || item.unidade.toLowerCase().includes(unidadeDigitada);
@@ -353,9 +372,9 @@
 
             if (lista.length === 0) {
                 container.innerHTML = `
-                    <div class="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-200">
-                        <p class="font-bold text-base">Nenhuma unidade encontrada com os filtros selecionados.</p>
-                        <p class="text-xs mt-1">Tente ajustar os critérios de busca acima.</p>
+                    <div class="bg-white p-6 rounded-xl text-center text-slate-500 border border-slate-200">
+                        <p class="font-bold text-sm">Nenhuma unidade encontrada.</p>
+                        <p class="text-xs mt-1 text-slate-400">Ajuste os filtros de busca acima.</p>
                     </div>`;
                 return;
             }
@@ -367,16 +386,16 @@
                 const isReady = item.is_ready;
 
                 const card = document.createElement("div");
-                card.className = "bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-400 transition flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs md:text-sm";
+                card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-slate-400 transition grid grid-cols-1 sm:grid-cols-12 items-center gap-2 text-xs md:text-sm";
 
                 card.innerHTML = `
-                    <!-- COLUNA 1: DADOS DO IMÓVEL -->
-                    <div class="space-y-1 flex-1">
-                        <div class="flex items-center gap-2">
+                    <!-- 1. DADOS DO IMÓVEL (5 colunas desktop) -->
+                    <div class="sm:col-span-5 space-y-0.5">
+                        <div class="flex items-center gap-1.5">
                             <span class="font-black text-slate-900 text-sm md:text-base">${item.empreendimento}</span>
-                            <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase border border-slate-200">${item.construtora}</span>
+                            <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-slate-200">${item.construtora}</span>
                         </div>
-                        <div class="text-slate-600 font-medium flex flex-wrap items-center gap-1.5">
+                        <div class="text-slate-600 font-medium flex flex-wrap items-center gap-1 text-[11px] md:text-xs">
                             <span class="text-amber-600 font-black">Apto ${item.unidade}</span>
                             <span class="text-slate-300">•</span>
                             <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-black uppercase">${item.income_type}</span>
@@ -389,23 +408,22 @@
                         </div>
                     </div>
 
-                    <!-- COLUNA 2: STATUS -->
-                    <div class="md:w-32 shrink-0">
-                        <span class="inline-block px-2.5 py-1 rounded-md text-[10px] md:text-xs font-black uppercase ${isReady ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
+                    <!-- 2. STATUS (2 colunas desktop) -->
+                    <div class="sm:col-span-2 text-left sm:text-center">
+                        <span class="inline-block px-2 py-0.5 rounded text-[10px] md:text-xs font-black uppercase ${isReady ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
                             ${isReady ? '🏠 PRONTO' : '🏗️ EM OBRA'}
                         </span>
                     </div>
 
-                    <!-- COLUNA 3: VALORES (TOTAL E M²) -->
-                    <div class="md:w-44 text-left md:text-right shrink-0">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase">Valor de Tabela</div>
+                    <!-- 3. VALORES (3 colunas desktop) -->
+                    <div class="sm:col-span-3 text-left sm:text-right">
                         <div class="text-sm md:text-base font-black text-slate-900">${fmt(item.precoTabela)}</div>
                         <div class="text-[10px] md:text-xs text-emerald-600 font-bold">${fmt(valM2)}/m²</div>
                     </div>
 
-                    <!-- COLUNA 4: BOTÃO SIMULAR -->
-                    <div class="md:w-32 shrink-0">
-                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center justify-center gap-1">
+                    <!-- 4. BOTÃO SIMULAR (2 colunas desktop) -->
+                    <div class="sm:col-span-2">
+                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center justify-center gap-1">
                             ⚡ Simular
                         </button>
                     </div>
