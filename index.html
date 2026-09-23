@@ -37,9 +37,6 @@
                     <span class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg badge-global" id="badgeCountGlobal">🏷️ 0 Globais</span>
                     <span class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg badge-privado" id="badgeCountPrivado">🔒 0 Privados</span>
                 </div>
-                <button onclick="abrirModalCadastro()" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-3 sm:px-4 rounded-xl text-xs transition flex items-center gap-1 shadow-md">
-                    ➕ Imóvel Privado
-                </button>
             </div>
         </header>
 
@@ -61,7 +58,6 @@
                         <option value="TODOS">Todos os Empreendimentos</option>
                     </select>
                 </div>
-                <!-- FILTRO DE TIPO DE RENDA -->
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Enquadramento / Renda</label>
                     <select id="filtroTipoRenda" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-amber-900 bg-amber-50 focus:bg-white outline-none">
@@ -96,7 +92,7 @@
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Nº da Unidade</label>
-                    <input type="text" id="filtroUnidadeTexto" placeholder="Ex: 2404" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
+                    <input type="text" id="filtroUnidadeTexto" placeholder="Ex: 1713" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
                 </div>
             </div>
         </section>
@@ -128,16 +124,14 @@
     </div>
 
     <script>
-        // --- COLOQUE SUAS CHAVES AQUI ---
         const SUPABASE_URL = "https://blzhzrctahvwaakxygzn.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0"; // Cole sua chave completa aqui
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
         
         let ESTOQUE_MOCK = [];
 
         async function carregarEstoqueDaNuvem() {
             mostrarLoader(true);
             try {
-                // Cria a instância manualmente se supabase-config não estiver disponível
                 const _supabase = typeof supabase !== 'undefined' ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
                 
                 if (!_supabase) throw new Error("Supabase não carregado.");
@@ -159,27 +153,46 @@
                             origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
                             construtora: construtoraNome,
                             empreendimento: u.developments?.title || "Empreendimento",
+                            emp: u.developments?.title || "Empreendimento",
                             unidade: String(u.unit_number),
                             pavimento: parseInt(u.floor) || 1,
+                            andar: parseInt(u.floor) || 1,
                             dorms: u.typology || "Studio",
+                            tipo: u.typology || "Studio",
                             typologyRaw: u.typology || "",
                             vagas: parseInt(u.parking_spaces) || 0,
                             m2: parseFloat(u.private_area_m2) || 0,
                             precoTabela: preco,
+                            preco: preco,
                             entregaObra: entregaObra,
+                            dataEntrega: entregaObra,
                             is_ready: ePronto,
+
+                            // MAPEAMENTO DO FLUXO FINANCEIRO COMPLETO (INCLUINDO A PERIODICIDADE)
                             val_ato: parseFloat(u.val_ato) || 0,
+                            valAto: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
+                            val306090: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
+                            qtdMensais: parseInt(u.qtd_mensais) || 0,
                             val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
-                            qtd_semestrais: parseInt(u.qtd_anuais) || parseInt(u.qtd_semestrais) || 0,
-                            val_semestral_unit: parseFloat(u.val_anual_unit) || parseFloat(u.val_semestral_unit) || 0,
+                            valMensalUnit: parseFloat(u.val_mensal_unit) || 0,
+                            qtd_semestrais: parseInt(u.qtd_semestrais) || parseInt(u.qtd_anuais) || 0,
+                            qtdAnuais: parseInt(u.qtd_anuais) || parseInt(u.qtd_semestrais) || 0,
+                            val_semestral_unit: parseFloat(u.val_semestral_unit) || parseFloat(u.val_anual_unit) || 0,
+                            valAnualUnit: parseFloat(u.val_anual_unit) || parseFloat(u.val_semestral_unit) || 0,
+                            
+                            // COLUNAS INDEPENDENTES
+                            val_periodicidade: parseFloat(u.val_periodicidade) || 0,
+                            valPeriodicidade: parseFloat(u.val_periodicidade) || 0,
                             val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
-                            val_financiamento: parseFloat(u.val_financiamento) || 0
+                            valChavesUnica: parseFloat(u.val_chaves_unica) || 0,
+                            val_financiamento: parseFloat(u.val_financiamento) || 0,
+                            valFinanciamento: parseFloat(u.val_financiamento) || 0
                         };
                     });
 
-                    // Ordenação Lexicográfica / Humana
+                    // Ordenação Lexicográfica / Humana (Andar depois Apto)
                     ESTOQUE_MOCK.sort((a, b) => {
                         if (a.pavimento !== b.pavimento) return a.pavimento - b.pavimento;
                         return a.unidade.localeCompare(b.unidade, undefined, { numeric: true });
@@ -212,7 +225,7 @@
         function atualizarOpcoesConstrutoras() {
             const select = document.getElementById("filtroConstrutora");
             const construtoras = [...new Set(ESTOQUE_MOCK.map(i => i.construtora))];
-            select.innerHTML = '<option value="TODAS">Todas as Construtoras</option><option value="PRIVADO">🔒 Inventário Privado</option>';
+            select.innerHTML = '<option value="TODOS">Todas as Construtoras</option><option value="PRIVADO">🔒 Inventário Privado</option>';
             construtoras.forEach(c => {
                 const opt = document.createElement("option");
                 opt.value = c; opt.innerText = c;
