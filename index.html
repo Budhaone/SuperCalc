@@ -205,47 +205,43 @@
         </div>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA RESILIENTE -->
     <script>
         let ESTOQUE_GLOBAL = [];
+
+        // Identificador resiliente do cliente Supabase
+        function getSupabase() {
+            if (window.supabaseClient) return window.supabaseClient;
+            if (window.supabase && typeof window.supabase.from === 'function') return window.supabase;
+            if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') return supabase;
+            return null;
+        }
 
         async function carregarEstoqueSupabase() {
             try {
                 exibirLoading(true);
 
-                if (!window.supabaseClient) {
-                    console.error("Cliente Supabase não configurado.");
+                const sb = getSupabase();
+                if (!sb) {
+                    console.error("Cliente Supabase não encontrado em window.supabaseClient nem em window.supabase.");
+                    alert("Atenção: Configuração do Supabase não foi detectada. Verifique o arquivo supabase-config.js.");
                     exibirLoading(false);
                     return;
                 }
 
-                let data = null;
-                let error = null;
-
-                // Tenta busca combinada de units com developments
-                const resJoin = await window.supabaseClient
-                    .from('units')
-                    .select('*, developments(name, builder)');
-
-                if (!resJoin.error && resJoin.data && resJoin.data.length > 0) {
-                    data = resJoin.data;
-                } else {
-                    // Fallback para busca direta sem dependência de foreign key
-                    const resDirect = await window.supabaseClient.from('units').select('*');
-                    data = resDirect.data;
-                    error = resDirect.error;
-                }
+                // Busca direta na tabela units para evitar travamento por Join
+                const { data, error } = await sb.from('units').select('*');
 
                 if (error) {
-                    console.error("Erro ao buscar unidades do Supabase:", error);
-                    alert("Atenção: Não foi possível carregar o estoque do banco de dados.");
+                    console.error("Erro na consulta Supabase:", error);
+                    alert("Erro ao consultar o banco de dados: " + (error.message || "Falha na conexão"));
                     exibirLoading(false);
                     return;
                 }
 
                 ESTOQUE_GLOBAL = (data || []).map(u => {
-                    const empNome = (u.developments && u.developments.name) || u.development_name || u.empreendimento || u.emp || 'Empreendimento';
-                    const construtoraNome = (u.developments && u.developments.builder) || u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
+                    const empNome = u.development_name || u.empreendimento || u.emp || u.building || 'Poema Liberdade';
+                    const construtoraNome = u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
 
                     return {
                         id: u.id,
@@ -262,7 +258,7 @@
                         is_ready: u.is_ready || false,
                         is_third_party: u.is_third_party || false,
                         
-                        // Campos da Engenharia Financeira
+                        // Engenharia do Fluxo
                         val_ato: parseFloat(u.val_ato || 0),
                         val_30_60_90: parseFloat(u.val_30_60_90 || 0),
                         qtd_mensais: parseInt(u.qtd_mensais || 36),
@@ -280,7 +276,7 @@
                 filtrarEstoque();
 
             } catch (err) {
-                console.error("Erro crítico ao carregar banco:", err);
+                console.error("Erro crítico ao processar o banco:", err);
             } finally {
                 exibirLoading(false);
             }
@@ -473,6 +469,12 @@
         async function salvarImovelPrivado(e) {
             e.preventDefault();
 
+            const sb = getSupabase();
+            if (!sb) {
+                alert("Erro ao conectar com Supabase.");
+                return;
+            }
+
             const novoItem = {
                 development_name: document.getElementById("addEmpreendimento").value.trim(),
                 unit_number: document.getElementById("addUnidade").value.trim(),
@@ -489,10 +491,7 @@
 
             exibirLoading(true);
 
-            const { data, error } = await window.supabaseClient
-                .from('units')
-                .insert([novoItem])
-                .select();
+            const { data, error } = await sb.from('units').insert([novoItem]).select();
 
             exibirLoading(false);
 
@@ -516,7 +515,8 @@
             }
         }
 
-        carregarEstoqueSupabase();
+        // Inicialização ao carregar a página
+        window.addEventListener("DOMContentLoaded", carregarEstoqueSupabase);
     </script>
 </body>
 </html>
