@@ -153,15 +153,13 @@
                 </div>
             </div>
 
-            <!-- CAIXA DE ALERTA DE BANCO (> 80%) -->
-            <div id="alertaFinanciamentoBancario" class="hidden p-3 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl text-amber-900 font-semibold text-xs space-y-0.5">
-                <div class="font-black text-amber-900 flex items-center gap-1">
+            <!-- CAIXA DE ALERTA DE BANCO (70% E 80%) -->
+            <div id="alertaFinanciamentoBancario" class="hidden p-3 rounded-r-xl border-l-4 font-semibold text-xs space-y-0.5">
+                <div class="font-black flex items-center gap-1">
                     <span>⚠️ ALERTA DE COMPATIBILIDADE BANCÁRIA:</span>
-                    <span id="txtPercAlertaFinan" class="text-rose-700 font-black">0.00%</span>
+                    <span id="txtPercAlertaFinan" class="font-black">0.00%</span>
                 </div>
-                <p class="text-[11px] text-amber-800">
-                    Financiamentos acima de <strong>80,00%</strong> dependem de análise de exceção e avaliação especial de crédito bancário.
-                </p>
+                <p id="txtMensagemAlertaFinan" class="text-[11px]">---</p>
             </div>
         </section>
 
@@ -180,7 +178,7 @@
         </section>
     </div>
 
-    <!-- LOGICA DO MOTOR FINANCEIRO -->
+    <!-- LÓGICA DO MOTOR FINANCEIRO -->
     <script>
         let unidadeAtual = null;
         let ePronto = false;
@@ -250,26 +248,42 @@
         }
 
         function onAtoChange() {
-            if (ePronto && unidadeAtual) {
+            if (unidadeAtual) {
                 const totalTabela = unidadeAtual.precoTabela || 0;
                 const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
                 const periodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
                 const chaves = parseFloat(document.getElementById("valChaves").value) || 0;
 
-                const totFinanciamento = Math.max(0, totalTabela - valAtoRaw - periodicidade - chaves);
+                let propObra = 0;
+                if (!ePronto) {
+                    const totE = (parseFloat(document.getElementById("valEntrada").value) || 0) * (parseInt(document.getElementById("qtdEntrada").value) || 0);
+                    const totM = (parseFloat(document.getElementById("valMensais").value) || 0) * (parseInt(document.getElementById("qtdMensais").value) || 0);
+                    const totA = (parseFloat(document.getElementById("valAnuais").value) || 0) * (parseInt(document.getElementById("qtdAnuais").value) || 0);
+                    propObra = totE + totM + totA;
+                }
+
+                const totFinanciamento = Math.max(0, totalTabela - valAtoRaw - propObra - periodicidade - chaves);
                 document.getElementById("valFinanciamento").value = totFinanciamento.toFixed(2);
             }
             recalculateAll();
         }
 
         function onFinanciamentoChange() {
-            if (ePronto && unidadeAtual) {
+            if (unidadeAtual) {
                 const totalTabela = unidadeAtual.precoTabela || 0;
                 const totFinanciamento = parseFloat(document.getElementById("valFinanciamento").value) || 0;
                 const periodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
                 const chaves = parseFloat(document.getElementById("valChaves").value) || 0;
 
-                const totAto = Math.max(0, totalTabela - totFinanciamento - periodicidade - chaves);
+                let propObra = 0;
+                if (!ePronto) {
+                    const totE = (parseFloat(document.getElementById("valEntrada").value) || 0) * (parseInt(document.getElementById("qtdEntrada").value) || 0);
+                    const totM = (parseFloat(document.getElementById("valMensais").value) || 0) * (parseInt(document.getElementById("qtdMensais").value) || 0);
+                    const totA = (parseFloat(document.getElementById("valAnuais").value) || 0) * (parseInt(document.getElementById("qtdAnuais").value) || 0);
+                    propObra = totE + totM + totA;
+                }
+
+                const totAto = Math.max(0, totalTabela - totFinanciamento - propObra - periodicidade - chaves);
                 document.getElementById("valAto").value = totAto.toFixed(2);
             }
             recalculateAll();
@@ -299,15 +313,23 @@
 
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
 
-            // CHECKER DE ALERTA > 80%
+            // CONTROLE DE ALERTAS DE FINANCIAMENTO (70% E 80%)
             const caixaAlerta = document.getElementById("alertaFinanciamentoBancario");
             const txtPercAlerta = document.getElementById("txtPercAlertaFinan");
+            const txtMensagemAlerta = document.getElementById("txtMensagemAlertaFinan");
 
             if (percFinan > 80.01) {
-                caixaAlerta.classList.remove("hidden");
+                caixaAlerta.className = "p-3 rounded-r-xl border-l-4 font-semibold text-xs space-y-0.5 bg-rose-50 border-rose-600 text-rose-900";
+                txtPercAlerta.className = "text-rose-700 font-black";
                 txtPercAlerta.innerText = percFinan.toFixed(2) + "%";
+                txtMensagemAlerta.innerText = "Financiamento acima de 80,00%: Excede o limite padrão bancário e depende de aprovação especial de exceção de crédito.";
+            } else if (percFinan > 70.01) {
+                caixaAlerta.className = "p-3 rounded-r-xl border-l-4 font-semibold text-xs space-y-0.5 bg-amber-50 border-amber-500 text-amber-900";
+                txtPercAlerta.className = "text-amber-800 font-black";
+                txtPercAlerta.innerText = percFinan.toFixed(2) + "%";
+                txtMensagemAlerta.innerText = "Financiamento acima de 70,00%: Requer atenção e análise do perfil de renda e crédito do cliente junto ao banco.";
             } else {
-                caixaAlerta.classList.add("hidden");
+                caixaAlerta.className = "hidden";
             }
 
             document.getElementById("txtTotalProposta").innerText = fmt(totalProposta);
@@ -377,7 +399,16 @@
             
             texto += `• Saldo Financiado / Quitação: ${fmt(finan)} (${((finan/totalTabela)*100).toFixed(2)}%)\n`;
             texto += `------------------------------------\n`;
-            texto += `*TOTAL DA PROPOSTA:* ${fmt(ato + (ePronto ? 0 : 0) + valPeriodicidade + valChaves + finan)}\n\n`;
+            
+            let propObra = 0;
+            if (!ePronto) {
+                const totE = (parseFloat(document.getElementById("valEntrada").value) || 0) * (parseInt(document.getElementById("qtdEntrada").value) || 0);
+                const totM = (parseFloat(document.getElementById("valMensais").value) || 0) * (parseInt(document.getElementById("qtdMensais").value) || 0);
+                const totA = (parseFloat(document.getElementById("valAnuais").value) || 0) * (parseInt(document.getElementById("qtdAnuais").value) || 0);
+                propObra = totE + totM + totA;
+            }
+            
+            texto += `*TOTAL DA PROPOSTA:* ${fmt(ato + propObra + valPeriodicidade + valChaves + finan)}\n\n`;
             texto += `_Obs: Proposta sujeita a aprovação de crédito bancário._`;
 
             navigator.clipboard.writeText(texto);
