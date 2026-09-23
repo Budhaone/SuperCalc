@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCalc - Motor Financeiro</title>
+    <title>SuperCalc - Motor Financeiro & Mesa de Negociação</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
 </head>
 <body class="bg-slate-100 font-sans p-2 md:p-6 text-slate-800">
 
     <div class="max-w-4xl mx-auto space-y-4">
         
-        <!-- CABEÇALHO -->
+        <!-- CABEÇALHO DA MESA DE NEGOCIAÇÃO -->
         <header class="bg-slate-900 text-white p-4 rounded-2xl shadow-xl border-b-4 border-yellow-400 space-y-3">
             <div class="flex justify-between items-center text-xs">
                 <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">
@@ -32,20 +33,36 @@
             </div>
         </header>
 
-        <!-- DADOS CLIENTE E IMÓVEL -->
+        <!-- 1. DADOS DE IDENTIFICAÇÃO (CLIENTE E CORRETOR COMPLETO) -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
             <div class="flex justify-between items-center border-b pb-1">
-                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Imóvel</h2>
+                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Corretor</h2>
                 <span id="badgeTipoModalidade" class="text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
                     🏗️ EM CONSTRUÇÃO
                 </span>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input type="text" id="inputNomeCliente" placeholder="Nome do Cliente (Opcional)" class="border border-slate-300 p-2.5 rounded-lg font-medium text-xs">
-                <input type="text" id="inputNomeCorretor" placeholder="Nome do Corretor" value="Corretor Parceiro" class="border border-slate-300 p-2.5 rounded-lg font-medium text-xs">
+            <!-- CAMPOS COMPLETOS DE IDENTIFICAÇÃO -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Proposta Para (Cliente)</label>
+                    <input type="text" id="inputNomeCliente" placeholder="Ex: Sr. Carlos Silva" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Nome do Corretor</label>
+                    <input type="text" id="inputNomeCorretor" placeholder="Ex: Wilson Wong" value="Wilson Wong" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">CRECI</label>
+                    <input type="text" id="inputCreciCorretor" placeholder="Ex: 120873F" value="120873F" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-0.5">Telefone / WhatsApp</label>
+                    <input type="text" id="inputFoneCorretor" placeholder="Ex: (11) 98473-2980" value="(11) 98473-2980" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs">
+                </div>
             </div>
 
+            <!-- FICHA TÉCNICA FIXA DA UNIDADE -->
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-700">
                 <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Empreendimento</span><strong id="lockEmpreendimento" class="text-slate-900 font-black">---</strong></div>
                 <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Unidade / Metragem</span><strong id="lockUnidadeM2" class="text-slate-900">---</strong></div>
@@ -54,27 +71,27 @@
             </div>
         </section>
 
-        <!-- ENGENHARIA FINANCEIRA -->
+        <!-- 2. ENGENHARIA FINANCEIRA E PROPOSTA -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-4 text-xs">
             <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">2. Engenharia Financeira & Proposta</h2>
 
-            <!-- ATO -->
+            <!-- 1. ATO / SINAL -->
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                 <label class="font-bold text-slate-800 block">1. Entrada / Sinal (Ato) (R$):</label>
                 <div class="flex gap-2">
-                    <input type="number" id="valAto" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                    <input type="number" id="valAto" value="0" oninput="onAtoChange()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                 </div>
             </div>
 
-            <!-- BLOCO DE OBRA -->
+            <!-- BLOCO DE OBRA (MENSAL E ANUAIS) -->
             <div id="secaoParcelasObra" class="space-y-4">
-                <!-- 30/60/90 -->
+                <!-- 2. ENTRADA FACILITADA 30/60/90 -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">2. Parcelas Mensais Iniciais (30/60/90):</label>
+                    <label class="font-bold text-slate-800 block">2. Entrada Facilitada (30/60/90):</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Quantidade</span>
-                            <input type="number" id="qtdEntrada" value="3" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
+                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor Unitário (R$)</span>
@@ -83,13 +100,13 @@
                     </div>
                 </div>
 
-                <!-- MENSAIS -->
+                <!-- 3. MENSAIS DE OBRA -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <label class="font-bold text-slate-800 block">3. Parcelas Mensais Padrão Obra:</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Quantidade</span>
-                            <input type="number" id="qtdMensais" value="0" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
+                            <input type="number" id="qtdMensais" value="0" min="0" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor Unitário (R$)</span>
@@ -98,13 +115,13 @@
                     </div>
                 </div>
 
-                <!-- ANUAIS -->
+                <!-- 4. INTERMEDIÁRIAS ANUAIS -->
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
                     <label class="font-bold text-slate-800 block">4. Intermediárias / Anuais:</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Quantidade</span>
-                            <input type="number" id="qtdAnuais" value="0" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
+                            <input type="number" id="qtdAnuais" value="0" min="0" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white" oninput="recalculateAll()">
                         </div>
                         <div class="col-span-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor Unitário (R$)</span>
@@ -112,27 +129,43 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- CHAVES -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">5. Parcela de Chaves / Habite-se (R$):</label>
-                    <div class="flex gap-2">
-                        <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                    </div>
+            <!-- CHAVES E PERIODICIDADE (VARIÁVEIS INDEPENDENTES) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div id="secaoChaves" class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                    <label class="font-bold text-slate-800 block text-[11px] uppercase">5. Parcela de Chaves / Habite-se (R$):</label>
+                    <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                </div>
+
+                <div id="secaoPeriodicidade" class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                    <label class="font-bold text-slate-800 block text-[11px] uppercase">6. Periodicidade / Resíduo (R$):</label>
+                    <input type="number" id="valPeriodicidade" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
                 </div>
             </div>
 
-            <!-- FINANCIAMENTO -->
+            <!-- FINANCIAMENTO BANCÁRIO / QUITAÇÃO -->
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">Saldo Financiamento Bancário / Quitação (R$):</label>
+                <label class="font-bold text-slate-800 block">7. Saldo Financiamento Bancário / Quitação (R$):</label>
                 <div class="flex items-center gap-2">
-                    <input type="number" id="valFinanciamento" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
+                    <input type="number" id="valFinanciamento" value="0" oninput="onFinanciamentoChange()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
                     <span id="percFinanciamento" class="font-black text-slate-900 text-sm min-w-[70px] text-right">0.00%</span>
                 </div>
             </div>
+
+            <!-- CAIXA DE ALERTA DE BANCO (> 80%) -->
+            <div id="alertaFinanciamentoBancario" class="hidden p-3 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl text-amber-900 font-semibold text-xs space-y-0.5">
+                <div class="font-black text-amber-900 flex items-center gap-1">
+                    <span>⚠️ ALERTA DE COMPATIBILIDADE BANCÁRIA:</span>
+                    <span id="txtPercAlertaFinan" class="text-rose-700 font-black">0.00%</span>
+                </div>
+                <p class="text-[11px] text-amber-800">
+                    Financiamentos acima de <strong>80,00%</strong> dependem de análise de exceção e avaliação especial de crédito bancário.
+                </p>
+            </div>
         </section>
 
-        <!-- BALANÇA -->
+        <!-- 3. BALANÇA FINAL -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
             <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">3. Balança Final (Proposta vs Tabela)</h2>
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 font-medium">
@@ -141,12 +174,13 @@
                 <div class="flex justify-between border-t pt-2 text-sm font-black"><span class="text-slate-900">Diferença (Balança):</span><strong id="txtDiferencaBalanca" class="text-emerald-600">R$ 0,00</strong></div>
             </div>
 
-            <button onclick="copyProposal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-md mt-2">
-                📲 Copiar Resumo para WhatsApp
+            <button onclick="copyProposal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-sm shadow-md mt-2 flex items-center justify-center gap-2">
+                📲 Copiar Resumo Completo para WhatsApp
             </button>
         </section>
     </div>
 
+    <!-- LOGICA DO MOTOR FINANCEIRO -->
     <script>
         let unidadeAtual = null;
         let ePronto = false;
@@ -180,27 +214,63 @@
             const secaoObra = document.getElementById("secaoParcelasObra");
             const badgeModal = document.getElementById("badgeTipoModalidade");
 
+            // LEITURA DAS COLUNAS INDEPENDENTES
+            const valPeriodicidadeDoBanco = parseFloat(unidadeAtual.val_periodicidade || unidadeAtual.valPeriodicidade) || 0;
+            const valChavesDoBanco = parseFloat(unidadeAtual.val_chaves_unica || unidadeAtual.valChavesUnica) || 0;
+
+            document.getElementById("valChaves").value = valChavesDoBanco;
+            document.getElementById("valPeriodicidade").value = valPeriodicidadeDoBanco;
+
             if (ePronto) {
                 badgeModal.innerText = "🏠 PRONTO PARA MORAR";
                 badgeModal.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
                 secaoObra.style.display = "none";
-                document.getElementById("valAto").value = unidadeAtual.val_ato > 0 ? unidadeAtual.val_ato : unidadeAtual.precoTabela * 0.20;
-                document.getElementById("valFinanciamento").value = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : unidadeAtual.precoTabela * 0.80;
+
+                // PADRÃO PRONTO: 30% ATO E 70% FINANCIAMENTO
+                const atoInicial = unidadeAtual.val_ato > 0 ? unidadeAtual.val_ato : (unidadeAtual.precoTabela * 0.30);
+                const finanInicial = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : (unidadeAtual.precoTabela - atoInicial - valPeriodicidadeDoBanco - valChavesDoBanco);
+
+                document.getElementById("valAto").value = atoInicial.toFixed(2);
+                document.getElementById("valFinanciamento").value = finanInicial.toFixed(2);
             } else {
                 badgeModal.innerText = "🏗️ EM CONSTRUÇÃO";
                 badgeModal.className = "text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
                 secaoObra.style.display = "block";
 
-                // Puxando 100% da Nuvem sem apagar
                 document.getElementById("valAto").value = unidadeAtual.val_ato || 0;
                 document.getElementById("qtdEntrada").value = 3;
                 document.getElementById("valEntrada").value = unidadeAtual.val_30_60_90 || 0;
                 document.getElementById("qtdMensais").value = unidadeAtual.qtd_mensais || 0;
                 document.getElementById("valMensais").value = unidadeAtual.val_mensal_unit || 0;
-                document.getElementById("qtdAnuais").value = unidadeAtual.qtd_semestrais || 0;
-                document.getElementById("valAnuais").value = unidadeAtual.val_semestral_unit || 0;
-                document.getElementById("valChaves").value = unidadeAtual.val_chaves_unica || 0;
+                document.getElementById("qtdAnuais").value = unidadeAtual.qtd_semestrais || unidadeAtual.qtd_anuais || 0;
+                document.getElementById("valAnuais").value = unidadeAtual.val_semestral_unit || unidadeAtual.val_anual_unit || 0;
                 document.getElementById("valFinanciamento").value = unidadeAtual.val_financiamento || 0;
+            }
+            recalculateAll();
+        }
+
+        function onAtoChange() {
+            if (ePronto && unidadeAtual) {
+                const totalTabela = unidadeAtual.precoTabela || 0;
+                const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
+                const periodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
+                const chaves = parseFloat(document.getElementById("valChaves").value) || 0;
+
+                const totFinanciamento = Math.max(0, totalTabela - valAtoRaw - periodicidade - chaves);
+                document.getElementById("valFinanciamento").value = totFinanciamento.toFixed(2);
+            }
+            recalculateAll();
+        }
+
+        function onFinanciamentoChange() {
+            if (ePronto && unidadeAtual) {
+                const totalTabela = unidadeAtual.precoTabela || 0;
+                const totFinanciamento = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+                const periodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
+                const chaves = parseFloat(document.getElementById("valChaves").value) || 0;
+
+                const totAto = Math.max(0, totalTabela - totFinanciamento - periodicidade - chaves);
+                document.getElementById("valAto").value = totAto.toFixed(2);
             }
             recalculateAll();
         }
@@ -211,6 +281,8 @@
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             const ato = parseFloat(document.getElementById("valAto").value) || 0;
+            const chaves = parseFloat(document.getElementById("valChaves").value) || 0;
+            const periodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
             const finan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
 
             let propObra = 0;
@@ -218,14 +290,26 @@
                 const totE = (parseFloat(document.getElementById("valEntrada").value) || 0) * (parseInt(document.getElementById("qtdEntrada").value) || 0);
                 const totM = (parseFloat(document.getElementById("valMensais").value) || 0) * (parseInt(document.getElementById("qtdMensais").value) || 0);
                 const totA = (parseFloat(document.getElementById("valAnuais").value) || 0) * (parseInt(document.getElementById("qtdAnuais").value) || 0);
-                const totC = parseFloat(document.getElementById("valChaves").value) || 0;
-                propObra = totE + totM + totA + totC;
+                propObra = totE + totM + totA;
             }
 
-            const totalProposta = ato + propObra + finan;
+            const totalProposta = ato + propObra + chaves + periodicidade + finan;
             const diff = totalProposta - totalTabela;
+            const percFinan = (finan / totalTabela) * 100;
 
-            document.getElementById("percFinanciamento").innerText = ((finan / totalTabela) * 100).toFixed(2) + "%";
+            document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
+
+            // CHECKER DE ALERTA > 80%
+            const caixaAlerta = document.getElementById("alertaFinanciamentoBancario");
+            const txtPercAlerta = document.getElementById("txtPercAlertaFinan");
+
+            if (percFinan > 80.01) {
+                caixaAlerta.classList.remove("hidden");
+                txtPercAlerta.innerText = percFinan.toFixed(2) + "%";
+            } else {
+                caixaAlerta.classList.add("hidden");
+            }
+
             document.getElementById("txtTotalProposta").innerText = fmt(totalProposta);
             document.getElementById("txtTabelaComparacao").innerText = fmt(totalTabela);
 
@@ -243,19 +327,61 @@
         }
 
         function copyProposal() {
+            if (!unidadeAtual) return;
+
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            let texto = `*SIMULAÇÃO - ${unidadeAtual.empreendimento}*\n`;
-            texto += `Unidade: ${unidadeAtual.unidade} | ${unidadeAtual.dorms}\n`;
-            texto += `Total Tabela: ${fmt(unidadeAtual.precoTabela)}\n\n`;
-            texto += `*PROPOSTA:*\n`;
-            texto += `Ato: ${fmt(parseFloat(document.getElementById("valAto").value) || 0)}\n`;
-            if(!ePronto) {
-                texto += `Mensais: ${document.getElementById("qtdMensais").value}x de ${fmt(parseFloat(document.getElementById("valMensais").value) || 0)}\n`;
-                texto += `Anuais: ${document.getElementById("qtdAnuais").value}x de ${fmt(parseFloat(document.getElementById("valAnuais").value) || 0)}\n`;
+            
+            const nomeCliente = document.getElementById("inputNomeCliente").value.trim();
+            const nomeCorretor = document.getElementById("inputNomeCorretor").value.trim() || 'Wilson Wong';
+            const creciCorretor = document.getElementById("inputCreciCorretor").value.trim();
+            const foneCorretor = document.getElementById("inputFoneCorretor").value.trim();
+
+            const totalTabela = unidadeAtual.precoTabela || 0;
+            const ato = parseFloat(document.getElementById("valAto").value) || 0;
+            const finan = parseFloat(document.getElementById("valFinanciamento").value) || 0;
+
+            let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
+            if (nomeCliente) texto += `👤 *A/C Cliente:* ${nomeCliente}\n`;
+            texto += `🏢 *Empreendimento:* ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n`;
+            texto += `📍 *Status:* ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
+            texto += `👔 *Corretor:* ${nomeCorretor}${creciCorretor ? ' - CRECI ' + creciCorretor : ''}\n`;
+            if (foneCorretor) texto += `📱 *Contato:* ${foneCorretor}\n`;
+            texto += `------------------------------------\n`;
+            texto += `💰 *Valor de Tabela:* ${fmt(totalTabela)}\n\n`;
+            texto += `*CONDIÇÕES PROPOSTAS:*\n`;
+            texto += `• Entrada / Sinal (Ato): ${fmt(ato)} (${((ato/totalTabela)*100).toFixed(2)}%)\n`;
+
+            const valPeriodicidade = parseFloat(document.getElementById("valPeriodicidade").value) || 0;
+            if (valPeriodicidade > 0) {
+                texto += `• Periodicidade / Resíduo: ${fmt(valPeriodicidade)}\n`;
             }
-            texto += `Financiamento: ${fmt(parseFloat(document.getElementById("valFinanciamento").value) || 0)}\n`;
+
+            const valChaves = parseFloat(document.getElementById("valChaves").value) || 0;
+            if (valChaves > 0) {
+                texto += `• Parcela de Chaves: ${fmt(valChaves)}\n`;
+            }
+
+            if (!ePronto) {
+                const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
+                const valEntrada = parseFloat(document.getElementById("valEntrada").value) || 0;
+                if (qtdEntrada > 0 && valEntrada > 0) texto += `• Entrada 30/60/90 (${qtdEntrada}x): ${fmt(valEntrada)} /cada\n`;
+
+                const qtdMensais = parseInt(document.getElementById("qtdMensais").value) || 0;
+                const valMensais = parseFloat(document.getElementById("valMensais").value) || 0;
+                if (qtdMensais > 0 && valMensais > 0) texto += `• Mensais de Obra (${qtdMensais}x): ${fmt(valMensais)} /mês\n`;
+
+                const qtdAnuais = parseInt(document.getElementById("qtdAnuais").value) || 0;
+                const valAnuais = parseFloat(document.getElementById("valAnuais").value) || 0;
+                if (qtdAnuais > 0 && valAnuais > 0) texto += `• Intermediárias Anuais (${qtdAnuais}x): ${fmt(valAnuais)} /cada\n`;
+            }
+            
+            texto += `• Saldo Financiado / Quitação: ${fmt(finan)} (${((finan/totalTabela)*100).toFixed(2)}%)\n`;
+            texto += `------------------------------------\n`;
+            texto += `*TOTAL DA PROPOSTA:* ${fmt(ato + (ePronto ? 0 : 0) + valPeriodicidade + valChaves + finan)}\n\n`;
+            texto += `_Obs: Proposta sujeita a aprovação de crédito bancário._`;
+
             navigator.clipboard.writeText(texto);
-            alert("Copiado com sucesso!");
+            alert("Proposta comercial copiada com sucesso!");
         }
 
         window.onload = carregarDados;
