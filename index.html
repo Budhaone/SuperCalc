@@ -168,7 +168,7 @@
                             dataEntrega: entregaObra,
                             is_ready: ePronto,
 
-                            // MAPEAMENTO DO FLUXO FINANCEIRO COMPLETO (INCLUINDO A PERIODICIDADE)
+                            // MAPEAMENTO DO FLUXO FINANCEIRO COMPLETO
                             val_ato: parseFloat(u.val_ato) || 0,
                             valAto: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
@@ -225,7 +225,7 @@
         function atualizarOpcoesConstrutoras() {
             const select = document.getElementById("filtroConstrutora");
             const construtoras = [...new Set(ESTOQUE_MOCK.map(i => i.construtora))];
-            select.innerHTML = '<option value="TODOS">Todas as Construtoras</option><option value="PRIVADO">🔒 Inventário Privado</option>';
+            select.innerHTML = '<option value="TODAS">Todas as Construtoras</option><option value="PRIVADO">🔒 Inventário Privado</option>';
             construtoras.forEach(c => {
                 const opt = document.createElement("option");
                 opt.value = c; opt.innerText = c;
@@ -243,7 +243,8 @@
         function atualizarEmpreendimentos() {
             const selectEmp = document.getElementById("filtroEmpreendimento");
             const construtora = document.getElementById("filtroConstrutora").value;
-            const emps = [...new Set(ESTOQUE_MOCK.filter(i => construtora === "TODAS" || (construtora === "PRIVADO" ? i.origem === "PRIVADO" : i.construtora === construtora)).map(i => i.empreendimento))];
+            const eTodas = construtora === "TODAS" || construtora === "TODOS";
+            const emps = [...new Set(ESTOQUE_MOCK.filter(i => eTodas || (construtora === "PRIVADO" ? i.origem === "PRIVADO" : i.construtora === construtora)).map(i => i.empreendimento))];
             selectEmp.innerHTML = '<option value="TODOS">Todos os Empreendimentos</option>';
             emps.forEach(emp => {
                 const opt = document.createElement("option");
@@ -262,7 +263,7 @@
             const buscaTexto = document.getElementById("filtroUnidadeTexto").value.toLowerCase().trim();
 
             const filtrados = ESTOQUE_MOCK.filter(item => {
-                const bateConstrutora = construtora === "TODAS" || (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
+                const bateConstrutora = construtora === "TODAS" || construtora === "TODOS" || (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
                 const bateEmpreendimento = empreendimento === "TODOS" || item.empreendimento === empreendimento;
                 const bateMetragem = metragemSel === "TODAS" || item.m2 === parseFloat(metragemSel);
                 const bateTipoRenda = tipoRenda === "TODOS" || item.typologyRaw.toUpperCase().includes(tipoRenda);
