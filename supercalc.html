@@ -18,20 +18,34 @@
         .status-info { background-color: #0984e3; color: #fff; font-weight: 800; }
     </style>
 </head>
-<body class="bg-slate-100 font-sans p-2 md:p-6 text-slate-800">
+<body class="bg-slate-100 font-sans p-1.5 md:p-4 text-slate-800">
 
-    <div class="max-w-4xl mx-auto space-y-4">
+    <div class="max-w-4xl mx-auto space-y-2.5">
 
-        <!-- BARRA FIXA DO TOPO -->
-        <header class="sticky top-2 z-40 bg-slate-900 text-white p-3.5 rounded-2xl shadow-xl border-b-4 border-emerald-500 space-y-2">
-            <div class="flex justify-between items-center text-xs">
-                <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1.5 px-3 rounded-lg text-[11px] transition">
-                    ← Voltar para Prateleira
+        <!-- BARRA FIXA DO TOPO COMPACTA COM IDENTIFICAÇÃO E FONTES AMPLIADAS -->
+        <header class="sticky top-1 z-40 bg-slate-900 text-white p-2.5 rounded-xl shadow-xl border-b-4 border-emerald-500 space-y-1.5">
+            <div class="flex justify-between items-center gap-2">
+                <button onclick="window.location.href='index.html'" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-1 px-2.5 rounded-lg text-xs md:text-sm transition">
+                    ← Prateleira
                 </button>
-                <span class="text-xs font-black text-amber-400" id="lblPropostaHeader">Proposta: R$ 0,00</span>
+                <span class="text-sm md:text-base font-black text-amber-400" id="lblPropostaHeader">Proposta: R$ 0,00</span>
             </div>
 
-            <div class="flex flex-wrap justify-between items-center gap-2 text-[11px] pt-1 border-t border-slate-800">
+            <!-- RESUMO BREVE DO IMÓVEL NO CABEÇALHO FIXO -->
+            <div class="text-xs md:text-sm font-bold text-amber-300 bg-slate-800/90 px-2.5 py-1 rounded-md flex flex-wrap items-center justify-between gap-1 border border-slate-700/60" id="lblHeaderUnitSummary">
+                <div class="flex items-center gap-1.5 truncate">
+                    <span id="hdrEmp" class="text-white font-extrabold truncate">Empreendimento</span>
+                    <span class="text-slate-500">•</span>
+                    <span id="hdrUnidade" class="text-amber-300">Apto ---</span>
+                    <span class="text-slate-500">•</span>
+                    <span id="hdrM2" class="text-slate-200">0 m²</span>
+                </div>
+                <span id="hdrIncomeType" class="bg-amber-400/20 text-amber-300 px-1.5 py-0.5 rounded text-[10px] md:text-xs font-black uppercase tracking-wider">
+                    R2V
+                </span>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-2 text-xs md:text-sm pt-1 border-t border-slate-800">
                 <div>
                     <span class="text-slate-400">Tabela: </span>
                     <strong class="text-white" id="lblTabelaHeader">R$ 0,00</strong>
@@ -40,8 +54,8 @@
                     <span class="text-slate-400">Diferença: </span>
                     <strong id="lblDiferencaHeader" class="text-emerald-400">R$ 0,00 (100%)</strong>
                 </div>
-                <div class="w-full text-center mt-1">
-                    <span id="badgeStatusHeader" class="px-3 py-1 rounded-full text-[10px] uppercase inline-block status-valid">
+                <div class="w-full text-center mt-0.5">
+                    <span id="badgeStatusHeader" class="px-2.5 py-0.5 rounded-full text-[11px] md:text-xs uppercase inline-block status-valid">
                         PROPOSTA EQUILIBRADA (100%)
                     </span>
                 </div>
@@ -49,59 +63,59 @@
         </header>
 
         <!-- IDENTIFICAÇÃO E DADOS DA UNIDADE SELECIONADA -->
-        <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
+        <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2.5 text-xs md:text-sm">
             <div class="flex justify-between items-center border-b pb-1">
-                <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider">1. Dados do Cliente e Imóvel</h2>
-                <span id="badgeTipoModalidade" class="text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
+                <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider">1. Dados do Cliente e Imóvel</h2>
+                <span id="badgeTipoModalidade" class="text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
                     🏗️ EM CONSTRUÇÃO
                 </span>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input type="text" id="inputNomeCliente" placeholder="Digite o nome do cliente" class="border border-slate-300 p-2.5 rounded-lg font-medium text-xs">
-                <input type="text" id="inputNomeCorretor" value="Wilson Wong" placeholder="Nome do Corretor" class="border border-slate-300 p-2.5 rounded-lg font-medium text-xs">
+                <input type="text" id="inputNomeCliente" placeholder="Digite o nome do cliente" class="border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                <input type="text" id="inputNomeCorretor" value="Wilson Wong" placeholder="Nome do Corretor" class="border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
             </div>
 
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-700">
-                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Empreendimento</span><strong id="lockEmpreendimento" class="text-slate-900 font-black">---</strong></div>
-                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Unidade / Metragem</span><strong id="lockUnidadeM2" class="text-slate-900">---</strong></div>
-                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Construtora</span><strong id="lockConstrutora" class="text-slate-900">---</strong></div>
-                <div><span class="block text-[10px] text-slate-400 font-bold uppercase">Valor de Tabela</span><strong id="lockValorTabela" class="text-emerald-600 font-black">R$ 0,00</strong></div>
+            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-700 text-xs md:text-sm">
+                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Empreendimento</span><strong id="lockEmpreendimento" class="text-slate-900 font-black">---</strong></div>
+                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Unidade / Metragem</span><strong id="lockUnidadeM2" class="text-slate-900">---</strong></div>
+                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Construtora</span><strong id="lockConstrutora" class="text-slate-900">---</strong></div>
+                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Valor de Tabela</span><strong id="lockValorTabela" class="text-emerald-600 font-black">R$ 0,00</strong></div>
             </div>
         </section>
 
         <!-- ENGENHARIA DO FLUXO DE ENTRADA -->
-        <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-4 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">2. Engenharia do Fluxo de Entrada</h2>
+        <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2.5 text-xs md:text-sm">
+            <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider border-b pb-1">2. Engenharia do Fluxo de Entrada</h2>
 
             <!-- 1. ATO -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">1. Ato / Sinal de Entrada (Imediato):</label>
+            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                <label class="font-bold text-slate-800 block text-xs md:text-sm">1. Ato / Sinal de Entrada (Imediato):</label>
                 <div class="flex gap-2">
-                    <input type="number" id="valAto" value="0" oninput="onAtoChange()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                    <select id="modeAto" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
+                    <input type="number" id="valAto" value="0" oninput="onAtoChange()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                    <select id="modeAto" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-xs md:text-sm bg-white">
                         <option value="R_FIXO">R$ FIXO</option>
                         <option value="PERC_TOT">% DO TOTAL</option>
                     </select>
                 </div>
-                <div id="badgeAto" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Total Ato: R$ 0,00 (0.00%)</div>
+                <div id="badgeAto" class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md text-xs font-bold">Total Ato: R$ 0,00 (0.00%)</div>
             </div>
 
             <!-- SEÇÕES DE OBRA -->
-            <div id="secaoParcelasObra" class="space-y-4">
+            <div id="secaoParcelasObra" class="space-y-2.5">
                 <!-- 2. ENTRADA FACILITADA -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">2. Parcelas de Entrada Facilitada (30 / 60 / 90 dias):</label>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                    <label class="font-bold text-slate-800 block text-xs md:text-sm">2. Parcelas de Entrada Facilitada (30 / 60 / 90 dias):</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Parcelas</span>
-                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Qtd Parcelas</span>
+                            <input type="number" id="qtdEntrada" value="3" min="0" max="5" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
                         </div>
                         <div class="col-span-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Valor / Modo</span>
                             <div class="flex gap-1">
-                                <input type="number" id="valEntrada" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                                <select id="modeEntrada" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                <input type="number" id="valEntrada" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                                <select id="modeEntrada" onchange="recalculateAll()" class="border border-slate-300 p-1 rounded-lg font-bold text-[11px] md:text-xs bg-white">
                                     <option value="PARC_R">R$ / PARCELA</option>
                                     <option value="PERC_TOT">% TOT. ENTRADA</option>
                                     <option value="TOT_R">R$ TOT. ENTRADA</option>
@@ -109,22 +123,22 @@
                             </div>
                         </div>
                     </div>
-                    <div id="badgeEntrada" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
+                    <div id="badgeEntrada" class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md text-xs font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
                 </div>
 
                 <!-- 3. MENSAIS -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">3. Parcelas Mensais de Obra:</label>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                    <label class="font-bold text-slate-800 block text-xs md:text-sm">3. Parcelas Mensais de Obra:</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nº Mensais</span>
-                            <input type="number" id="qtdMensais" value="36" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Nº Mensais</span>
+                            <input type="number" id="qtdMensais" value="36" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
                         </div>
                         <div class="col-span-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Valor / Modo</span>
                             <div class="flex gap-1">
-                                <input type="number" id="valMensais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                                <select id="modeMensais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                <input type="number" id="valMensais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                                <select id="modeMensais" onchange="recalculateAll()" class="border border-slate-300 p-1 rounded-lg font-bold text-[11px] md:text-xs bg-white">
                                     <option value="PARC_R">R$ / PARCELA</option>
                                     <option value="PERC_TOT">% TOT. MENSAL</option>
                                     <option value="TOT_R">R$ TOT. MENSAL</option>
@@ -132,22 +146,22 @@
                             </div>
                         </div>
                     </div>
-                    <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">36x de R$ 0,00 /mês - Tot: R$ 0,00</div>
+                    <div id="badgeMensais" class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md text-xs font-bold">36x de R$ 0,00 /mês - Tot: R$ 0,00</div>
                 </div>
 
                 <!-- 4. INTERMEDIÁRIAS ANUAIS -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">4. Intermediárias (Anuais):</label>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                    <label class="font-bold text-slate-800 block text-xs md:text-sm">4. Intermediárias (Anuais):</label>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Qtd Anuais</span>
-                            <input type="number" id="qtdAnuais" value="3" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Qtd Anuais</span>
+                            <input type="number" id="qtdAnuais" value="3" min="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
                         </div>
                         <div class="col-span-2">
-                            <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Valor / Modo</span>
+                            <span class="text-[10px] md:text-xs font-bold text-slate-400 uppercase block mb-0.5">Valor / Modo</span>
                             <div class="flex gap-1">
-                                <input type="number" id="valAnuais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                                <select id="modeAnuais" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-[10px] bg-white">
+                                <input type="number" id="valAnuais" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                                <select id="modeAnuais" onchange="recalculateAll()" class="border border-slate-300 p-1 rounded-lg font-bold text-[11px] md:text-xs bg-white">
                                     <option value="PARC_R">R$ / PARCELA</option>
                                     <option value="PERC_TOT">% TOT. INTERM.</option>
                                     <option value="TOT_R">R$ TOT. INTERM.</option>
@@ -155,70 +169,70 @@
                             </div>
                         </div>
                     </div>
-                    <div id="badgeAnuais" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
+                    <div id="badgeAnuais" class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md text-xs font-bold">3x de R$ 0,00 - Tot: R$ 0,00</div>
                 </div>
 
                 <!-- 5. CHAVES -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                    <label class="font-bold text-slate-800 block">5. Parcela Única de Chaves:</label>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                    <label class="font-bold text-slate-800 block text-xs md:text-sm">5. Parcela Única de Chaves:</label>
                     <div class="flex gap-2">
-                        <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2.5 rounded-lg font-bold text-sm bg-white">
-                        <select id="modeChaves" onchange="recalculateAll()" class="border border-slate-300 p-2 rounded-lg font-bold text-xs bg-white">
+                        <input type="number" id="valChaves" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                        <select id="modeChaves" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-xs md:text-sm bg-white">
                             <option value="R_FIXO">R$ FIXO</option>
                             <option value="PERC_TOT">% DO TOTAL</option>
                         </select>
                     </div>
-                    <div id="badgeChaves" class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md text-[11px] font-bold">Chaves (1x): R$ 0,00</div>
+                    <div id="badgeChaves" class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-md text-xs font-bold">Chaves (1x): R$ 0,00</div>
                 </div>
             </div>
         </section>
 
         <!-- SALDO A FINANCIAR E TETO BANCÁRIO -->
-        <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">3. Saldo a Financiar e Teto Bancário</h2>
+        <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2.5 text-xs md:text-sm">
+            <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider border-b pb-1">3. Saldo a Financiar e Teto Bancário</h2>
 
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
-                <label class="font-bold text-slate-800 block">Saldo a Financiar Resultante (R$ Digitável):</label>
+            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
+                <label class="font-bold text-slate-800 block text-xs md:text-sm">Saldo a Financiar Resultante (R$ Digitável):</label>
                 <div class="flex items-center gap-2">
-                    <input type="number" id="valFinanciamento" value="0" step="100" oninput="onFinanciamentoChange()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
-                    <span id="percFinanciamento" class="font-black text-slate-900 text-sm min-w-[70px] text-right">0.00%</span>
+                    <input type="number" id="valFinanciamento" value="0" step="100" oninput="onFinanciamentoChange()" class="w-full border border-slate-300 p-2 rounded-lg font-black text-slate-900 text-base md:text-lg bg-white">
+                    <span id="percFinanciamento" class="font-black text-slate-900 text-sm md:text-base min-w-[70px] text-right">0.00%</span>
                 </div>
-                <div id="alertaTetoFinanciamento" class="hidden p-2.5 bg-amber-100 text-amber-900 rounded-lg text-[11px] font-bold border border-amber-300 mt-2">
+                <div id="alertaTetoFinanciamento" class="hidden p-2 bg-amber-100 text-amber-900 rounded-lg text-xs font-bold border border-amber-300 mt-1">
                     ⚠️ Atenção: Financiamento acima de 80%. Operações de 85% a 90% dependem de análise especial de crédito bancário.
                 </div>
             </div>
 
-            <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-1">
+            <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
                 <div class="flex justify-between items-center">
                     <strong class="text-slate-700">Teto Máx. Financiável do Banco (%):</strong>
-                    <input type="number" id="tetoFinanciamentoPerc" value="80" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold">
+                    <input type="number" id="tetoFinanciamentoPerc" value="80" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold text-sm">
                 </div>
-                <div class="text-slate-500 font-semibold text-[11px]">Valor Limite de Aprovação: <strong id="txtValorMaxFinanciavel" class="text-slate-900">R$ 0,00</strong></div>
+                <div class="text-slate-500 font-semibold text-xs md:text-sm">Valor Limite de Aprovação: <strong id="txtValorMaxFinanciavel" class="text-slate-900">R$ 0,00</strong></div>
             </div>
         </section>
 
         <!-- BALANÇA DE VALOR -->
-        <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-            <h2 class="font-bold text-slate-900 uppercase text-[11px] tracking-wider border-b pb-1">4. Balança de Valor (Checagem de Fechamento)</h2>
+        <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2.5 text-xs md:text-sm">
+            <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider border-b pb-1">4. Balança de Valor (Checagem de Fechamento)</h2>
 
-            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 font-medium">
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1.5 font-medium text-xs md:text-sm">
                 <div class="flex justify-between"><span>(+) Soma do Fluxo de Entrada:</span><strong id="txtSomaEntradas">R$ 0,00</strong></div>
                 <div class="flex justify-between"><span>(+) Saldo Financiado Digitado:</span><strong id="txtFinanciadoDigitado">R$ 0,00</strong></div>
-                <div class="flex justify-between border-t pt-2 text-slate-900 font-bold"><span>(=) Total Geral da Proposta:</span><strong id="txtTotalProposta">R$ 0,00</strong></div>
-                <div class="flex justify-between text-slate-400 text-[11px]"><span>(vs) Valor de Tabela Vigente:</span><span id="txtTabelaComparacao">R$ 0,00</span></div>
-                <div class="flex justify-between border-t pt-2 text-sm font-black"><span class="text-slate-900">Balança / Diferença:</span><strong id="txtDiferencaBalanca" class="text-emerald-600">R$ 0,00</strong></div>
+                <div class="flex justify-between border-t pt-1.5 text-slate-900 font-bold"><span>(=) Total Geral da Proposta:</span><strong id="txtTotalProposta">R$ 0,00</strong></div>
+                <div class="flex justify-between text-slate-400 text-xs"><span>(vs) Valor de Tabela Vigente:</span><span id="txtTabelaComparacao">R$ 0,00</span></div>
+                <div class="flex justify-between border-t pt-1.5 text-sm md:text-base font-black"><span class="text-slate-900">Balança / Diferença:</span><strong id="txtDiferencaBalanca" class="text-emerald-600">R$ 0,00</strong></div>
             </div>
 
-            <div class="text-center pt-2">
-                <div id="txtTotalFinanciadoRodape" class="text-xl font-black text-slate-900">R$ 0,00</div>
-                <div class="text-slate-500 text-[11px] font-bold">Percentual Fechado da Proposta: <span id="txtSomaPorcentagem">100.00%</span></div>
+            <div class="text-center pt-1">
+                <div id="txtTotalFinanciadoRodape" class="text-xl md:text-2xl font-black text-slate-900">R$ 0,00</div>
+                <div class="text-slate-500 text-xs md:text-sm font-bold">Percentual Fechado da Proposta: <span id="txtSomaPorcentagem">100.00%</span></div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-                <button onclick="copyUnitSummary()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1">
+                <button onclick="copyUnitSummary()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-3 rounded-xl text-xs md:text-sm transition shadow-md flex items-center justify-center gap-1">
                     📋 Copiar Resumo da Unidade
                 </button>
-                <button onclick="copyProposal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-3 rounded-xl text-xs transition shadow-md flex items-center justify-center gap-1">
+                <button onclick="copyProposal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-3 rounded-xl text-xs md:text-sm transition shadow-md flex items-center justify-center gap-1">
                     💬 Copiar Simulação de Fluxo
                 </button>
             </div>
@@ -243,7 +257,8 @@
                     m2: 48.25,
                     precoTabela: 937685,
                     entregaObra: "2029-12",
-                    is_ready: false
+                    is_ready: false,
+                    income_type: "R2V"
                 };
             }
 
@@ -256,14 +271,14 @@
 
             if (ePronto) {
                 badgeModalidade.innerText = "🏠 PRONTO PARA MORAR";
-                badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
+                badgeModalidade.className = "text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
                 secaoObra.style.display = "none";
                 
                 document.getElementById("valAto").value = (preco * 0.30).toFixed(2);
                 document.getElementById("valFinanciamento").value = (preco * 0.70).toFixed(2);
             } else {
                 badgeModalidade.innerText = "🏗️ EM CONSTRUÇÃO";
-                badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
+                badgeModalidade.className = "text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
                 secaoObra.style.display = "block";
 
                 document.getElementById("valAto").value = unidadeAtual.val_ato > 0 ? unidadeAtual.val_ato : (preco * 0.10).toFixed(2);
@@ -278,10 +293,21 @@
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            document.getElementById("lockEmpreendimento").innerText = unidadeAtual.empreendimento || "Empreendimento";
+            const empNome = unidadeAtual.empreendimento || unidadeAtual.emp || "Empreendimento";
+            const incType = unidadeAtual.income_type || unidadeAtual.tipo || unidadeAtual.enquadramento || "R2V";
+
+            document.getElementById("lockEmpreendimento").innerText = empNome;
             document.getElementById("lockUnidadeM2").innerText = `Apto ${unidadeAtual.unidade || '---'} (${unidadeAtual.m2 || 0} m²)`;
             document.getElementById("lockConstrutora").innerText = unidadeAtual.construtora || "AAM Incorporadora";
             document.getElementById("lockValorTabela").innerText = fmt(preco);
+
+            // PREENCHIMENTO DO CABEÇALHO FIXO DO TOPO
+            if (document.getElementById("hdrEmp")) {
+                document.getElementById("hdrEmp").innerText = empNome;
+                document.getElementById("hdrUnidade").innerText = `Apto ${unidadeAtual.unidade || '---'}`;
+                document.getElementById("hdrM2").innerText = `${unidadeAtual.m2 || 0} m²`;
+                document.getElementById("hdrIncomeType").innerText = incType;
+            }
 
             recalculateAll();
         }
@@ -400,7 +426,7 @@
                 txtDiffHeader.innerText = fmt(0) + " (100%)";
                 txtDiffHeader.className = "text-emerald-400 font-bold";
                 badgeHeader.innerText = "PROPOSTA EQUILIBRADA (100%)";
-                badgeHeader.className = "px-3 py-1 rounded-full text-[10px] uppercase inline-block status-valid";
+                badgeHeader.className = "px-2.5 py-0.5 rounded-full text-[11px] md:text-xs uppercase inline-block status-valid";
             } else if (diferencaBalanca < 0) {
                 const difAbs = Math.abs(diferencaBalanca);
                 txtDiff.innerText = `- ${fmt(difAbs)} (Abaixo da Tabela)`;
@@ -408,14 +434,14 @@
                 txtDiffHeader.innerText = `- ${fmt(difAbs)}`;
                 txtDiffHeader.className = "text-rose-400 font-bold";
                 badgeHeader.innerText = `FALTAM ${fmt(difAbs)} PARA A TABELA`;
-                badgeHeader.className = "px-3 py-1 rounded-full text-[10px] uppercase inline-block status-danger";
+                badgeHeader.className = "px-2.5 py-0.5 rounded-full text-[11px] md:text-xs uppercase inline-block status-danger";
             } else {
                 txtDiff.innerText = `+ ${fmt(diferencaBalanca)} (Sobra no Fluxo)`;
                 txtDiff.className = "text-blue-600 font-black";
                 txtDiffHeader.innerText = `+ ${fmt(diferencaBalanca)}`;
                 txtDiffHeader.className = "text-blue-400 font-bold";
                 badgeHeader.innerText = `PROPOSTA SUPERIOR À TABELA (+${fmt(diferencaBalanca)})`;
-                badgeHeader.className = "px-3 py-1 rounded-full text-[10px] uppercase inline-block status-info";
+                badgeHeader.className = "px-2.5 py-0.5 rounded-full text-[11px] md:text-xs uppercase inline-block status-info";
             }
         }
 
@@ -424,11 +450,13 @@
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const preco = unidadeAtual.precoTabela || unidadeAtual.preco || 0;
+            const empNome = unidadeAtual.empreendimento || unidadeAtual.emp || "Empreendimento";
+            const incType = unidadeAtual.income_type || unidadeAtual.tipo || unidadeAtual.enquadramento || "R2V";
 
             let texto = `🏢 *RESUMO TÉCNICO DA UNIDADE*\n`;
-            texto += `• Empreendimento: ${unidadeAtual.empreendimento}\n`;
+            texto += `• Empreendimento: ${empNome}\n`;
             texto += `• Unidade: ${unidadeAtual.unidade} (${unidadeAtual.pavimento || '---'}º Andar)\n`;
-            texto += `• Tipologia: ${unidadeAtual.tipologia || 'Studio'} (${unidadeAtual.income_type || 'R2V'})\n`;
+            texto += `• Tipologia: ${unidadeAtual.tipologia || 'Studio'} (${incType})\n`;
             texto += `• Metragem: ${unidadeAtual.m2} m²\n`;
             texto += `• Vagas: ${unidadeAtual.vagas > 0 ? unidadeAtual.vagas : 'Sem vaga'}\n`;
             texto += `• Status: ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
@@ -445,6 +473,7 @@
             const nomeCliente = document.getElementById("inputNomeCliente").value.trim();
             const nomeCorretor = document.getElementById("inputNomeCorretor").value.trim() || 'Wilson Wong';
             const totalTabela = unidadeAtual.precoTabela || unidadeAtual.preco || 0;
+            const empNome = unidadeAtual.empreendimento || unidadeAtual.emp || "Empreendimento";
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             // 1. ATO
@@ -485,7 +514,7 @@
                 : (totAto + totEntrada + totMensais + totAnuais + totChaves + totFin);
 
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
-            texto += `🏢 *Empreendimento:* ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n`;
+            texto += `🏢 *Empreendimento:* ${empNome} (Apto ${unidadeAtual.unidade})\n`;
             texto += `📍 *Status:* ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
             texto += `👔 *Corretor:* ${nomeCorretor}\n`;
             if (nomeCliente) texto += `👤 *Cliente:* ${nomeCliente}\n`;
@@ -494,10 +523,10 @@
             texto += `*CONDIÇÕES PROPOSTAS:*\n`;
 
             if (ePronto) {
-                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} (${percAto.toFixed(2)}%)\n`;
-                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} (${percFin.toFixed(2)}%)\n`;
+                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
+                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             } else {
-                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} (${percAto.toFixed(2)}%)\n`;
+                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
                 if (totChaves > 0) {
                     texto += `• Parcela de Chaves: ${fmt(totChaves)}\n`;
                 }
@@ -510,7 +539,7 @@
                 if (totAnuais > 0) {
                     texto += `• Intermediárias Anuais (${qtdAnuais}x): ${fmt(valAnualUnit)} /cada\n`;
                 }
-                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} (${percFin.toFixed(2)}%)\n`;
+                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             }
 
             texto += `------------------------------------\n`;
