@@ -130,7 +130,7 @@
     <script>
         // --- COLOQUE SUAS CHAVES AQUI ---
         const SUPABASE_URL = "https://blzhzrctahvwaakxygzn.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwNjIyMjIsImV4cCI6MjEwNDYzODIyMn0.ENdprA6pZYce1BkjV5_frncWv_zqCq0XfoKfzF72JE0";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsemh6cmN0YWh2d2Fha3h5Z3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAwMzM5MjMsImV4cCI6MjAyNTYwOTkyM30.6w_oF-6o4c8LzO-0T_0_0"; // Cole sua chave completa aqui
         
         let ESTOQUE_MOCK = [];
 
@@ -152,11 +152,12 @@
                         const entregaObra = u.data_entrega || (u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12");
                         const ePronto = u.developments?.is_ready || (entregaObra <= mesAtual);
                         const preco = parseFloat(u.list_price) || 0;
+                        const construtoraNome = u.developments?.builder || u.developments?.developer_name || "Incorporadora";
 
                         return {
                             id: u.id,
                             origem: u.developments?.is_third_party ? "PRIVADO" : "GLOBAL",
-                            construtora: u.developments?.builder || u.developments?.title || "Construtora",
+                            construtora: construtoraNome,
                             empreendimento: u.developments?.title || "Empreendimento",
                             unidade: String(u.unit_number),
                             pavimento: parseInt(u.floor) || 1,
@@ -171,8 +172,8 @@
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
                             val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
-                            qtd_semestrais: parseInt(u.qtd_anuais) || 0,
-                            val_semestral_unit: parseFloat(u.val_anual_unit) || 0,
+                            qtd_semestrais: parseInt(u.qtd_anuais) || parseInt(u.qtd_semestrais) || 0,
+                            val_semestral_unit: parseFloat(u.val_anual_unit) || parseFloat(u.val_semestral_unit) || 0,
                             val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
                             val_financiamento: parseFloat(u.val_financiamento) || 0
                         };
