@@ -41,14 +41,14 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMPACTA -->
+        <!-- BARRA DE FILTROS COMPACTA (GRADE DUPLA NO CELULAR) -->
         <section class="bg-white p-2.5 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
             <div class="flex justify-between items-center border-b pb-1">
                 <h2 class="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros de Busca</h2>
                 <button onclick="limparFiltros()" class="text-[11px] text-blue-600 font-bold hover:underline">Limpar Filtros</button>
             </div>
 
-            <!-- GRADE COMPACTA DOS FILTROS -->
+            <!-- GRADE COMPACTA DE FILTROS -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 <!-- 1. Incorporadora -->
                 <div>
@@ -124,7 +124,7 @@
             </div>
         </section>
 
-        <!-- LISTA COMPACTA EM CARTÕES SIMPLIFICADOS -->
+        <!-- LISTA COMPACTA EM CARTÕES SIMPLIFICADOS POR COLUNA -->
         <main class="space-y-2" id="containerEstoque">
             <!-- Renderizado dinamicamente -->
         </main>
@@ -205,14 +205,24 @@
         </div>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA COMPATÍVEL -->
     <script>
         let ESTOQUE_GLOBAL = [];
 
         function obterClienteSupabase() {
             if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) return window.supabaseClient;
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
             if (typeof window.supabase !== 'undefined' && window.supabase && typeof window.supabase.from === 'function') return window.supabase;
-            if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') return supabase;
+            if (typeof supabase !== 'undefined' && supabase && typeof supabase.from === 'function') return supabase;
+            if (typeof window._supabase !== 'undefined' && window._supabase) return window._supabase;
+            
+            // Instanciação emergencial caso exista a biblioteca Supabase e chaves globais
+            if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+                if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+                    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    return window.supabaseClient;
+                }
+            }
             return null;
         }
 
@@ -223,22 +233,38 @@
                 const client = obterClienteSupabase();
                 if (!client) {
                     console.error("Cliente Supabase não encontrado.");
+                    alert("Atenção: A configuração do Supabase (supabase-config.js) não foi detectada.");
                     exibirLoading(false);
                     return;
                 }
 
-                const { data, error } = await client.from('units').select('*');
+                // 1. Busca unidades diretamente
+                const { data: unitsData, error: unitsError } = await client.from('units').select('*');
 
-                if (error) {
-                    console.error("Erro na busca de unidades do Supabase:", error);
-                    alert("Erro ao buscar unidades do Supabase: " + (error.message || "Erro desconhecido"));
+                if (unitsError) {
+                    console.error("Erro na busca de unidades do Supabase:", unitsError);
+                    alert("Erro ao consultar o banco de dados: " + (unitsError.message || "Falha na conexão"));
                     exibirLoading(false);
                     return;
                 }
 
-                ESTOQUE_GLOBAL = (data || []).map(u => {
-                    const empNome = u.development_name || u.empreendimento || u.emp || u.building || 'Poema Liberdade';
-                    const construtoraNome = u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
+                // 2. Busca opcional de empreendimentos para enriquecer nomes caso necessário
+                let devMap = {};
+                try {
+                    const { data: devsData } = await client.from('developments').select('*');
+                    if (devsData && Array.isArray(devsData)) {
+                        devsData.forEach(d => { if (d.id) devMap[d.id] = d; });
+                    }
+                } catch (e) {
+                    console.warn("Aviso na busca da tabela developments:", e);
+                }
+
+                ESTOQUE_GLOBAL = (unitsData || []).map(u => {
+                    const dev = devMap[u.development_id] || {};
+                    const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.name || 'Poema Liberdade';
+                    const construtoraNome = u.builder || u.construtora || dev.builder || dev.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
+
+                    const precoVal = parseFloat(u.list_price || u.precoTabela || u.preco || 0);
 
                     return {
                         id: u.id,
@@ -251,11 +277,12 @@
                         vagas: u.vagas !== undefined && u.vagas !== null ? parseInt(u.vagas) : 0,
                         tipologia: u.typology || u.tipologia || (u.dorms ? `${u.dorms} dorms` : 'Studio'),
                         income_type: u.income_type || u.enquadramento || 'R2V',
-                        precoTabela: parseFloat(u.list_price || u.precoTabela || u.preco || 0),
-                        is_ready: u.is_ready || false,
-                        is_third_party: u.is_third_party || false,
+                        precoTabela: precoVal,
+                        preco: precoVal,
+                        is_ready: Boolean(u.is_ready),
+                        is_third_party: Boolean(u.is_third_party),
                         
-                        // Engenharia Financeira
+                        // Engenharia Financeira intacta
                         val_ato: parseFloat(u.val_ato || 0),
                         val_30_60_90: parseFloat(u.val_30_60_90 || 0),
                         qtd_mensais: parseInt(u.qtd_mensais || 36),
@@ -512,7 +539,7 @@
             }
         }
 
-        // Executa imediatamente e no DOMContentLoaded para garantir a leitura do Supabase
+        // Execução direta ao carregar
         if (document.readyState === "loading") {
             window.addEventListener("DOMContentLoaded", carregarEstoqueSupabase);
         } else {
