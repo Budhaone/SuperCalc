@@ -67,25 +67,35 @@
             </div>
         </header>
 
-        <!-- IDENTIFICAÇÃO E DADOS DA UNIDADE SELECIONADA -->
+        <!-- IDENTIFICAÇÃO E DADOS DO CLIENTE E CORRETOR -->
         <section class="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2.5 text-xs md:text-sm">
             <div class="flex justify-between items-center border-b pb-1">
-                <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider">1. Dados do Cliente e Imóvel</h2>
+                <h2 class="font-bold text-slate-900 uppercase text-xs md:text-sm tracking-wider">1. Dados do Cliente e Corretor</h2>
                 <span id="badgeTipoModalidade" class="text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">
                     🏗️ EM CONSTRUÇÃO
                 </span>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input type="text" id="inputNomeCliente" placeholder="Digite o nome do cliente" class="border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
-                <input type="text" id="inputNomeCorretor" value="Wilson Wong" placeholder="Nome do Corretor" class="border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                <div>
+                    <label class="block text-[10px] md:text-xs text-slate-500 font-bold uppercase mb-0.5">Cliente</label>
+                    <input type="text" id="inputNomeCliente" placeholder="Digite o nome do cliente" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] md:text-xs text-slate-500 font-bold uppercase mb-0.5">Corretor</label>
+                    <input type="text" id="inputNomeCorretor" value="Wilson Wong" placeholder="Nome do Corretor" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                </div>
             </div>
 
-            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-2 text-slate-700 text-xs md:text-sm">
-                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Empreendimento</span><strong id="lockEmpreendimento" class="text-slate-900 font-black">---</strong></div>
-                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Unidade / Metragem</span><strong id="lockUnidadeM2" class="text-slate-900">---</strong></div>
-                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Construtora</span><strong id="lockConstrutora" class="text-slate-900">---</strong></div>
-                <div><span class="block text-[10px] md:text-xs text-slate-400 font-bold uppercase">Valor de Tabela</span><strong id="lockValorTabela" class="text-emerald-600 font-black">R$ 0,00</strong></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] md:text-xs text-slate-500 font-bold uppercase mb-0.5">CRECI do Corretor</label>
+                    <input type="text" id="inputCreciCorretor" value="120873F" placeholder="Ex: 120873F" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                </div>
+                <div>
+                    <label class="block text-[10px] md:text-xs text-slate-500 font-bold uppercase mb-0.5">Telefone / WhatsApp</label>
+                    <input type="text" id="inputFoneCorretor" value="(11) 98473-2980" placeholder="Ex: (11) 98473-2980" class="w-full border border-slate-300 p-2 rounded-lg font-medium text-xs md:text-sm">
+                </div>
             </div>
         </section>
 
@@ -103,7 +113,6 @@
                         <option value="PERC_TOT">% DO TOTAL</option>
                     </select>
                 </div>
-                <!-- TARJA DE DESTAQUE REFORÇADA -->
                 <div id="badgeAto" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                     Total Ato: R$ 0,00 (0.00%)
                 </div>
@@ -131,7 +140,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- TARJA DE DESTAQUE REFORÇADA -->
                     <div id="badgeEntrada" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                         3x de R$ 0,00 - Tot: R$ 0,00
                     </div>
@@ -157,7 +165,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- TARJA DE DESTAQUE REFORÇADA -->
                     <div id="badgeMensais" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                         36x de R$ 0,00 /mês - Tot: R$ 0,00
                     </div>
@@ -183,7 +190,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- TARJA DE DESTAQUE REFORÇADA -->
                     <div id="badgeAnuais" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                         3x de R$ 0,00 - Tot: R$ 0,00
                     </div>
@@ -199,7 +205,6 @@
                             <option value="PERC_TOT">% DO TOTAL</option>
                         </select>
                     </div>
-                    <!-- TARJA DE DESTAQUE REFORÇADA -->
                     <div id="badgeChaves" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                         Chaves (1x): R$ 0,00
                     </div>
@@ -315,11 +320,6 @@
 
             const empNome = unidadeAtual.empreendimento || unidadeAtual.emp || "Empreendimento";
             const incType = unidadeAtual.income_type || unidadeAtual.tipo || unidadeAtual.enquadramento || "R2V";
-
-            document.getElementById("lockEmpreendimento").innerText = empNome;
-            document.getElementById("lockUnidadeM2").innerText = `Apto ${unidadeAtual.unidade || '---'} (${unidadeAtual.m2 || 0} m²)`;
-            document.getElementById("lockConstrutora").innerText = unidadeAtual.construtora || "AAM Incorporadora";
-            document.getElementById("lockValorTabela").innerText = fmt(preco);
 
             // PREENCHIMENTO DO CABEÇALHO FIXO
             if (document.getElementById("hdrEmp")) {
@@ -492,6 +492,8 @@
 
             const nomeCliente = document.getElementById("inputNomeCliente").value.trim();
             const nomeCorretor = document.getElementById("inputNomeCorretor").value.trim() || 'Wilson Wong';
+            const creciCorretor = document.getElementById("inputCreciCorretor") ? document.getElementById("inputCreciCorretor").value.trim() : '120873F';
+            const foneCorretor = document.getElementById("inputFoneCorretor") ? document.getElementById("inputFoneCorretor").value.trim() : '(11) 98473-2980';
             const totalTabela = unidadeAtual.precoTabela || unidadeAtual.preco || 0;
             const empNome = unidadeAtual.empreendimento || unidadeAtual.emp || "Empreendimento";
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -536,7 +538,8 @@
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
             texto += `🏢 *Empreendimento:* ${empNome} (Apto ${unidadeAtual.unidade})\n`;
             texto += `📍 *Status:* ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
-            texto += `👔 *Corretor:* ${nomeCorretor}\n`;
+            texto += `👔 *Corretor:* ${nomeCorretor}${creciCorretor ? ' - CRECI ' + creciCorretor : ''}\n`;
+            if (foneCorretor) texto += `📱 *Contato:* ${foneCorretor}\n`;
             if (nomeCliente) texto += `👤 *Cliente:* ${nomeCliente}\n`;
             texto += `------------------------------------\n`;
             texto += `💰 *Valor de Tabela:* ${fmt(totalTabela)}\n\n`;
@@ -547,6 +550,9 @@
                 texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             } else {
                 texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
+                if (totChaves > 0) {
+                    texto += `• Parcela de Chaves: ${fmt(totChaves)}\n`;
+                }
                 if (totEntrada > 0) {
                     texto += `• Entrada 30/60/90 (${qtdEntrada}x): ${fmt(valEntradaUnit)} /cada\n`;
                 }
@@ -555,9 +561,6 @@
                 }
                 if (totAnuais > 0) {
                     texto += `• Intermediárias Anuais (${qtdAnuais}x): ${fmt(valAnualUnit)} /cada\n`;
-                }
-                if (totChaves > 0) {
-                    texto += `• Parcela de Chaves: ${fmt(totChaves)}\n`;
                 }
                 texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             }
