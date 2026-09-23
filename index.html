@@ -41,7 +41,7 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMPACTA (GRADE DUPLA NO CELULAR) -->
+        <!-- BARRA DE FILTROS COMPACTA -->
         <section class="bg-white p-2.5 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
             <div class="flex justify-between items-center border-b pb-1">
                 <h2 class="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros de Busca</h2>
@@ -124,7 +124,7 @@
             </div>
         </section>
 
-        <!-- LISTA COMPACTA EM CARTÕES SIMPLIFICADOS POR COLUNA -->
+        <!-- LISTA COMPACTA EM ESTRUTURA DE 3 COLUNAS POR CARTÃO -->
         <main class="space-y-2" id="containerEstoque">
             <!-- Renderizado dinamicamente -->
         </main>
@@ -142,7 +142,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
                         <label class="block font-bold text-slate-700 mb-0.5">Empreendimento *</label>
-                        <input type="text" id="addEmpreendimento" required placeholder="Ex: Poema Liberdade" class="w-full border p-2 rounded-lg font-medium">
+                        <input type="text" id="addEmpreendimento" required placeholder="Ex: Sky Pinheiros" class="w-full border p-2 rounded-lg font-medium">
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-0.5">Nº Unidade *</label>
@@ -205,7 +205,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA COMPATÍVEL -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E MAPEAMENTO CORRETO DOS EMPREENDIMENTOS -->
     <script>
         let ESTOQUE_GLOBAL = [];
 
@@ -215,14 +215,6 @@
             if (typeof window.supabase !== 'undefined' && window.supabase && typeof window.supabase.from === 'function') return window.supabase;
             if (typeof supabase !== 'undefined' && supabase && typeof supabase.from === 'function') return supabase;
             if (typeof window._supabase !== 'undefined' && window._supabase) return window._supabase;
-            
-            // Instanciação emergencial caso exista a biblioteca Supabase e chaves globais
-            if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
-                if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
-                    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                    return window.supabaseClient;
-                }
-            }
             return null;
         }
 
@@ -238,7 +230,20 @@
                     return;
                 }
 
-                // 1. Busca unidades diretamente
+                // 1. Busca empreendimentos primeiro para mapear IDs UUID aos nomes reais (Sky, NOW, Poema, etc.)
+                let devMap = {};
+                try {
+                    const { data: devsData } = await client.from('developments').select('*');
+                    if (devsData && Array.isArray(devsData)) {
+                        devsData.forEach(d => { 
+                            if (d.id) devMap[d.id] = d; 
+                        });
+                    }
+                } catch (e) {
+                    console.warn("Aviso na consulta da tabela developments:", e);
+                }
+
+                // 2. Busca de unidades
                 const { data: unitsData, error: unitsError } = await client.from('units').select('*');
 
                 if (unitsError) {
@@ -248,20 +253,10 @@
                     return;
                 }
 
-                // 2. Busca opcional de empreendimentos para enriquecer nomes caso necessário
-                let devMap = {};
-                try {
-                    const { data: devsData } = await client.from('developments').select('*');
-                    if (devsData && Array.isArray(devsData)) {
-                        devsData.forEach(d => { if (d.id) devMap[d.id] = d; });
-                    }
-                } catch (e) {
-                    console.warn("Aviso na busca da tabela developments:", e);
-                }
-
                 ESTOQUE_GLOBAL = (unitsData || []).map(u => {
+                    // Mapeamento dinâmico sem forçar nome fixo
                     const dev = devMap[u.development_id] || {};
-                    const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.name || 'Poema Liberdade';
+                    const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.name || dev.empreendimento || (u.is_third_party ? 'Imóvel Avulso / Terceiro' : 'Empreendimento');
                     const construtoraNome = u.builder || u.construtora || dev.builder || dev.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
 
                     const precoVal = parseFloat(u.list_price || u.precoTabela || u.preco || 0);
@@ -282,7 +277,7 @@
                         is_ready: Boolean(u.is_ready),
                         is_third_party: Boolean(u.is_third_party),
                         
-                        // Engenharia Financeira intacta
+                        // Engenharia Financeira
                         val_ato: parseFloat(u.val_ato || 0),
                         val_30_60_90: parseFloat(u.val_30_60_90 || 0),
                         qtd_mensais: parseInt(u.qtd_mensais || 36),
@@ -406,19 +401,14 @@
                 const isReady = item.is_ready;
 
                 const card = document.createElement("div");
-                card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-slate-400 transition grid grid-cols-1 sm:grid-cols-12 items-center gap-2 text-xs md:text-sm";
+                card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-slate-400 transition grid grid-cols-1 md:grid-cols-12 items-center gap-3 text-xs md:text-sm";
 
                 card.innerHTML = `
-                    <!-- 1. DADOS DO IMÓVEL (5 colunas desktop) -->
-                    <div class="sm:col-span-5 space-y-0.5">
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-black text-slate-900 text-sm md:text-base">${item.empreendimento}</span>
-                            <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-slate-200">${item.construtora}</span>
-                        </div>
-                        <div class="text-slate-600 font-medium flex flex-wrap items-center gap-1 text-[11px] md:text-xs">
+                    <!-- COLUNA 1: RESUMO DA UNIDADE (SEM CONSTRUTORA) -->
+                    <div class="md:col-span-6 space-y-0.5">
+                        <div class="font-black text-slate-900 text-sm md:text-base">${item.empreendimento}</div>
+                        <div class="text-slate-600 font-medium flex flex-wrap items-center gap-1.5 text-[11px] md:text-xs">
                             <span class="text-amber-600 font-black">Apto ${item.unidade}</span>
-                            <span class="text-slate-300">•</span>
-                            <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] font-black uppercase">${item.income_type}</span>
                             <span class="text-slate-300">•</span>
                             <span class="font-bold text-slate-800">${item.m2} m²</span>
                             <span class="text-slate-300">•</span>
@@ -428,22 +418,25 @@
                         </div>
                     </div>
 
-                    <!-- 2. STATUS (2 colunas desktop) -->
-                    <div class="sm:col-span-2 text-left sm:text-center">
-                        <span class="inline-block px-2 py-0.5 rounded text-[10px] md:text-xs font-black uppercase ${isReady ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
-                            ${isReady ? '🏠 PRONTO' : '🏗️ EM OBRA'}
-                        </span>
+                    <!-- COLUNA 2: STATUS, TIPO DE RENDA E VALORES DE TABELA / M² -->
+                    <div class="md:col-span-4 flex flex-col justify-center space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] md:text-xs font-black uppercase ${isReady ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-blue-100 text-blue-800 border border-blue-200'}">
+                                ${isReady ? '🏠 PRONTO PARA MORAR' : '🏗️ EM CONSTRUÇÃO'}
+                            </span>
+                            <span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded text-[10px] md:text-xs font-black uppercase border border-amber-200">
+                                ${item.income_type}
+                            </span>
+                        </div>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sm md:text-base font-black text-slate-900">${fmt(item.precoTabela)}</span>
+                            <span class="text-[10px] md:text-xs text-emerald-600 font-bold">(${fmt(valM2)}/m²)</span>
+                        </div>
                     </div>
 
-                    <!-- 3. VALORES (3 colunas desktop) -->
-                    <div class="sm:col-span-3 text-left sm:text-right">
-                        <div class="text-sm md:text-base font-black text-slate-900">${fmt(item.precoTabela)}</div>
-                        <div class="text-[10px] md:text-xs text-emerald-600 font-bold">${fmt(valM2)}/m²</div>
-                    </div>
-
-                    <!-- 4. BOTÃO SIMULAR (2 colunas desktop) -->
-                    <div class="sm:col-span-2">
-                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center justify-center gap-1">
+                    <!-- COLUNA 3: BOTÃO DE SIMULAR -->
+                    <div class="md:col-span-2">
+                        <button onclick="enviarParaSuperCalc('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center justify-center gap-1">
                             ⚡ Simular
                         </button>
                     </div>
@@ -539,7 +532,7 @@
             }
         }
 
-        // Execução direta ao carregar
+        // Execução ao carregar a página
         if (document.readyState === "loading") {
             window.addEventListener("DOMContentLoaded", carregarEstoqueSupabase);
         } else {
