@@ -183,7 +183,6 @@
                     <input type="number" id="valFinanciamento" value="0" step="100" oninput="onFinanciamentoChange()" class="w-full border border-slate-300 p-2.5 rounded-lg font-black text-slate-900 text-base bg-white">
                     <span id="percFinanciamento" class="font-black text-slate-900 text-sm min-w-[70px] text-right">0.00%</span>
                 </div>
-                <!-- Alerta de financiamento acima de 80% -->
                 <div id="alertaTetoFinanciamento" class="hidden p-2.5 bg-amber-100 text-amber-900 rounded-lg text-[11px] font-bold border border-amber-300 mt-2">
                     ⚠️ Atenção: Financiamento acima de 80%. Operações de 85% a 90% dependem de análise especial de crédito bancário.
                 </div>
@@ -226,7 +225,6 @@
         </section>
     </div>
 
-    <!-- SCRIPT DE CÁLCULO E INICIALIZAÇÃO -->
     <script>
         let unidadeAtual = null;
         let ePronto = false;
@@ -261,7 +259,6 @@
                 badgeModalidade.className = "text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
                 secaoObra.style.display = "none";
                 
-                // Padrão Imóvel Pronto: 30% Ato e 70% Financiamento
                 document.getElementById("valAto").value = (preco * 0.30).toFixed(2);
                 document.getElementById("valFinanciamento").value = (preco * 0.70).toFixed(2);
             } else {
@@ -275,8 +272,8 @@
                 document.getElementById("valMensais").value = unidadeAtual.val_mensal_unit > 0 ? unidadeAtual.val_mensal_unit : (preco * 0.10 / 36).toFixed(2);
                 document.getElementById("qtdAnuais").value = unidadeAtual.qtd_anuais > 0 ? unidadeAtual.qtd_anuais : 3;
                 document.getElementById("valAnuais").value = unidadeAtual.val_anual_unit > 0 ? unidadeAtual.val_anual_unit : (preco * 0.05 / 3).toFixed(2);
-                document.getElementById("valChaves").value = unidadeAtual.val_chaves_unica > 0 ? unidadeAtual.val_chaves_unica : 0;
-                document.getElementById("valFinanciamento").value = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : (preco * 0.60).toFixed(2);
+                document.getElementById("valChaves").value = unidadeAtual.val_chaves_unica > 0 ? unidadeAtual.val_chaves_unica : (preco * 0.05).toFixed(2);
+                document.getElementById("valFinanciamento").value = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : (preco * 0.65).toFixed(2);
             }
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -351,7 +348,6 @@
 
             const somaEntradas = totAto + totEntrada + totMensais + totAnuais + totChaves;
 
-            // BALANCEAMENTO AUTOMÁTICO DE FINANCIAMENTO PARA IMÓVEIS PRONTOS
             let totFinanciamentoDigitado = parseFloat(document.getElementById("valFinanciamento").value) || 0;
             if (ePronto && !usuarioEditandoFinanciamento) {
                 totFinanciamentoDigitado = totalTabela - totAto;
@@ -369,7 +365,6 @@
             const percFinan = (totFinanciamentoDigitado / totalTabela) * 100;
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
 
-            // Alerta se financiamento ultrapassar 80%
             const elAlertaFinan = document.getElementById("alertaTetoFinanciamento");
             if (percFinan > 80.01) {
                 elAlertaFinan.classList.remove("hidden");
@@ -419,7 +414,7 @@
                 txtDiff.className = "text-blue-600 font-black";
                 txtDiffHeader.innerText = `+ ${fmt(diferencaBalanca)}`;
                 txtDiffHeader.className = "text-blue-400 font-bold";
-                badgeHeader.innerText = `PROPOSTAS SUPERIOR À TABELA (+${fmt(diferencaBalanca)})`;
+                badgeHeader.innerText = `PROPOSTA SUPERIOR À TABELA (+${fmt(diferencaBalanca)})`;
                 badgeHeader.className = "px-3 py-1 rounded-full text-[10px] uppercase inline-block status-info";
             }
         }
@@ -452,33 +447,78 @@
             const totalTabela = unidadeAtual.precoTabela || unidadeAtual.preco || 0;
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+            // 1. ATO
             const valAtoRaw = parseFloat(document.getElementById("valAto").value) || 0;
             const modeAto = document.getElementById("modeAto").value;
             let totAto = modeAto === 'PERC_TOT' ? (totalTabela * (valAtoRaw / 100)) : valAtoRaw;
-            let percAto = (totAto / totalTabela) * 100;
+            let percAto = totalTabela > 0 ? (totAto / totalTabela) * 100 : 0;
 
+            // 2. FINANCIAMENTO
             const totFin = parseFloat(document.getElementById("valFinanciamento").value) || 0;
-            const somaEntradas = parseFloat(document.getElementById("txtSomaEntradas").innerText.replace(/[R$\s.]/g, '').replace(',', '.')) || totAto;
-            const totalProposta = somaEntradas + totFin;
-            const diferenca = totalProposta - totalTabela;
+            const percFin = totalTabela > 0 ? (totFin / totalTabela) * 100 : 0;
+
+            // OBRA - CÁLCULOS UNITÁRIOS
+            let qtdEntrada = parseInt(document.getElementById("qtdEntrada")?.value) || 0;
+            let valEntradaRaw = parseFloat(document.getElementById("valEntrada")?.value) || 0;
+            let modeEntrada = document.getElementById("modeEntrada")?.value;
+            let totEntrada = qtdEntrada > 0 ? (modeEntrada === 'PERC_TOT' ? (totalTabela * (valEntradaRaw / 100)) : (modeEntrada === 'PARC_R' ? valEntradaRaw * qtdEntrada : valEntradaRaw)) : 0;
+            let valEntradaUnit = qtdEntrada > 0 ? totEntrada / qtdEntrada : 0;
+
+            let qtdMensais = parseInt(document.getElementById("qtdMensais")?.value) || 0;
+            let valMensaisRaw = parseFloat(document.getElementById("valMensais")?.value) || 0;
+            let modeMensais = document.getElementById("modeMensais")?.value;
+            let totMensais = qtdMensais > 0 ? (modeMensais === 'PERC_TOT' ? (totalTabela * (valMensaisRaw / 100)) : (modeMensais === 'PARC_R' ? valMensaisRaw * qtdMensais : valMensaisRaw)) : 0;
+            let valMensalUnit = qtdMensais > 0 ? totMensais / qtdMensais : 0;
+
+            let qtdAnuais = parseInt(document.getElementById("qtdAnuais")?.value) || 0;
+            let valAnuaisRaw = parseFloat(document.getElementById("valAnuais")?.value) || 0;
+            let modeAnuais = document.getElementById("modeAnuais")?.value;
+            let totAnuais = qtdAnuais > 0 ? (modeAnuais === 'PERC_TOT' ? (totalTabela * (valAnuaisRaw / 100)) : (modeAnuais === 'PARC_R' ? valAnuaisRaw * qtdAnuais : valAnuaisRaw)) : 0;
+            let valAnualUnit = qtdAnuais > 0 ? totAnuais / qtdAnuais : 0;
+
+            let valChavesRaw = parseFloat(document.getElementById("valChaves")?.value) || 0;
+            let modeChaves = document.getElementById("modeChaves")?.value;
+            let totChaves = ePronto ? 0 : (modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw);
+
+            const totalProposta = ePronto 
+                ? (totAto + totFin) 
+                : (totAto + totEntrada + totMensais + totAnuais + totChaves + totFin);
 
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
-            if (nomeCliente) texto += `👤 A/C Cliente: ${nomeCliente}\n`;
-            texto += `🏢 Empreendimento: ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n`;
-            texto += `📍 Status: ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
-            texto += `👔 Corretor: ${nomeCorretor}\n`;
+            texto += `🏢 *Empreendimento:* ${unidadeAtual.empreendimento} (Apto ${unidadeAtual.unidade})\n`;
+            texto += `📍 *Status:* ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
+            texto += `👔 *Corretor:* ${nomeCorretor}\n`;
+            if (nomeCliente) texto += `👤 *Cliente:* ${nomeCliente}\n`;
             texto += `------------------------------------\n`;
-            texto += `💰 Valor de Tabela: ${fmt(totalTabela)}\n`;
-            texto += `📊 Total da Proposta: ${fmt(totalProposta)}\n`;
-            texto += `⚖️ Diferença / Ajuste: ${fmt(diferenca)}\n\n`;
+            texto += `💰 *Valor de Tabela:* ${fmt(totalTabela)}\n\n`;
             texto += `*CONDIÇÕES PROPOSTAS:*\n`;
-            texto += `• Entrada / Sinal: ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
-            texto += `• Saldo Financiado / Recursos Próprios: ${fmt(totFin)}\n`;
+
+            if (ePronto) {
+                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} (${percAto.toFixed(2)}%)\n`;
+                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} (${percFin.toFixed(2)}%)\n`;
+            } else {
+                texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} (${percAto.toFixed(2)}%)\n`;
+                if (totChaves > 0) {
+                    texto += `• Parcela de Chaves: ${fmt(totChaves)}\n`;
+                }
+                if (totEntrada > 0) {
+                    texto += `• Entrada 30/60/90 (${qtdEntrada}x): ${fmt(valEntradaUnit)} /cada\n`;
+                }
+                if (totMensais > 0) {
+                    texto += `• Mensais de Obra (${qtdMensais}x): ${fmt(valMensalUnit)} /mês\n`;
+                }
+                if (totAnuais > 0) {
+                    texto += `• Intermediárias Anuais (${qtdAnuais}x): ${fmt(valAnualUnit)} /cada\n`;
+                }
+                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} (${percFin.toFixed(2)}%)\n`;
+            }
+
             texto += `------------------------------------\n`;
-            texto += `_Obs: Proposta sujeita a aprovação de crédito bancário._`;
+            texto += `*TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n`;
+            texto += `\n_Obs: Proposta sujeita a aprovação de crédito bancário._`;
 
             navigator.clipboard.writeText(texto);
-            alert("Proposta comercial copiada com sucesso para a área de transferência!");
+            alert("Proposta comercial copiada com sucesso para o WhatsApp!");
         }
 
         inicializarDadosUnidade();
