@@ -272,21 +272,10 @@
                     return;
                 }
 
-                // 1. Mapeamento de Empreendimentos
-                let devMap = {};
-                try {
-                    const { data: devsData } = await sb.from('developments').select('*');
-                    if (devsData && Array.isArray(devsData)) {
-                        devsData.forEach(d => { if (d.id) devMap[d.id] = d; });
-                    }
-                } catch (e) {
-                    console.warn("Aviso na consulta da tabela developments:", e);
-                }
-
-                // 2. Busca de Unidades
+                // Busca Unidades com relação a Developments (*)
                 const { data, error } = await sb
                     .from('units')
-                    .select('*, developments(title, name, builder, address, is_ready, delivery_date)');
+                    .select('*, developments(*)');
 
                 if (error) {
                     console.error("Erro ao buscar unidades do Supabase:", error);
@@ -297,10 +286,10 @@
 
                 if (data) {
                     unidadesGlobais = data.map(u => {
-                        const dev = devMap[u.development_id] || u.developments || {};
+                        const dev = u.developments || {};
                         
-                        // Leitura do Nome Real do Empreendimento sem Fallback Fixo
-                        const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.title || dev.name || (u.is_third_party ? 'Imóvel Avulso / Terceiro' : 'Empreendimento');
+                        // Leitura do Nome Real do Empreendimento usando a coluna title da tabela developments
+                        const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.title || (u.is_third_party ? 'Imóvel Avulso / Terceiro' : 'Empreendimento');
                         const builder = dev.builder || u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
                         const isGlobal = !u.is_third_party && !builder.toLowerCase().includes('terceiros') && !builder.toLowerCase().includes('avulso');
                         
