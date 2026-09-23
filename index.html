@@ -40,11 +40,23 @@
             </div>
         </header>
 
-        <!-- FILTROS AVANÇADOS -->
+        <!-- FILTROS AVANÇADOS COM ORDENAÇÃO POR VALOR E M² -->
         <section class="bg-white p-3 sm:p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-            <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados de Busca</h2>
+            <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider border-b pb-2">Filtros Avançados & Ordenação</h2>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-3">
+                <!-- SELETOR DE ORDENAÇÃO R$ E R$/M² -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Ordenar Resultados Por</label>
+                    <select id="filtroOrdenacao" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-emerald-900 bg-emerald-50 focus:bg-white outline-none">
+                        <option value="PADRAO">🏢 Pavimento / Andar (Padrão)</option>
+                        <option value="PRECO_ASC">💲 Menor Preço Total (R$)</option>
+                        <option value="PRECO_DESC">💎 Maior Preço Total (R$)</option>
+                        <option value="M2_ASC">📐 Menor Valor por m² (R$/m²)</option>
+                        <option value="M2_DESC">🏆 Maior Valor por m² (R$/m²)</option>
+                    </select>
+                </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Incorporadora / Origem</label>
                     <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
@@ -52,12 +64,14 @@
                         <option value="PRIVADO">🔒 Inventário Privado</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Empreendimento</label>
                     <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
                         <option value="TODOS">Todos os Empreendimentos</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Enquadramento / Renda</label>
                     <select id="filtroTipoRenda" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-amber-900 bg-amber-50 focus:bg-white outline-none">
@@ -68,12 +82,14 @@
                         <option value="NR">NR (Non-Residential)</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Metragem Privativa (m²)</label>
                     <select id="filtroMetragem" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-bold text-purple-900 bg-purple-50 focus:bg-white outline-none">
                         <option value="TODAS">Todas as Metragens</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Status da Entrega</label>
                     <select id="filtroStatusEntrega" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
@@ -82,6 +98,7 @@
                         <option value="OBRA">🏗️ Em Construção</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Vagas de Garagem</label>
                     <select id="filtroVagas" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
@@ -90,6 +107,7 @@
                         <option value="2">2+ Vagas</option>
                     </select>
                 </div>
+
                 <div>
                     <label class="block text-[11px] font-bold text-slate-600 mb-0.5">Nº da Unidade</label>
                     <input type="text" id="filtroUnidadeTexto" placeholder="Ex: 1713" oninput="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2 text-xs font-medium bg-slate-50 focus:bg-white outline-none">
@@ -110,7 +128,7 @@
                                 <th class="p-2.5 sm:p-3">Empreendimento / Unidade</th>
                                 <th class="p-2.5 sm:p-3">Tipologia / m²</th>
                                 <th class="p-2.5 sm:p-3">Vagas</th>
-                                <th class="p-2.5 sm:p-3">Preço Tabela</th>
+                                <th class="p-2.5 sm:p-3">Preço / Valor m²</th>
                                 <th class="p-2.5 sm:p-3 text-center">Ações</th>
                             </tr>
                         </thead>
@@ -146,6 +164,7 @@
                         const entregaObra = u.data_entrega || (u.developments?.delivery_date ? u.developments.delivery_date.substring(0, 7) : "2029-12");
                         const ePronto = u.developments?.is_ready || (entregaObra <= mesAtual);
                         const preco = parseFloat(u.list_price) || 0;
+                        const areaM2 = parseFloat(u.private_area_m2) || 1;
                         const construtoraNome = u.developments?.builder || u.developments?.developer_name || "Incorporadora";
 
                         return {
@@ -161,14 +180,14 @@
                             tipo: u.typology || "Studio",
                             typologyRaw: u.typology || "",
                             vagas: parseInt(u.parking_spaces) || 0,
-                            m2: parseFloat(u.private_area_m2) || 0,
+                            m2: areaM2,
                             precoTabela: preco,
-                            preco: preco,
+                            precoM2: preco / areaM2, // CÁLCULO DINÂMICO DO VALOR POR M²
                             entregaObra: entregaObra,
                             dataEntrega: entregaObra,
                             is_ready: ePronto,
 
-                            // MAPEAMENTO DO FLUXO FINANCEIRO COMPLETO
+                            // MAPEAMENTO FINANCEIRO COMPLETO PRESERVADO
                             val_ato: parseFloat(u.val_ato) || 0,
                             valAto: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
@@ -182,7 +201,6 @@
                             val_semestral_unit: parseFloat(u.val_semestral_unit) || parseFloat(u.val_anual_unit) || 0,
                             valAnualUnit: parseFloat(u.val_anual_unit) || parseFloat(u.val_semestral_unit) || 0,
                             
-                            // COLUNAS INDEPENDENTES
                             val_periodicidade: parseFloat(u.val_periodicidade) || 0,
                             valPeriodicidade: parseFloat(u.val_periodicidade) || 0,
                             val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
@@ -190,12 +208,6 @@
                             val_financiamento: parseFloat(u.val_financiamento) || 0,
                             valFinanciamento: parseFloat(u.val_financiamento) || 0
                         };
-                    });
-
-                    // Ordenação Lexicográfica / Humana (Andar depois Apto)
-                    ESTOQUE_MOCK.sort((a, b) => {
-                        if (a.pavimento !== b.pavimento) return a.pavimento - b.pavimento;
-                        return a.unidade.localeCompare(b.unidade, undefined, { numeric: true });
                     });
 
                     atualizarOpcoesMetragens();
@@ -261,6 +273,7 @@
             const statusEntrega = document.getElementById("filtroStatusEntrega").value;
             const vagas = parseInt(document.getElementById("filtroVagas").value) || 0;
             const buscaTexto = document.getElementById("filtroUnidadeTexto").value.toLowerCase().trim();
+            const ordenacao = document.getElementById("filtroOrdenacao").value;
 
             const filtrados = ESTOQUE_MOCK.filter(item => {
                 const bateConstrutora = construtora === "TODAS" || construtora === "TODOS" || (construtora === "PRIVADO" ? item.origem === "PRIVADO" : item.construtora === construtora);
@@ -272,6 +285,18 @@
                 const bateTexto = buscaTexto === "" || item.unidade.toLowerCase().includes(buscaTexto) || item.empreendimento.toLowerCase().includes(buscaTexto);
 
                 return bateConstrutora && bateEmpreendimento && bateMetragem && bateTipoRenda && bateStatus && bateVagas && bateTexto;
+            });
+
+            // LÓGICA DE ORDENAÇÃO DINÂMICA
+            filtrados.sort((a, b) => {
+                if (ordenacao === "PRECO_ASC") return a.precoTabela - b.precoTabela;
+                if (ordenacao === "PRECO_DESC") return b.precoTabela - a.precoTabela;
+                if (ordenacao === "M2_ASC") return a.precoM2 - b.precoM2;
+                if (ordenacao === "M2_DESC") return b.precoM2 - a.precoM2;
+
+                // ORDENAÇÃO PADRÃO: PAVIMENTO E DEPOIS NÚMERO DA UNIDADE
+                if (a.pavimento !== b.pavimento) return a.pavimento - b.pavimento;
+                return a.unidade.localeCompare(b.unidade, undefined, { numeric: true });
             });
 
             renderizarTabela(filtrados);
@@ -306,7 +331,10 @@
                         <div class="text-[11px] font-bold text-purple-900">${item.m2.toFixed(2).replace('.', ',')} m²</div>
                     </td>
                     <td class="p-2.5 sm:p-3 font-bold text-slate-700">${item.vagas} vaga(s)</td>
-                    <td class="p-2.5 sm:p-3 font-black text-slate-900 text-xs sm:text-sm">${fmt(item.precoTabela)}</td>
+                    <td class="p-2.5 sm:p-3">
+                        <div class="font-black text-slate-900 text-xs sm:text-sm">${fmt(item.precoTabela)}</div>
+                        <div class="text-[10px] font-bold text-emerald-700">${fmt(item.precoM2)} / m²</div>
+                    </td>
                     <td class="p-2.5 sm:p-3 text-center">
                         <button onclick="enviarParaSuperCalc('${item.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition shadow-sm">
                             ⚡ Simular
