@@ -159,9 +159,29 @@
             </div>
         </section>
 
-        <!-- MAIN LIST: FORMATO DE CARTÕES COMPACTOS EM 3 COLUNAS -->
-        <main class="space-y-2" id="containerEstoque">
-            <!-- Renderizado dinamicamente -->
+        <!-- INDICADOR DE CONTAGEM DE UNIDADES ENCONTRADAS -->
+        <div class="px-1 pt-1">
+            <span id="txtCountEncontrados" class="text-xs md:text-sm font-black text-slate-700 uppercase tracking-wider">0 UNIDADE(S) ENCONTRADA(S)</span>
+        </div>
+
+        <!-- TABELA EM CONTAINER DE ROLAGEM HORIZONTAL -->
+        <main class="space-y-2">
+            <div id="containerTabela" class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+                <table class="w-full text-left text-xs border-collapse min-w-[720px]">
+                    <thead class="bg-slate-900 text-white uppercase text-[10px] md:text-xs tracking-wider">
+                        <tr>
+                            <th class="p-3">EMPREENDIMENTO / UNIDADE</th>
+                            <th class="p-3">TIPOLOGIA / M²</th>
+                            <th class="p-3">VAGAS</th>
+                            <th class="p-3">PREÇO / VALOR M²</th>
+                            <th class="p-3 text-center">AÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyEstoque" class="divide-y divide-slate-100">
+                        <!-- Linhas renderizadas dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
         </main>
     </div>
 
@@ -241,7 +261,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA COMPATÍVEL -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E MONTAGEM DA TABELA -->
     <script>
         let unidadesGlobais = [];
         let filtroOrigemAtual = 'TODOS';
@@ -272,7 +292,6 @@
                     return;
                 }
 
-                // Busca Unidades com relação a Developments (*)
                 const { data, error } = await sb
                     .from('units')
                     .select('*, developments(*)');
@@ -288,12 +307,10 @@
                     unidadesGlobais = data.map(u => {
                         const dev = u.developments || {};
                         
-                        // Leitura do Nome Real do Empreendimento usando a coluna title da tabela developments
-                        const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.title || (u.is_third_party ? 'Imóvel Avulso / Terceiro' : 'Empreendimento');
+                        const empNome = u.development_name || u.empreendimento || u.emp || u.building || dev.title || dev.name || (u.is_third_party ? 'Imóvel Avulso / Terceiro' : 'Empreendimento');
                         const builder = dev.builder || u.builder || u.construtora || (u.is_third_party ? 'PRIVADO / TERCEIROS' : 'AAM Incorporadora');
                         const isGlobal = !u.is_third_party && !builder.toLowerCase().includes('terceiros') && !builder.toLowerCase().includes('avulso');
                         
-                        // Status de Obras estritamente verificado linha a linha
                         const isReady = u.is_ready !== undefined && u.is_ready !== null 
                             ? Boolean(u.is_ready) 
                             : Boolean(dev.is_ready);
@@ -320,7 +337,6 @@
                             is_third_party: !isGlobal,
                             data_entrega: u.data_entrega || dev.delivery_date || (isReady ? 'PRONTO' : '2029-12'),
                             
-                            // Valores Financeiros Estritos do Banco
                             val_ato: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
@@ -421,7 +437,6 @@
                 return bateOrigem && bateConst && bateEmp && bateIncome && bateStatus && bateDorms && bateVagas && bateM2 && batePreco && bateBusq;
             });
 
-            // Aplicação da Ordenação
             filtrados.sort((a, b) => {
                 if (ordenacao === 'PRECO_ASC') return a.preco - b.preco;
                 if (ordenacao === 'PRECO_DESC') return b.preco - a.preco;
@@ -433,80 +448,92 @@
             });
 
             document.getElementById('totalBadge').innerText = `${filtrados.length} Imóveis`;
-            renderizarCartoes(filtrados);
+            document.getElementById('txtCountEncontrados').innerText = `${filtrados.length} UNIDADE(S) ENCONTRADA(S)`;
+            renderizarTabela(filtrados);
         }
 
-        function renderizarCartoes(lista) {
-            const container = document.getElementById('containerEstoque');
-            container.innerHTML = "";
+        function renderizarTabela(lista) {
+            const tbody = document.getElementById('tbodyEstoque');
+            tbody.innerHTML = "";
 
             if (lista.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white p-6 rounded-xl text-center text-slate-500 border border-slate-200">
-                        <p class="font-bold text-sm">Nenhum imóvel encontrado com os filtros selecionados.</p>
-                        <p class="text-xs mt-1 text-slate-400">Tente redefinir a busca acima.</p>
-                    </div>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-6 text-center text-slate-500 font-bold">
+                            Nenhum imóvel encontrado com os filtros selecionados.
+                        </td>
+                    </tr>`;
                 return;
             }
 
             const fmt = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            lista.forEach(i => {
-                const card = document.createElement("div");
-                card.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-sm hover:border-slate-400 transition grid grid-cols-1 md:grid-cols-12 items-center gap-3 text-xs md:text-sm";
+            tbody.innerHTML = lista.map(i => {
+                const fmtM2 = i.m2 ? i.m2.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
+                const precoM2Str = fmt(i.precoM2);
+                const precoStr = fmt(i.preco);
 
-                card.innerHTML = `
-                    <!-- COLUNA 1: RESUMO DA UNIDADE (SEM NOME DA CONSTRUTORA) -->
-                    <div class="md:col-span-6 space-y-0.5">
-                        <div class="font-black text-slate-900 text-sm md:text-base">${i.empreendimento}</div>
-                        <div class="text-slate-600 font-medium flex flex-wrap items-center gap-1.5 text-[11px] md:text-xs">
-                            <span class="text-amber-600 font-black">Apto ${i.unidade}</span>
-                            <span class="text-slate-300">•</span>
-                            <span class="font-bold text-slate-800">${i.m2} m²</span>
-                            <span class="text-slate-300">•</span>
-                            <span class="text-slate-500">${i.pavimento}º Andar</span>
-                            <span class="text-slate-300">•</span>
-                            <span class="text-slate-500">${i.tipologia}</span>
-                        </div>
-                    </div>
+                const isReadyTag = i.is_ready 
+                    ? `<span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-emerald-200">PRONTO</span>`
+                    : `<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-blue-200">EM OBRA</span>`;
 
-                    <!-- COLUNA 2: STATUS DA OBRA, ENQUADRAMENTO E VALORES -->
-                    <div class="md:col-span-4 flex flex-col justify-center space-y-1">
-                        <div class="flex items-center gap-1.5">
-                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-black uppercase ${i.is_ready ? 'bg-teal-100 text-teal-800 border border-teal-200' : 'bg-amber-100 text-amber-800 border border-amber-200'}">
-                                ${i.is_ready ? '🏠 PRONTO' : '🏗️ EM OBRA'}
-                            </span>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${getBadgeClass(i.income_type)}">
-                                ${i.income_type}
-                            </span>
-                        </div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-sm md:text-base font-black text-emerald-700">${fmt(i.preco)}</span>
-                            <span class="text-[10px] md:text-xs text-slate-500 font-medium">(${fmt(i.precoM2)}/m²)</span>
-                        </div>
-                    </div>
+                const origemTag = i.origem === 'GLOBAL'
+                    ? `<span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-sky-200">GLOBAL</span>`
+                    : `<span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px] font-bold uppercase border border-purple-200">PRIVADO</span>`;
 
-                    <!-- COLUNA 3: BOTÃO DE SIMULAR -->
-                    <div class="md:col-span-2">
-                        <button onclick='simular("${i.id}")' class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm transition shadow-sm flex items-center justify-center gap-1">
-                            ⚡ Simular
-                        </button>
-                    </div>
+                return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <!-- COLUNA 1: EMPREENDIMENTO / UNIDADE -->
+                        <td class="p-3 align-top min-w-[220px]">
+                            <div class="font-black text-slate-900 text-xs md:text-sm">
+                                ${i.empreendimento} — 
+                                <span class="text-purple-700 font-extrabold">Apto ${i.unidade}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 font-medium my-0.5">
+                                ${i.construtora} • ${i.pavimento}º Andar
+                            </div>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                ${origemTag}
+                                ${isReadyTag}
+                            </div>
+                        </td>
+
+                        <!-- COLUNA 2: TIPOLOGIA / M² -->
+                        <td class="p-3 align-top min-w-[130px]">
+                            <div class="font-bold text-slate-800 text-xs md:text-sm">
+                                ${i.tipologia}${i.income_type ? ` (${i.income_type})` : ''}
+                            </div>
+                            <div class="text-purple-700 font-extrabold text-xs md:text-sm">
+                                ${fmtM2} m²
+                            </div>
+                        </td>
+
+                        <!-- COLUNA 3: VAGAS -->
+                        <td class="p-3 align-top min-w-[100px]">
+                            <div class="font-bold text-slate-800 text-xs md:text-sm">
+                                ${i.vagas} vaga(s)
+                            </div>
+                        </td>
+
+                        <!-- COLUNA 4: PREÇO / VALOR M² -->
+                        <td class="p-3 align-top min-w-[160px]">
+                            <div class="font-black text-slate-900 text-xs md:text-sm">
+                                ${precoStr}
+                            </div>
+                            <div class="text-emerald-600 font-bold text-[11px] md:text-xs">
+                                ${precoM2Str} / m²
+                            </div>
+                        </td>
+
+                        <!-- COLUNA 5: AÇÃO -->
+                        <td class="p-3 align-middle text-center min-w-[110px]">
+                            <button onclick='simular("${i.id}")' class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3.5 rounded-lg text-xs transition shadow-sm inline-flex items-center justify-center gap-1">
+                                ⚡ Simular
+                            </button>
+                        </td>
+                    </tr>
                 `;
-
-                container.appendChild(card);
-            });
-        }
-
-        function getBadgeClass(type) {
-            switch(type) {
-                case 'HIS': return 'bg-purple-100 text-purple-800 border border-purple-200';
-                case 'HMP': return 'bg-orange-100 text-orange-800 border border-orange-200';
-                case 'R2V': return 'bg-blue-100 text-blue-800 border border-blue-200';
-                case 'NR':  return 'bg-pink-100 text-pink-800 border border-pink-200';
-                case 'LOJA': return 'bg-amber-100 text-amber-800 border border-amber-200';
-                default:    return 'bg-slate-100 text-slate-800 border border-slate-200';
-            }
+            }).join('');
         }
 
         function simular(id) {
@@ -516,7 +543,6 @@
                 return;
             }
 
-            // Payload 100% fidedigno e sem valores forçados
             const payload = {
                 id: item.id,
                 empreendimento: item.empreendimento,
