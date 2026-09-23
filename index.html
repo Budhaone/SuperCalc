@@ -41,14 +41,14 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS COMPACTA (GRADE DUPLA NO CELULAR) -->
+        <!-- BARRA DE FILTROS COMPACTA -->
         <section class="bg-white p-2.5 md:p-4 rounded-xl shadow-sm border border-slate-200 space-y-2">
             <div class="flex justify-between items-center border-b pb-1">
                 <h2 class="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros de Busca</h2>
                 <button onclick="limparFiltros()" class="text-[11px] text-blue-600 font-bold hover:underline">Limpar Filtros</button>
             </div>
 
-            <!-- GRADE COMPACTA DE 2 COLUNAS NO CELULAR E 4 NO DESKTOP -->
+            <!-- GRADE COMPACTA DOS FILTROS -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                 <!-- 1. Incorporadora -->
                 <div>
@@ -205,14 +205,13 @@
         </div>
     </div>
 
-    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA RESILIENTE -->
+    <!-- SCRIPT INTEGRAÇÃO SUPABASE E BUSCA -->
     <script>
         let ESTOQUE_GLOBAL = [];
 
-        // Identificador resiliente do cliente Supabase
-        function getSupabase() {
-            if (window.supabaseClient) return window.supabaseClient;
-            if (window.supabase && typeof window.supabase.from === 'function') return window.supabase;
+        function obterClienteSupabase() {
+            if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) return window.supabaseClient;
+            if (typeof window.supabase !== 'undefined' && window.supabase && typeof window.supabase.from === 'function') return window.supabase;
             if (typeof supabase !== 'undefined' && typeof supabase.from === 'function') return supabase;
             return null;
         }
@@ -221,20 +220,18 @@
             try {
                 exibirLoading(true);
 
-                const sb = getSupabase();
-                if (!sb) {
-                    console.error("Cliente Supabase não encontrado em window.supabaseClient nem em window.supabase.");
-                    alert("Atenção: Configuração do Supabase não foi detectada. Verifique o arquivo supabase-config.js.");
+                const client = obterClienteSupabase();
+                if (!client) {
+                    console.error("Cliente Supabase não encontrado.");
                     exibirLoading(false);
                     return;
                 }
 
-                // Busca direta na tabela units para evitar travamento por Join
-                const { data, error } = await sb.from('units').select('*');
+                const { data, error } = await client.from('units').select('*');
 
                 if (error) {
-                    console.error("Erro na consulta Supabase:", error);
-                    alert("Erro ao consultar o banco de dados: " + (error.message || "Falha na conexão"));
+                    console.error("Erro na busca de unidades do Supabase:", error);
+                    alert("Erro ao buscar unidades do Supabase: " + (error.message || "Erro desconhecido"));
                     exibirLoading(false);
                     return;
                 }
@@ -258,7 +255,7 @@
                         is_ready: u.is_ready || false,
                         is_third_party: u.is_third_party || false,
                         
-                        // Engenharia do Fluxo
+                        // Engenharia Financeira
                         val_ato: parseFloat(u.val_ato || 0),
                         val_30_60_90: parseFloat(u.val_30_60_90 || 0),
                         qtd_mensais: parseInt(u.qtd_mensais || 36),
@@ -276,7 +273,7 @@
                 filtrarEstoque();
 
             } catch (err) {
-                console.error("Erro crítico ao processar o banco:", err);
+                console.error("Erro no processamento:", err);
             } finally {
                 exibirLoading(false);
             }
@@ -469,9 +466,9 @@
         async function salvarImovelPrivado(e) {
             e.preventDefault();
 
-            const sb = getSupabase();
-            if (!sb) {
-                alert("Erro ao conectar com Supabase.");
+            const client = obterClienteSupabase();
+            if (!client) {
+                alert("Erro ao conectar com o Supabase.");
                 return;
             }
 
@@ -491,7 +488,7 @@
 
             exibirLoading(true);
 
-            const { data, error } = await sb.from('units').insert([novoItem]).select();
+            const { data, error } = await client.from('units').insert([novoItem]).select();
 
             exibirLoading(false);
 
@@ -515,8 +512,12 @@
             }
         }
 
-        // Inicialização ao carregar a página
-        window.addEventListener("DOMContentLoaded", carregarEstoqueSupabase);
+        // Executa imediatamente e no DOMContentLoaded para garantir a leitura do Supabase
+        if (document.readyState === "loading") {
+            window.addEventListener("DOMContentLoaded", carregarEstoqueSupabase);
+        } else {
+            carregarEstoqueSupabase();
+        }
     </script>
 </body>
 </html>
