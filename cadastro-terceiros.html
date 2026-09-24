@@ -1,219 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperCalc - Cadastro de Terceiros e Distratos</title>
-    <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-</head>
-<body class="bg-slate-100 font-sans text-slate-800 min-h-screen p-3 md:p-6">
-
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
-        
-        <!-- CABEÇALHO -->
-        <div class="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center gap-3">
-            <div>
-                <h1 class="text-xl font-black tracking-tight text-amber-400">➕ Cadastrar Imóvel Terceiro / Distrato</h1>
-                <p class="text-xs text-slate-400">Inventário Privado, Captados e Retorno ao Espelho de Vendas</p>
-            </div>
-            <a href="index.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700">
-                ← Voltar à Prateleira
-            </a>
-        </div>
-
-        <form id="formCadastroTerceiro" onsubmit="salvarEEnviar(event)" class="p-5 md:p-8 space-y-6">
-
-            <!-- 1. IDENTIFICAÇÃO E TIPO DE CONTRATO -->
-            <div class="space-y-3">
-                <h2 class="text-xs font-black uppercase text-slate-400 tracking-wider">1. Identificação do Imóvel</h2>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Empreendimento *</label>
-                        <select id="selectEmpreendimento" onchange="tratarSelecaoEmpreendimento()" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none">
-                            <option value="poema-liberdade">Poema Liberdade</option>
-                            <option value="now-butanta">NOW Butantã</option>
-                            <option value="sky-pinheiros">Sky Pinheiros</option>
-                            <option value="OUTRO">+ Outro Empreendimento / Avulso</option>
-                        </select>
-                    </div>
-
-                    <div id="boxOutroEmp" class="hidden">
-                        <label class="block text-xs font-bold mb-1">Nome do Prédio Novo *</label>
-                        <input type="text" id="inputOutroEmp" placeholder="Ex: Mansão Jardins" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Nº Unidade / Apto *</label>
-                        <input type="text" id="inputUnidade" required placeholder="Ex: 1204" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Andar / Pavimento</label>
-                        <input type="number" id="inputAndar" placeholder="Ex: 12" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Tipologia</label>
-                        <select id="selectTipologia" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                            <option value="Studio">Studio</option>
-                            <option value="1 Dorm">1 Dormitório</option>
-                            <option value="2 Dorms">2 Dormitórios</option>
-                            <option value="3 Dorms">3 Dormitórios</option>
-                            <option value="Loja">Loja / Comercial</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Enquadramento</label>
-                        <select id="selectIncomeType" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                            <option value="TERCEIROS">TERCEIROS / AVULSO</option>
-                            <option value="HIS">HIS (Social)</option>
-                            <option value="HMP">HMP (Médio Popular)</option>
-                            <option value="R2V">R2V (Livre Mercado)</option>
-                            <option value="NR">NR (Não Residencial)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Área Privativa (m²)</label>
-                        <input type="number" step="0.01" id="inputM2" placeholder="Ex: 35.50" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold mb-1">Vagas de Garagem</label>
-                        <input type="number" id="inputVagas" value="0" class="w-full bg-slate-50 border border-slate-300 p-2.5 rounded-xl text-sm font-bold">
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. ESTÁGIO DO IMÓVEL (PRONTO VS OBRA) -->
-            <div class="space-y-3 pt-3 border-t border-slate-200">
-                <h2 class="text-xs font-black uppercase text-slate-400 tracking-wider">2. Estágio e Construção</h2>
-                
-                <div class="flex items-center gap-6 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm">
-                        <input type="radio" name="radioEstagio" value="PRONTO" checked onchange="alternarEstagioObra()" class="w-4 h-4 text-amber-500">
-                        🏠 Imóvel Pronto / Mobiliado
-                    </label>
-                    <label class="flex items-center gap-2 cursor-pointer font-bold text-sm">
-                        <input type="radio" name="radioEstagio" value="OBRA" onchange="alternarEstagioObra()" class="w-4 h-4 text-amber-500">
-                        🏗️ Imóvel Em Obra / Distrato
-                    </label>
-                </div>
-            </div>
-
-            <!-- 3. ENGENHARIA FINANCEIRA DE VALORES -->
-            <div class="space-y-4 pt-3 border-t border-slate-200">
-                <h2 class="text-xs font-black uppercase text-slate-400 tracking-wider">3. Engenharia Financeira de Venda</h2>
-
-                <!-- CAMPO DE VALOR TOTAL -->
-                <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                    <label class="block text-xs font-black text-amber-900 uppercase mb-1">Preço Total de Anúncio / Tabela (R$) *</label>
-                    <input type="text" id="inputPrecoTotal" required oninput="mascaraMoeda(this); calcularComissao();" placeholder="R$ 0,00" class="w-full bg-white border border-amber-300 p-3 rounded-xl text-xl font-black text-slate-900">
-                </div>
-
-                <!-- FLUXO DETALHADO DE OBRA / DISTRATO (OCULTO PARA PRONTOS) -->
-                <div id="painelFluxoObra" class="hidden space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <div class="text-xs font-bold text-slate-600 mb-2">📊 Tabela Original da Construtora (Preenchimento do Distrato/Obra):</div>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold">Ato / Sinal (R$)</label>
-                            <input type="text" id="inputValAto" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">30/60/90 Dias (R$)</label>
-                            <input type="text" id="inputVal306090" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Qtd Mensais</label>
-                            <input type="number" id="inputQtdMensais" placeholder="Ex: 36" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Valor Mensal (R$)</label>
-                            <input type="text" id="inputValMensal" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold">Qtd Anuais</label>
-                            <input type="number" id="inputQtdAnuais" placeholder="Ex: 3" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Valor Anual Unit (R$)</label>
-                            <input type="text" id="inputValAnual" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Periodicidade (R$)</label>
-                            <input type="text" id="inputValPeriodicidade" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Chaves / Única (R$)</label>
-                            <input type="text" id="inputValChaves" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[11px] font-bold">Financiamento / Quitação (R$)</label>
-                            <input type="text" id="inputValFinanciamento" oninput="mascaraMoeda(this)" placeholder="0,00" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold">Data Entrega (YYYY-MM)</label>
-                            <input type="text" id="inputDataEntrega" placeholder="Ex: 2029-12" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. CALCULADORA DE COMISSÃO E EXCLUSIVIDADE -->
-                <div class="bg-slate-900 text-white p-4 rounded-xl space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-black uppercase text-amber-400">💼 Honorários CRECI & Exclusividade</span>
-                        <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-300">
-                            <input type="checkbox" id="chkExclusividade" class="w-4 h-4 rounded text-amber-500">
-                            ⭐ Contrato de Exclusividade
-                        </label>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-800">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-300 mb-1">Comissão (%)</label>
-                            <input type="number" step="0.1" id="inputComissaoPct" value="6.00" oninput="calcularComissao()" class="w-full bg-white border p-2 rounded-lg text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-300 mb-1">Cálculo de Reversão</label>
-                            <label class="flex items-center gap-2 bg-slate-800 text-white p-2 rounded-lg text-xs cursor-pointer border border-slate-700">
-                                <input type="checkbox" id="chkGrossUp" onchange="calcularComissao()" class="w-4 h-4">
-                                Valor Líquido Pretendido
-                            </label>
-                        </div>
-                        <div class="bg-slate-800 p-2.5 rounded-lg border border-slate-700 text-white">
-                            <div class="text-[10px] text-slate-400">Repasse Líquido Proprietário:</div>
-                            <div id="lblLiquidoProprietario" class="text-sm font-black text-emerald-400">R$ 0,00</div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- BOTÕES DE AÇÃO -->
-            <div class="pt-4 flex flex-wrap gap-3">
-                <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 p-4 rounded-xl font-black text-sm tracking-wide transition shadow-lg">
-                    💾 Salvar no Banco & Enviar para SuperCalc
-                </button>
-            </div>
-
-        </form>
-    </div>
-
-    <script>
+<script>
         // MÁSCARA MONETÁRIA BRL
         function mascaraMoeda(campo) {
             let valor = campo.value.replace(/\D/g, '');
@@ -246,11 +31,9 @@
 
             let valorLiquido = 0;
             if (isGrossUp) {
-                // Preço digitado é o líquido na mão do proprietário
-                valorLiquido = total;
+                valorLiquido = total; // O preço digitado já é o líquido pretendido
             } else {
-                // Preço digitado é o total bruto de tabela
-                valorLiquido = total * (1 - (comissaoPct / 100));
+                valorLiquido = total * (1 - (comissaoPct / 100)); // Desmembra os 6% do valor cheio
             }
 
             document.getElementById("lblLiquidoProprietario").innerText = valorLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -260,8 +43,15 @@
             e.preventDefault();
 
             const selectEmp = document.getElementById("selectEmpreendimento").value;
-            const empSlug = selectEmp === 'OUTRO' ? 
-                document.getElementById("inputOutroEmp").value.toLowerCase().replace(/\s+/g, '-') : selectEmp;
+            let empSlug = selectEmp;
+            let empTitle = selectEmp;
+
+            // Formata o Slug e Título caso seja um prédio novo
+            if (selectEmp === 'OUTRO') {
+                empTitle = document.getElementById("inputOutroEmp").value.trim();
+                // Converte "Mansão Jardins" para "mansao-jardins"
+                empSlug = empTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+            }
             
             const isObra = document.querySelector('input[name="radioEstagio"]:checked').value === 'OBRA';
             const precoTotal = parseMoeda(document.getElementById("inputPrecoTotal").value);
@@ -272,11 +62,9 @@
                 return;
             }
 
-            // ENGENHARIA FINANCEIRA PARA A SUPERCALC
+            // ENGENHARIA FINANCEIRA: PRONTO VS OBRA
             let valAto = 0, valFinanciamento = 0;
-
             if (!isObra) {
-                // REGRA IMÓVEL PRONTO: 30% ATO / 70% FINANCIAMENTO
                 valAto = precoTotal * 0.30;
                 valFinanciamento = precoTotal * 0.70;
             } else {
@@ -286,7 +74,7 @@
 
             const payloadUnidade = {
                 development_id: empSlug,
-                empreendimento: selectEmp === 'OUTRO' ? document.getElementById("inputOutroEmp").value : selectEmp.toUpperCase(),
+                empreendimento: selectEmp === 'OUTRO' ? empTitle : selectEmp.toUpperCase(),
                 unidade: numUnidade,
                 unit_number: numUnidade,
                 floor: parseInt(document.getElementById("inputAndar").value) || 1,
@@ -302,7 +90,6 @@
                 is_third_party: true,
                 is_exclusive: document.getElementById("chkExclusividade").checked,
                 
-                -- CAMPOS DE FLUXO PARA A SUPERCALC
                 val_ato: valAto,
                 val_30_60_90: parseMoeda(document.getElementById("inputVal306090").value),
                 qtd_mensais: parseInt(document.getElementById("inputQtdMensais").value) || 0,
@@ -318,10 +105,22 @@
             // 1. SALVA NA MEMÓRIA DO NAVEGADOR PARA SUPERCALC
             localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(payloadUnidade));
 
-            // 2. ENVIA PARA O SUPABASE (SE CONECTADO)
+            // 2. GRAVAÇÃO SEGURA NO SUPABASE
             if (typeof _supabase !== 'undefined' && _supabase) {
                 try {
-                    await _supabase.from('units').insert([{
+                    // PASSO A: Cadastra o Prédio Novo antes da Unidade (Impede Erro 23503 FK Constraint)
+                    if (selectEmp === 'OUTRO') {
+                        const { error: devError } = await _supabase.from('developments').upsert([{
+                            id: empSlug,
+                            title: empTitle,
+                            builder: 'Particular / Terceiros',
+                            is_third_party: true
+                        }]);
+                        if (devError) throw devError;
+                    }
+
+                    // PASSO B: Cadastra a Unidade
+                    const { error: unitError } = await _supabase.from('units').insert([{
                         development_id: empSlug,
                         unit_number: payloadUnidade.unit_number,
                         floor: payloadUnidade.floor,
@@ -341,16 +140,21 @@
                         val_chaves_unica: payloadUnidade.val_chaves_unica,
                         val_financiamento: payloadUnidade.val_financiamento,
                         is_third_party: true,
-                        is_exclusive: payloadUnidade.is_exclusive
+                        is_exclusive: payloadUnidade.is_exclusive,
+                        commission_rate: parseFloat(document.getElementById("inputComissaoPct").value) || 6.00,
+                        net_owner_value: parseMoeda(document.getElementById("lblLiquidoProprietario").innerText)
                     }]);
+                    
+                    if (unitError) throw unitError;
+
                 } catch (err) {
-                    console.warn("Aviso ao salvar no Supabase:", err);
+                    console.error("Erro Supabase:", err);
+                    alert("Erro de segurança no banco de dados: " + (err.message || "Verifique a conexão."));
+                    return; // Aborta e não muda de tela se falhar
                 }
             }
 
-            // 3. REDIRECIONA PARA A SUPERCALC
-            window.location.href = "supercalc.html";
+            // 3. SE SUCESSO, REDIRECIONA PARA A PRATELEIRA OU SUPERCALC
+            window.location.href = "index.html";
         }
     </script>
-</body>
-</html>
