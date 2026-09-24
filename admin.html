@@ -3,500 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor Central de Estoque - SuperCalc Admin</title>
-
-    <!-- FAVICON SUPERCALC -->
+    <title>Gestor Central de Estoque | SuperCalc Admin</title>
     <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
-
-    <!-- Supabase JS Client -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="supabase-config.js"></script>
     <style>
-        :root {
-            --primary: #1a252f;
-            --accent: #f1c40f;
-            --bg: #f4f6f9;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --info: #2980b9;
-            --border: #cccccc;
+        .unit-btn {
+            user-select: none;
+            transition: all 0.15s ease-in-out;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg); padding: 8px; font-size: 13px; color: #333; padding-bottom: 75px; }
-
-        .top-bar {
-            background: linear-gradient(135deg, #111111 0%, #2c3e50 100%);
-            color: var(--accent); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
-            border: 1.5px solid var(--accent); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;
+        .unit-btn:hover {
+            transform: scale(1.05);
         }
-        .top-bar h1 { font-size: 0.9rem; font-weight: 800; color: #fff; text-transform: uppercase; }
-
-        .selector-card {
-            background: #fff; padding: 8px 10px; border-radius: 10px; margin-bottom: 6px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1.5px solid #2980b9;
-        }
-        .selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .selector-grid label { font-size: 0.7rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 2px; }
-        .selector-grid select { width: 100%; padding: 6px 8px; font-size: 0.8rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; font-weight: bold; }
-
-        .gavetas-card { background: #fff; padding: 6px 8px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #ddd; }
-        .gavetas-bar { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
-        .btn-gaveta {
-            padding: 5px 10px; font-size: 0.7rem; font-weight: bold; border: 1.5px solid var(--border);
-            border-radius: 20px; background: #fff; cursor: pointer; white-space: nowrap; color: var(--primary);
-        }
-        .btn-gaveta.active { background: var(--primary); color: var(--accent); border-color: var(--primary); }
-
-        .stats-bar {
-            background: #fff; padding: 6px 10px; border-radius: 8px; margin-bottom: 6px;
-            font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #ddd; flex-wrap: wrap; gap: 4px;
-        }
-        .st-disp { color: #27ae60; }
-        .st-promo { color: #2980b9; }
-        .st-indisp { color: #e74c3c; }
-
-        .control-card { background: #fff; padding: 8px; border-radius: 10px; margin-bottom: 6px; border: 1px solid #ddd; }
-        .mode-toggle-container { display: flex; gap: 4px; background: #eaeded; padding: 3px; border-radius: 8px; margin-bottom: 6px; }
-        .mode-btn { flex: 1; padding: 6px 4px; font-size: 0.72rem; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-align: center; color: #555; }
-        .mode-btn.active-lock { background: #e74c3c; color: #fff; }
-        .mode-btn.active-promo { background: #2980b9; color: #fff; }
-
-        .filter-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin-bottom: 6px; }
-        .filter-grid input, .filter-grid select { width: 100%; padding: 6px 8px; font-size: 0.75rem; border: 1.5px solid var(--border); border-radius: 6px; background: #fff; }
-
-        .bulk-actions { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
-        .btn-bulk { padding: 6px 4px; font-size: 0.72rem; font-weight: bold; border-radius: 6px; border: none; color: #fff; cursor: pointer; text-align: center; }
-        .btn-lock { background: #e74c3c; }
-        .btn-free { background: #27ae60; }
-        .btn-promo-bulk { background: #2980b9; }
-        .btn-reset { background: #7f8c8d; }
-
-        .matrix-wrapper {
-            background: #fff; padding: 6px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            overflow-x: auto; max-height: 65vh; border: 1px solid #ddd;
-        }
-        .matrix-table { width: 100%; border-collapse: separate; border-spacing: 2px; }
-        .matrix-table th { background: #2c3e50; color: var(--accent); padding: 5px 2px; font-size: 0.7rem; font-weight: 800; border-radius: 4px; text-align: center; position: sticky; top: 0; z-index: 2; }
-        .andar-tag { background: #eaeded; color: #1a252f; font-size: 0.7rem; font-weight: 800; padding: 4px 2px; border-radius: 4px; text-align: center; position: sticky; left: 0; z-index: 1; }
-
-        .unit-card {
-            border-radius: 4px; padding: 2px 1px; min-width: 38px; min-height: 30px; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; cursor: pointer; user-select: none; border: 1.5px solid transparent;
-        }
-        .unit-card .num { font-size: 0.72rem; font-weight: 800; line-height: 1; }
-        .unit-card .st { font-size: 0.55rem; font-weight: 700; margin-top: 1px; text-transform: uppercase; }
-
-        .unit-disp { background: #e8f8f5; color: #1e8449; border-color: #27ae60; }
-        .unit-promo { background: #ebf5fb; color: #1b4f72; border-color: #2980b9; }
-        .unit-indisp { background: #fadbd8; color: #78281f; border-color: #e74c3c; text-decoration: line-through; }
-
-        .btn-fab-save {
-            position: fixed; bottom: 16px; right: 16px; width: 54px; height: 54px;
-            border-radius: 50%; background: #27ae60; color: #fff; font-size: 1.5rem;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.35); border: 2.5px solid #ffffff; z-index: 9999; cursor: pointer;
-        }
-
-        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a252f; z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
 
-    <!-- BLOQUEIO PIN -->
-    <div id="loginOverlay">
-        <div style="background: #ffffff; padding: 28px 20px; border-radius: 16px; width: 100%; max-width: 360px; text-align: center; border: 2px solid #f1c40f;">
-            <h2 style="margin: 0 0 6px 0; color: #1a252f; font-size: 1.3rem;">SUPERCALC - ADMIN</h2>
-            <p style="margin: 0 0 16px 0; color: #666; font-size: 0.85rem;">Digite o PIN master de gestão:</p>
-            <input type="password" id="inputPinAdmin" placeholder="••••••" style="width: 100%; text-align: center; font-size: 1.8rem; padding: 10px; border: 2px solid #ccc; border-radius: 10px; margin-bottom: 14px;" onkeyup="if(event.key==='Enter') validarPinAdmin()">
-            <button onclick="validarPinAdmin()" style="width: 100%; background: #27ae60; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer;">Acessar Gestor Central</button>
-            <p id="msgErroAdmin" style="color: #e74c3c; font-size: 0.85rem; margin-top: 10px; display: none; font-weight: bold;">PIN incorreto ou não autorizado!</p>
-        </div>
-    </div>
-
-    <!-- CABEÇALHO -->
-    <div class="top-bar">
-        <h1>GESTOR CENTRAL DE ESTOQUE SUPERCALC</h1>
-        <button onclick="window.print()" style="background:#2980b9; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-weight:bold; cursor:pointer;">PDF Espelho</button>
-    </div>
-
-    <!-- SELETOR MULTI-EMPREENDIMENTO -->
-    <div class="selector-card">
-        <div class="selector-grid">
+    <!-- CABEÇALHO DO PAINEL GESTOR -->
+    <header class="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <label>1. INCORPORADORA:</label>
-                <select id="selIncorporadora" onchange="carregarEmpreendimentos()">
-                    <option value="">Todas</option>
-                    <option value="AAM Incorporadora">AAM Incorporadora</option>
-                    <option value="Marquês Construtora">Marquês Construtora</option>
-                    <option value="Imóveis de Terceiros">Imóveis de Terceiros</option>
-                </select>
+                <h1 class="text-xl font-black text-amber-400 tracking-tight flex items-center gap-2">
+                    🛡️ GESTOR CENTRAL DE ESTOQUE SUPERCALC
+                </h1>
+                <p class="text-xs text-slate-400 font-medium">Controle de Espelho de Vendas e Status em Tempo Real</p>
             </div>
-            <div>
-                <label>2. EMPREENDIMENTO:</label>
-                <select id="selEmpreendimento" onchange="carregarMapeamentoEmpreendimento()">
-                    <option value="">Selecione...</option>
-                </select>
+            
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition shadow">
+                    ← Voltar à Prateleira
+                </a>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- BARRA DE GAVETAS (MODALIDADES) -->
-    <div class="gavetas-card">
-        <label style="font-size: 0.68rem; font-weight: bold; color: var(--primary); margin-bottom: 3px; display: block;">FILTRAR GAVETA / MODALIDADE:</label>
-        <div class="gavetas-bar">
-            <button class="btn-gaveta active" onclick="filtrarGaveta('TODOS', this)">Todas as Unidades</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('HIS', this)">Gaveta 1: HIS</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('HMP', this)">Gaveta 2: HMP</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('NR', this)">Gaveta 3: NR / Short Stay</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('R2V', this)">Gaveta 4: R2V (Com Vaga)</button>
-            <button class="btn-gaveta" onclick="filtrarGaveta('TERCEIROS', this)">Gaveta 5: Avulsos</button>
-        </div>
-    </div>
+    <main class="max-w-7xl mx-auto p-3 md:p-6 space-y-4 flex-1 w-full">
 
-    <!-- RESUMO DE ESTOQUE -->
-    <div class="stats-bar">
-        <span>Matriz: <strong id="lblTotalMatriz">0</strong></span>
-        <span class="st-disp">🟢 Disp: <strong id="lblTotalDisp">0</strong></span>
-        <span class="st-promo">🔵 Promo: <strong id="lblTotalPromo">0</strong></span>
-        <span class="st-indisp">🔴 Indisp: <strong id="lblTotalIndisp">0</strong></span>
-    </div>
+        <!-- PAINEL DE CONTROLE E SELEÇÃO DE EMPREENDIMENTO -->
+        <section class="bg-slate-800 p-4 md:p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 1. Incorporadora -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">1. Incorporadora / Origem:</label>
+                    <select id="selIncorporadora" onchange="filtrarEmpreendimentosPorIncorporadora()" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-xs font-bold text-slate-100 outline-none focus:border-amber-400">
+                        <option value="TODAS">Todas as Incorporadoras</option>
+                    </select>
+                </div>
 
-    <!-- CONTROLES E FILTROS -->
-    <div class="control-card">
-        <div class="mode-toggle-container">
-            <button id="btnModoTrava" class="mode-btn active-lock" onclick="setModo('TRAVA')">🔴 Clique: Disp ⇄ Trava</button>
-            <button id="btnModoPromo" class="mode-btn" onclick="setModo('PROMO')">🔵 Clique: Disp ⇄ Promo</button>
-        </div>
-
-        <div class="filter-grid">
-            <div>
-                <select id="filtroFaixaAndar" onchange="aplicarFiltros()">
-                    <option value="TODOS">Todos os Pavimentos</option>
-                    <option value="BAIXO">Andares Baixos (1º ao 10º)</option>
-                    <option value="MEDIO">Andares Médios (11º ao 25º)</option>
-                    <option value="ALTO">Andares Altos (26º ao 37º)</option>
-                </select>
+                <!-- 2. Empreendimento -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">2. Empreendimento:</label>
+                    <select id="selEmpreendimento" onchange="carregarEstoqueEmpreendimento()" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-xs font-bold text-amber-400 outline-none focus:border-amber-400">
+                        <option value="">Carregando Empreendimentos...</option>
+                    </select>
+                </div>
             </div>
+
+            <!-- FILTRO DA 4ª GAVETA (ENQUADRAMENTO / INCOME_TYPE) -->
             <div>
-                <select id="filterPrumada" onchange="aplicarFiltros()">
-                    <option value="">Todas as Prumadas</option>
-                </select>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filtrar Enquadramento (4ª Gaveta / Modalidade):</label>
+                <div class="flex flex-wrap gap-2" id="containerBotoesGaveta">
+                    <button onclick="setFiltroGaveta('TODAS', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 shadow">Todas as Unidades</button>
+                    <button onclick="setFiltroGaveta('HIS', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-purple-300 border border-slate-700 hover:bg-slate-700">HIS</button>
+                    <button onclick="setFiltroGaveta('HMP', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-orange-300 border border-slate-700 hover:bg-slate-700">HMP</button>
+                    <button onclick="setFiltroGaveta('NR', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-pink-300 border border-slate-700 hover:bg-slate-700">NR / Short Stay</button>
+                    <button onclick="setFiltroGaveta('R2V', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-blue-300 border border-slate-700 hover:bg-slate-700">R2V (Livre)</button>
+                    <button onclick="setFiltroGaveta('LOJA', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-yellow-300 border border-slate-700 hover:bg-slate-700">LOJA</button>
+                    <button onclick="setFiltroGaveta('LIVRE', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-emerald-300 border border-slate-700 hover:bg-slate-700">Terceiros / Avulsos</button>
+                </div>
             </div>
-            <div>
-                <input type="text" id="filterText" placeholder="Ex: 2217" onkeyup="aplicarFiltros()">
+
+            <!-- CONTADORES RESUMIDOS -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-center text-xs font-bold">
+                <div class="text-slate-300">Total: <span id="lblTotalMatriz" class="text-amber-400 text-sm">0</span></div>
+                <div class="text-emerald-400">🟢 Disponíveis: <span id="lblDispMatriz" class="text-sm">0</span></div>
+                <div class="text-blue-400">🔵 Promo: <span id="lblPromoMatriz" class="text-sm">0</span></div>
+                <div class="text-red-400">🔴 Trava / Indisp: <span id="lblIndispMatriz" class="text-sm">0</span></div>
             </div>
-        </div>
 
-        <div class="bulk-actions">
-            <button class="btn-bulk btn-lock" onclick="confirmarStatusEmLote('INDISPONIVEL')">🔒 Travar</button>
-            <button class="btn-bulk btn-free" onclick="confirmarStatusEmLote('DISPONIVEL')">🔓 Liberar</button>
-            <button class="btn-bulk btn-promo-bulk" onclick="confirmarStatusEmLote('PROMOCIONAL')">🏷️ Promo</button>
-            <button class="btn-bulk btn-reset" onclick="resetarFiltros()">🔄 Reset</button>
-        </div>
-    </div>
+            <!-- ALTERNADOR DE MODO DE CLIQUE E BUSCA -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-700">
+                <button id="btnModoTrava" onclick="setModoClique('TRAVA')" class="w-full py-2 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition shadow flex items-center justify-center gap-1">
+                    🔴 Clique Alterna: Disp ⇄ Trava
+                </button>
+                <button id="btnModoPromo" onclick="setModoClique('PROMO')" class="w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1">
+                    🔵 Clique Alterna: Disp ⇄ Promo
+                </button>
+                <input type="text" id="txtBuscaUnidade" onkeyup="aplicarFiltrosMatriz()" placeholder="Buscar por número (Ex: 1714, 501)..." class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-xs font-medium text-slate-100 outline-none focus:border-amber-400">
+            </div>
 
-    <!-- GRID DINÂMICO -->
-    <div class="matrix-wrapper">
-        <table class="matrix-table">
-            <thead><tr id="matrixHeader"><th>Andar</th></tr></thead>
-            <tbody id="matrixBody"></tbody>
-        </table>
-    </div>
+            <!-- AÇÕES EM LOTE -->
+            <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-700/50">
+                <button onclick="alterarStatusVisiveis('INDISPONIVEL')" class="bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔒 Travar Visíveis</button>
+                <button onclick="alterarStatusVisiveis('DISPONIVEL')" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔓 Liberar Visíveis</button>
+                <button onclick="alterarStatusVisiveis('PROMOCIONAL')" class="bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🏷️ Promo Visíveis</button>
+            </div>
+        </section>
 
-    <button class="btn-fab-save" onclick="salvarEstoque()" title="Salvar Alterações">💾</button>
+        <!-- ESPELHO DE VENDAS / MATRIZ DE UNIDADES -->
+        <section class="bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-700 shadow-xl min-h-[300px]">
+            <div id="loadingMatriz" class="py-12 text-center text-slate-400 font-bold text-xs space-y-2">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
+                <p>Carregando empreendimentos do banco de dados...</p>
+            </div>
 
+            <div id="containerMatriz" class="hidden overflow-x-auto space-y-2">
+                <!-- Linhas dos andares geradas via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- SCRIPT DE INTEGRAÇÃO COM O SUPABASE -->
     <script>
-        const SUPABASE_URL = 'https://SEU_PROJETO.supabase.co';
-        const SUPABASE_KEY = 'SUA_CHAVE_ANON_PUBLIC_AQUI';
-        let supabaseClient = null;
+        let empreendimentosDB = [];
+        let unidadesDB = [];
+        let modoClique = 'TRAVA'; // 'TRAVA' ou 'PROMO'
+        let filtroGavetaAtual = 'TODAS';
 
-        if (typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('SEU_PROJETO') === -1) {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-
-        const MOCK_EMPREENDIMENTOS = [
-            { id: 'a2222222-2222-2222-2222-222222222222', title: 'Poema Liberdade', developer_name: 'AAM Incorporadora', is_ready: false, is_third_party: false },
-            { id: 'a1111111-1111-1111-1111-111111111111', title: 'Sky Pinheiros', developer_name: 'AAM Incorporadora', is_ready: true, is_third_party: false },
-            { id: 'a3333333-3333-3333-3333-333333333333', title: 'NOW Butantã', developer_name: 'AAM Incorporadora', is_ready: true, is_third_party: false }
-        ];
-
-        let empreendimentoAtual = null;
-        let unidadesGlobais = [];
-        let prumadasUnicas = [];
-        let modoAtivo = 'TRAVA';
-        let gavetaAtiva = 'TODOS';
-
-        window.onload = function() {
-            if (sessionStorage.getItem("auth_admin_ok") === "true") {
-                document.getElementById("loginOverlay").style.display = "none";
-                carregarEmpreendimentos();
-            }
+        window.onload = async () => {
+            await carregarEmpreendimentos();
         };
 
-        function validarPinAdmin() {
-            const digitado = document.getElementById("inputPinAdmin").value.trim();
-            if (digitado === "123456" || digitado === "120873") {
-                sessionStorage.setItem("auth_admin_ok", "true");
-                document.getElementById("loginOverlay").style.display = "none";
-                carregarEmpreendimentos();
-            } else {
-                document.getElementById("msgErroAdmin").style.display = "block";
-            }
-        }
-
         async function carregarEmpreendimentos() {
-            const incSel = document.getElementById("selIncorporadora").value;
-            const selEmp = document.getElementById("selEmpreendimento");
-            selEmp.innerHTML = '<option value="">Carregando...</option>';
-
-            let list = MOCK_EMPREENDIMENTOS;
-            if (supabaseClient) {
-                try {
-                    const { data } = await supabaseClient.from('developments').select('*').order('title');
-                    if (data && data.length > 0) list = data;
-                } catch(e) {}
-            }
-
-            selEmp.innerHTML = '<option value="">Selecione...</option>';
-            list.forEach(emp => {
-                if (!incSel || emp.developer_name === incSel) {
-                    const opt = document.createElement("option");
-                    opt.value = emp.id;
-                    opt.innerText = `${emp.title} (${emp.developer_name})`;
-                    selEmp.appendChild(opt);
+            try {
+                if (typeof _supabase === 'undefined') {
+                    throw new Error("Supabase não inicializado. Verifique supabase-config.js");
                 }
-            });
 
-            if (selEmp.options.length > 1) {
-                selEmp.selectedIndex = 1;
-                carregarMapeamentoEmpreendimento();
+                const { data, error } = await _supabase
+                    .from('developments')
+                    .select('*')
+                    .order('title', { ascending: true });
+
+                if (error) throw error;
+                empreendimentosDB = data || [];
+
+                popularIncorporadoras();
+                filtrarEmpreendimentosPorIncorporadora();
+            } catch (err) {
+                console.error("Erro ao carregar empreendimentos:", err);
+                document.getElementById('loadingMatriz').innerHTML = `<p class="text-red-400 font-bold">Erro ao conectar ao banco de dados: ${err.message}</p>`;
             }
         }
 
-        async function carregarMapeamentoEmpreendimento() {
-            const empId = document.getElementById("selEmpreendimento").value;
-            if (!empId) return;
+        function popularIncorporadoras() {
+            const selectInc = document.getElementById('selIncorporadora');
+            const incs = [...new Set(empreendimentosDB.map(d => d.builder || d.developer_name || 'AAM Incorporadora'))].sort();
 
-            empreendimentoAtual = empId;
-            unidadesGlobais = [];
-
-            if (supabaseClient) {
-                try {
-                    const { data } = await supabaseClient.from('units').select('*').eq('development_id', empId).order('unit_number');
-                    if (data) unidadesGlobais = data;
-                } catch(e) {}
-            }
-
-            // Fallback de simulação local caso o banco não tenha retornado dados
-            if (unidadesGlobais.length === 0) {
-                const andares = empId.includes('2222') ? 37 : 20;
-                const prumadas = empId.includes('2222') ? 18 : 8;
-                for (let a = 1; a <= andares; a++) {
-                    for (let p = 1; p <= prumadas; p++) {
-                        const pStr = p < 10 ? `0${p}` : `${p}`;
-                        unidadesGlobais.push({
-                            id: `u_${a}_${pStr}`,
-                            unit_number: `${a}${pStr}`,
-                            floor: a,
-                            typology: p <= 4 ? 'HIS' : (p <= 8 ? 'HMP' : 'R2V'),
-                            status: 'DISPONIVEL',
-                            list_price: 350000 + (a * 4000),
-                            private_area_m2: 38.0
-                        });
-                    }
-                }
-            }
-
-            // Mapeamento dinâmico de prumadas
-            const pSet = new Set();
-            unidadesGlobais.forEach(u => {
-                const num = String(u.unit_number);
-                const final = num.length >= 3 ? num.slice(-2) : num;
-                pSet.add(final);
-            });
-            prumadasUnicas = Array.from(pSet).sort((a,b) => parseInt(a) - parseInt(b));
-
-            const selP = document.getElementById("filterPrumada");
-            selP.innerHTML = '<option value="">Todas as Prumadas</option>';
-            prumadasUnicas.forEach(p => selP.innerHTML += `<option value="${p}">Prumada ${p}</option>`);
-
-            renderizarGrid();
+            selectInc.innerHTML = '<option value="TODAS">Todas as Incorporadoras</option>' +
+                incs.map(i => `<option value="${i}">${i}</option>`).join('');
         }
 
-        function renderizarGrid() {
-            const thead = document.getElementById("matrixHeader");
-            const tbody = document.getElementById("matrixBody");
-            
-            thead.innerHTML = '<th>Andar</th>';
-            prumadasUnicas.forEach(p => thead.innerHTML += `<th class="col-prumada-${p}">P.${p}</th>`);
+        function filtrarEmpreendimentosPorIncorporadora() {
+            const inc = document.getElementById('selIncorporadora').value;
+            const selectEmp = document.getElementById('selEmpreendimento');
 
-            tbody.innerHTML = '';
-
-            const andaresMap = new Map();
-            let cntDisp = 0, cntPromo = 0, cntIndisp = 0;
-
-            unidadesGlobais.forEach(u => {
-                const num = String(u.unit_number);
-                const final = num.length >= 3 ? num.slice(-2) : num;
-                
-                if (gavetaAtiva !== 'TODOS' && !u.typology.toUpperCase().includes(gavetaAtiva)) return;
-
-                if (!andaresMap.has(u.floor)) andaresMap.set(u.floor, new Map());
-                andaresMap.get(u.floor).set(final, u);
+            const filtrados = empreendimentosDB.filter(d => {
+                const devInc = d.builder || d.developer_name || 'AAM Incorporadora';
+                return inc === 'TODAS' || devInc === inc;
             });
 
-            const andaresOrdenados = Array.from(andaresMap.keys()).sort((a,b) => b - a);
+            selectEmp.innerHTML = filtrados.map(d => `<option value="${d.id}">${d.title} (${d.builder || d.developer_name || 'AAM'})</option>`).join('');
 
-            andaresOrdenados.forEach(andar => {
-                const tr = document.createElement("tr");
-                tr.setAttribute("data-andar", andar);
-                let rowHtml = `<td class="andar-tag">${andar}º</td>`;
-
-                prumadasUnicas.forEach(p => {
-                    const u = andaresMap.get(andar)?.get(p);
-                    if (u) {
-                        let stClass = 'unit-disp';
-                        let stTxt = 'DISP';
-                        if (u.status === 'INDISPONIVEL') { stClass = 'unit-indisp'; stTxt = 'TRAV'; cntIndisp++; }
-                        else if (u.status === 'PROMOCIONAL') { stClass = 'unit-promo'; stTxt = 'PROMO'; cntPromo++; }
-                        else { cntDisp++; }
-
-                        rowHtml += `
-                            <td class="col-prumada-${p}">
-                                <div class="unit-card ${stClass}" data-num="${u.unit_number}" onclick="alternarStatus('${u.id}')" ondblclick="dispararParaSuperCalc('${u.id}')">
-                                    <span class="num">${u.unit_number}</span>
-                                    <span class="st">${stTxt}</span>
-                                </div>
-                            </td>`;
-                    } else {
-                        rowHtml += `<td class="col-prumada-${p}"></td>`;
-                    }
-                });
-
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById("lblTotalMatriz").innerText = unidadesGlobais.length;
-            document.getElementById("lblTotalDisp").innerText = cntDisp;
-            document.getElementById("lblTotalPromo").innerText = cntPromo;
-            document.getElementById("lblTotalIndisp").innerText = cntIndisp;
-
-            aplicarFiltros();
-        }
-
-        async function alternarStatus(unitId) {
-            const u = unidadesGlobais.find(x => x.id === unitId);
-            if (!u) return;
-
-            let novoStatus = 'DISPONIVEL';
-            if (modoAtivo === 'TRAVA') {
-                novoStatus = (u.status === 'INDISPONIVEL') ? 'DISPONIVEL' : 'INDISPONIVEL';
+            if (filtrados.length > 0) {
+                selectEmp.value = filtrados[0].id;
+                carregarEstoqueEmpreendimento();
             } else {
-                novoStatus = (u.status === 'PROMOCIONAL') ? 'DISPONIVEL' : 'PROMOCIONAL';
-            }
-
-            u.status = novoStatus;
-            renderizarGrid();
-
-            if (supabaseClient) {
-                try { await supabaseClient.from('units').update({ status: novoStatus }).eq('id', unitId); } catch(e) {}
+                selectEmp.innerHTML = '<option value="">Nenhum empreendimento encontrado</option>';
+                desenharMatriz();
             }
         }
 
-        function aplicarFiltros() {
-            const faixa = document.getElementById("filtroFaixaAndar").value;
-            const prumadaSel = document.getElementById("filterPrumada").value;
-            const query = document.getElementById("filterText").value.trim().toLowerCase();
+        async function carregarEstoqueEmpreendimento() {
+            const devId = document.getElementById('selEmpreendimento').value;
+            const loading = document.getElementById('loadingMatriz');
+            const container = document.getElementById('containerMatriz');
 
-            prumadasUnicas.forEach(p => {
-                const cols = document.querySelectorAll(`.col-prumada-${p}`);
-                cols.forEach(c => c.style.display = (!prumadaSel || prumadaSel === p) ? '' : 'none');
-            });
-
-            const trs = document.querySelectorAll("#matrixBody tr");
-            trs.forEach(tr => {
-                const andar = parseInt(tr.getAttribute("data-andar"));
-                let matchFaixa = true;
-
-                if (faixa === "BAIXO") matchFaixa = (andar >= 1 && andar <= 10);
-                else if (faixa === "MEDIO") matchFaixa = (andar >= 11 && andar <= 25);
-                else if (faixa === "ALTO") matchFaixa = (andar >= 26);
-
-                const cards = tr.querySelectorAll(".unit-card");
-                let matchText = false;
-                cards.forEach(card => {
-                    const num = card.getAttribute("data-num");
-                    if (!query || num.includes(query) || String(andar) === query) matchText = true;
-                });
-
-                tr.style.display = (matchFaixa && (!query || matchText)) ? '' : 'none';
-            });
-        }
-
-        function confirmarStatusEmLote(novoStatus) {
-            const confirmou = confirm(`⚠️ Trava de Segurança: Deseja alterar todas as unidades visíveis para "${novoStatus}"?`);
-            if (!confirmou) return;
-
-            const trsVisiveis = document.querySelectorAll("#matrixBody tr:not([style*='display: none'])");
-            trsVisiveis.forEach(tr => {
-                const cards = tr.querySelectorAll(".unit-card");
-                cards.forEach(card => {
-                    const parentTd = card.closest('td');
-                    if (parentTd && parentTd.style.display !== 'none') {
-                        const num = card.getAttribute("data-num");
-                        const u = unidadesGlobais.find(x => String(x.unit_number) === String(num));
-                        if (u) u.status = novoStatus;
-                    }
-                });
-            });
-            renderizarGrid();
-        }
-
-        function resetarFiltros() {
-            document.getElementById("filtroFaixaAndar").value = 'TODOS';
-            document.getElementById("filterPrumada").value = '';
-            document.getElementById("filterText").value = '';
-            aplicarFiltros();
-        }
-
-        function filtrarGaveta(gaveta, btn) {
-            gavetaAtiva = gaveta;
-            document.querySelectorAll('.btn-gaveta').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderizarGrid();
-        }
-
-        function setModo(m) {
-            modoAtivo = m;
-            document.getElementById("btnModoTrava").className = m === 'TRAVA' ? 'mode-btn active-lock' : 'mode-btn';
-            document.getElementById("btnModoPromo").className = m === 'PROMO' ? 'mode-btn active-promo' : 'mode-btn';
-        }
-
-        function salvarEstoque() {
-            alert("✅ Estoque e disponibilidades sincronizados!");
-        }
-
-        function dispararParaSuperCalc(unitId) {
-            const u = unidadesGlobais.find(x => x.id === unitId);
-            if (!u || u.status === 'INDISPONIVEL') {
-                alert("⚠️ Unidades indisponíveis ou travadas não podem ser simuladas.");
+            if (!devId) {
+                desenharMatriz();
                 return;
             }
 
-            const payload = {
-                empreendimento: 'Poema Liberdade',
+            loading.classList.remove('hidden');
+            container.classList.add('hidden');
+
+            try {
+                const { data, error } = await _supabase
+                    .from('units')
+                    .select('*, developments(*)')
+                    .eq('development_id', devId)
+                    .order('floor', { ascending: false });
+
+                if (error) throw error;
+                unidadesDB = data || [];
+
+                desenharMatriz();
+            } catch (err) {
+                console.error("Erro ao buscar estoque das unidades:", err);
+                loading.innerHTML = `<p class="text-red-400 font-bold">Erro ao carregar unidades do empreendimento.</p>`;
+            }
+        }
+
+        function desenharMatriz() {
+            const loading = document.getElementById('loadingMatriz');
+            const container = document.getElementById('containerMatriz');
+
+            loading.classList.add('hidden');
+            container.classList.remove('hidden');
+
+            if (unidadesDB.length === 0) {
+                container.innerHTML = `<div class="py-12 text-center text-slate-500 font-bold text-xs">Nenhuma unidade cadastrada para este empreendimento no banco de dados.</div>`;
+                atualizarContadores([]);
+                return;
+            }
+
+            const andares = [...new Set(unidadesDB.map(u => parseInt(u.floor) || 0))].sort((a, b) => b - a);
+
+            let html = '';
+            andares.forEach(andar => {
+                const unidadesAndar = unidadesDB.filter(u => (parseInt(u.floor) || 0) === andar);
+                unidadesAndar.sort((a, b) => String(a.unit_number).localeCompare(String(b.unit_number), undefined, { numeric: true }));
+
+                html += `
+                    <div class="flex items-center gap-2 border-b border-slate-700/40 pb-1.5 tr-andar" data-andar="${andar}">
+                        <span class="w-16 text-xs text-amber-400 font-black flex-shrink-0">${andar}º Andar</span>
+                        <div class="flex flex-wrap gap-1.5 flex-1">
+                            ${unidadesAndar.map(u => `
+                                <button id="btn_unit_${u.id}"
+                                        onclick="clicarUnidade('${u.id}')"
+                                        ondblclick="simularUnidadeDirect('${u.id}')"
+                                        data-num="${String(u.unit_number).toLowerCase()}"
+                                        data-gaveta="${u.income_type || 'R2V'}"
+                                        data-status="${u.status || 'DISPONIVEL'}"
+                                        title="Clique duplo para Simular na SuperCalc"
+                                        class="unit-btn px-2.5 py-1.5 rounded-lg text-xs font-bold shadow ${getEstiloStatus(u.status)} flex flex-col items-center leading-tight">
+                                    <span>${u.unit_number}</span>
+                                    <span class="text-[9px] opacity-80 uppercase">${u.income_type || 'R2V'}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            aplicarFiltrosMatriz();
+        }
+
+        function getEstiloStatus(status) {
+            switch (status) {
+                case 'INDISPONIVEL':
+                case 'BLOQUEADO':
+                case 'VENDIDO':
+                case 'RESERVADO':
+                    return 'bg-red-600 hover:bg-red-500 text-white';
+                case 'PROMOCIONAL':
+                    return 'bg-blue-600 hover:bg-blue-500 text-white';
+                default:
+                    return 'bg-emerald-600 hover:bg-emerald-500 text-white';
+            }
+        }
+
+        function setFiltroGaveta(gaveta, btn) {
+            filtroGavetaAtual = gaveta;
+            document.querySelectorAll('.btn-gaveta').forEach(b => {
+                b.classList.remove('bg-amber-400', 'text-slate-950');
+                b.classList.add('bg-slate-900', 'text-slate-300');
+            });
+            btn.classList.remove('bg-slate-900', 'text-slate-300');
+            btn.classList.add('bg-amber-400', 'text-slate-950');
+
+            aplicarFiltrosMatriz();
+        }
+
+        function setModoClique(modo) {
+            modoClique = modo;
+            const btnTrava = document.getElementById('btnModoTrava');
+            const btnPromo = document.getElementById('btnModoPromo');
+
+            if (modo === 'TRAVA') {
+                btnTrava.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition shadow flex items-center justify-center gap-1";
+                btnPromo.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1";
+            } else {
+                btnPromo.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition shadow flex items-center justify-center gap-1";
+                btnTrava.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1";
+            }
+        }
+
+        function aplicarFiltrosMatriz() {
+            const busca = document.getElementById('txtBuscaUnidade').value.trim().toLowerCase();
+            let visiveis = [];
+
+            unidadesDB.forEach(u => {
+                const btn = document.getElementById(`btn_unit_${u.id}`);
+                if (!btn) return;
+
+                const bateGaveta = filtroGavetaAtual === 'TODAS' || 
+                                  (filtroGavetaAtual === 'LIVRE' ? (u.income_type === 'LIVRE' || u.income_type === 'AVULSO') : u.income_type === filtroGavetaAtual);
+                const bateBusca = !busca || String(u.unit_number).toLowerCase().includes(busca);
+
+                if (bateGaveta && bateBusca) {
+                    btn.classList.remove('hidden');
+                    visiveis.push(u);
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+
+            atualizarContadores(visiveis);
+        }
+
+        function atualizarContadores(lista) {
+            const total = lista.length;
+            const disp = lista.filter(u => u.status === 'DISPONIVEL' || !u.status).length;
+            const promo = lista.filter(u => u.status === 'PROMOCIONAL').length;
+            const indisp = lista.filter(u => u.status === 'INDISPONIVEL' || u.status === 'RESERVADO' || u.status === 'VENDIDO').length;
+
+            document.getElementById('lblTotalMatriz').innerText = total;
+            document.getElementById('lblDispMatriz').innerText = disp;
+            document.getElementById('lblPromoMatriz').innerText = promo;
+            document.getElementById('lblIndispMatriz').innerText = indisp;
+        }
+
+        async function clicarUnidade(id) {
+            const unidade = unidadesDB.find(u => u.id === id);
+            if (!unidade) return;
+
+            let novoStatus = 'DISPONIVEL';
+            if (modoClique === 'TRAVA') {
+                novoStatus = unidade.status === 'INDISPONIVEL' ? 'DISPONIVEL' : 'INDISPONIVEL';
+            } else if (modoClique === 'PROMO') {
+                novoStatus = unidade.status === 'PROMOCIONAL' ? 'DISPONIVEL' : 'PROMOCIONAL';
+            }
+
+            unidade.status = novoStatus;
+
+            const btn = document.getElementById(`btn_unit_${id}`);
+            if (btn) {
+                btn.className = `unit-btn px-2.5 py-1.5 rounded-lg text-xs font-bold shadow ${getEstiloStatus(novoStatus)} flex flex-col items-center leading-tight`;
+            }
+
+            try {
+                const { error } = await _supabase
+                    .from('units')
+                    .update({ status: novoStatus })
+                    .eq('id', id);
+
+                if (error) throw error;
+                aplicarFiltrosMatriz();
+            } catch (err) {
+                console.error("Erro ao atualizar status no banco:", err);
+                alert("Falha ao salvar a alteração no banco de dados.");
+            }
+        }
+
+        async function alterarStatusVisiveis(novoStatus) {
+            const busca = document.getElementById('txtBuscaUnidade').value.trim().toLowerCase();
+            const visiveis = unidadesDB.filter(u => {
+                const bateGaveta = filtroGavetaAtual === 'TODAS' || 
+                                  (filtroGavetaAtual === 'LIVRE' ? (u.income_type === 'LIVRE' || u.income_type === 'AVULSO') : u.income_type === filtroGavetaAtual);
+                const bateBusca = !busca || String(u.unit_number).toLowerCase().includes(busca);
+                return bateGaveta && bateBusca;
+            });
+
+            if (visiveis.length === 0) return;
+
+            if (!confirm(`Deseja alterar o status de ${visiveis.length} unidade(s) visível(is) para "${novoStatus}"?`)) {
+                return;
+            }
+
+            const ids = visiveis.map(u => u.id);
+            visiveis.forEach(u => u.status = novoStatus);
+
+            try {
+                const { error } = await _supabase
+                    .from('units')
+                    .update({ status: novoStatus })
+                    .in('id', ids);
+
+                if (error) throw error;
+                desenharMatriz();
+            } catch (err) {
+                console.error("Erro ao alterar em lote:", err);
+                alert("Erro ao aplicar alteração em lote no banco de dados.");
+            }
+        }
+
+        function simularUnidadeDirect(id) {
+            const u = unidadesDB.find(item => item.id === id);
+            if (!u) return;
+
+            const itemPayload = {
+                id: u.id,
+                empreendimento: u.developments?.title || 'Empreendimento',
+                construtora: u.developments?.builder || u.developments?.developer_name || 'AAM Incorporadora',
                 unidade: u.unit_number,
-                precoTabela: u.list_price,
+                pavimento: u.floor,
+                tipologia: u.typology,
+                income_type: u.income_type || 'R2V',
                 m2: u.private_area_m2,
-                dorms: u.typology,
-                is_ready: false,
-                origem: 'GLOBAL'
+                precoTabela: u.list_price,
+                preco: u.list_price,
+                val_ato: u.val_ato,
+                val_30_60_90: u.val_30_60_90,
+                qtd_mensais: u.qtd_mensais,
+                val_mensal_unit: u.val_mensal_unit,
+                qtd_anuais: u.qtd_anuais,
+                val_anual_unit: u.val_anual_unit,
+                val_periodicidade: u.val_periodicidade,
+                val_chaves_unica: u.val_chaves_unica,
+                val_financiamento: u.val_financiamento,
+                data_entrega: u.developments?.delivery_date || '2029-12'
             };
 
-            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(payload));
+            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(itemPayload));
             window.location.href = "supercalc.html";
         }
     </script>
