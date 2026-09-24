@@ -409,9 +409,34 @@
             }
         }
 
-        function recalculateAll() {
-            if (!unidadeAtual) return;
+        function balancearImovelPronto() {
+    if (!ePronto) return;
 
+    const precoTabela = parseFloat(unidadeAtual.precoTabela || unidadeAtual.preco) || 0;
+    const valPeriodicidade = parseFloat(document.getElementById("valPeriodicidade")?.value) || 0;
+    const campoAtivo = document.activeElement ? document.activeElement.id : '';
+
+    let elAto = document.getElementById("valAto");
+    let elFinan = document.getElementById("valFinanciamento");
+
+    if (!elAto || !elFinan || precoTabela === 0) return;
+
+    if (campoAtivo === "valAto" || campoAtivo === "percAto") {
+        let atoAtual = parseFloat(elAto.value) || 0;
+        let novoFinan = precoTabela - atoAtual - valPeriodicidade;
+        if (novoFinan < 0) novoFinan = 0;
+        elFinan.value = novoFinan.toFixed(2);
+    } else if (campoAtivo === "valFinanciamento" || campoAtivo === "percFinanciamento") {
+        let finanAtual = parseFloat(elFinan.value) || 0;
+        let novoAto = precoTabela - finanAtual - valPeriodicidade;
+        if (novoAto < 0) novoAto = 0;
+        elAto.value = novoAto.toFixed(2);
+    }
+}
+        function recalculateAll() {
+            
+            if (!unidadeAtual) return;
+            balancearImovelPronto();
             validarETravarPrazos();
 
             const totalTabela = unidadeAtual.precoTabela || unidadeAtual.preco || 1;
