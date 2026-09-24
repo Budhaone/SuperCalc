@@ -107,7 +107,7 @@
             <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
                 <label class="font-bold text-slate-800 block text-xs md:text-sm">1. Ato / Sinal de Entrada (Imediato):</label>
                 <div class="flex gap-2">
-                    <input type="number" id="valAto" value="0" oninput="onAtoChange()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                    <input type="number" id="valAto" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
                     <select id="modeAto" onchange="recalculateAll()" class="border border-slate-300 p-1.5 rounded-lg font-bold text-xs md:text-sm bg-white">
                         <option value="R_FIXO">R$ FIXO</option>
                         <option value="PERC_TOT">% DO TOTAL</option>
@@ -115,6 +115,17 @@
                 </div>
                 <div id="badgeAto" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
                     Total Ato: R$ 0,00 (0.00%)
+                </div>
+            </div>
+
+            <!-- PARCELA PERIÓDICA PARA IMÓVEL PRONTO (LIDA DIRETAMENTE DA LINHA DO BANCO) -->
+            <div id="boxPeriodicidadePronto" class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5 hidden">
+                <label class="font-bold text-slate-800 block text-xs md:text-sm">Parcela Periódica / Intermediária da Tabela:</label>
+                <div class="flex gap-2">
+                    <input type="number" id="valPeriodicidade" value="0" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-bold text-sm md:text-base bg-white">
+                </div>
+                <div id="badgePeriodicidade" class="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1.5 rounded-lg text-xs md:text-sm font-black shadow-sm">
+                    Periodicidade: R$ 0,00
                 </div>
             </div>
 
@@ -225,7 +236,7 @@
             <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 space-y-1.5">
                 <label class="font-bold text-slate-800 block text-xs md:text-sm">Saldo a Financiar Resultante (R$ Digitável):</label>
                 <div class="flex items-center gap-2">
-                    <input type="number" id="valFinanciamento" value="0" step="100" oninput="onFinanciamentoChange()" class="w-full border border-slate-300 p-2 rounded-lg font-black text-slate-900 text-base md:text-lg bg-white">
+                    <input type="number" id="valFinanciamento" value="0" step="100" oninput="recalculateAll()" class="w-full border border-slate-300 p-2 rounded-lg font-black text-slate-900 text-base md:text-lg bg-white">
                     <span id="percFinanciamento" class="font-black text-slate-900 text-sm md:text-base min-w-[70px] text-right">0.00%</span>
                 </div>
                 
@@ -236,7 +247,7 @@
             <div class="bg-white p-2.5 rounded-lg border border-slate-200 space-y-1">
                 <div class="flex justify-between items-center">
                     <strong class="text-slate-700">Teto Máx. Financiável do Banco (%):</strong>
-                    <input type="number" id="tetoFinanciamentoPerc" value="80" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold text-sm">
+                    <input type="number" id="tetoFinanciamentoPerc" value="70" oninput="recalculateAll()" class="w-16 border border-slate-300 p-1 rounded-lg text-center font-bold text-sm">
                 </div>
                 <div class="text-slate-500 font-semibold text-xs md:text-sm">Valor Limite de Aprovação: <strong id="txtValorMaxFinanciavel" class="text-slate-900">R$ 0,00</strong></div>
             </div>
@@ -273,7 +284,7 @@
     <script>
         let unidadeAtual = null;
         let ePronto = false;
-        let usuarioEditandoFinanciamento = false;
+        let isDireto = false;
 
         function calcularMesesRestantes(dataEntregaStr) {
             if (!dataEntregaStr || dataEntregaStr === 'PRONTO') return 0;
@@ -305,41 +316,57 @@
                     m2: 48.25,
                     precoTabela: 937685,
                     is_ready: false,
+                    has_direct_financing: false,
                     data_entrega: "2029-12"
                 };
             }
 
             ePronto = Boolean(unidadeAtual.is_ready);
+            isDireto = Boolean(unidadeAtual.has_direct_financing || unidadeAtual.financing_type === 'DIRECT');
 
             const badgeModalidade = document.getElementById("badgeTipoModalidade");
             const secaoObra = document.getElementById("secaoParcelasObra");
-            const preco = unidadeAtual.precoTabela || unidadeAtual.preco || 0;
+            const boxPeriodicidade = document.getElementById("boxPeriodicidadePronto");
 
             if (ePronto) {
-                // IMÓVEL PRONTO PARA MORAR: Lê estritamente os valores gravados na linha da tabela
+                // IMÓVEL PRONTO PARA MORAR: Lê estritamente os valores gravados na linha do banco (sem cálculos)
                 badgeModalidade.innerText = "🏠 PRONTO PARA MORAR";
                 badgeModalidade.className = "text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase";
                 secaoObra.style.display = "none";
                 
-                const valAtoLinha = unidadeAtual.val_ato > 0 ? unidadeAtual.val_ato : 0;
-                const valFinanciamentoLinha = unidadeAtual.val_financiamento > 0 ? unidadeAtual.val_financiamento : (preco - valAtoLinha);
+                const valAtoLinha = parseFloat(unidadeAtual.val_ato) || 0;
+                const valPeriodicidadeLinha = parseFloat(unidadeAtual.val_periodicidade) || 0;
+                const valFinanciamentoLinha = parseFloat(unidadeAtual.val_financiamento) || 0;
+
+                if (valPeriodicidadeLinha > 0) {
+                    boxPeriodicidade.classList.remove("hidden");
+                    document.getElementById("valPeriodicidade").value = valPeriodicidadeLinha.toFixed(2);
+                } else {
+                    boxPeriodicidade.classList.add("hidden");
+                    document.getElementById("valPeriodicidade").value = "0.00";
+                }
 
                 document.getElementById("valAto").value = valAtoLinha.toFixed(2);
                 document.getElementById("valFinanciamento").value = valFinanciamentoLinha.toFixed(2);
             } else {
-                // IMÓVEL EM CONSTRUÇÃO: Lê estritamente os valores da tabela de obra
+                // IMÓVEL EM CONSTRUÇÃO: Lê estritamente os valores gravados na linha do banco
                 badgeModalidade.innerText = "🏗️ EM CONSTRUÇÃO";
                 badgeModalidade.className = "text-[10px] md:text-xs font-black px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase";
                 secaoObra.style.display = "block";
+                boxPeriodicidade.classList.add("hidden");
 
-                document.getElementById("valAto").value = (unidadeAtual.val_ato || 0).toFixed(2);
-                document.getElementById("valEntrada").value = (unidadeAtual.val_30_60_90 || 0).toFixed(2);
-                document.getElementById("qtdMensais").value = unidadeAtual.qtd_mensais || 36;
-                document.getElementById("valMensais").value = (unidadeAtual.val_mensal_unit || 0).toFixed(2);
-                document.getElementById("qtdAnuais").value = unidadeAtual.qtd_anuais || 3;
-                document.getElementById("valAnuais").value = (unidadeAtual.val_anual_unit || 0).toFixed(2);
-                document.getElementById("valChaves").value = (unidadeAtual.val_chaves_unica || 0).toFixed(2);
-                document.getElementById("valFinanciamento").value = (unidadeAtual.val_financiamento || 0).toFixed(2);
+                const valAnualOuPeriodicidade = parseFloat(unidadeAtual.val_anual_unit) > 0 
+                    ? parseFloat(unidadeAtual.val_anual_unit) 
+                    : (parseFloat(unidadeAtual.val_periodicidade) > 0 ? parseFloat(unidadeAtual.val_periodicidade) : 0);
+
+                document.getElementById("valAto").value = (parseFloat(unidadeAtual.val_ato) || 0).toFixed(2);
+                document.getElementById("valEntrada").value = (parseFloat(unidadeAtual.val_30_60_90) || 0).toFixed(2);
+                document.getElementById("qtdMensais").value = parseInt(unidadeAtual.qtd_mensais) || 36;
+                document.getElementById("valMensais").value = (parseFloat(unidadeAtual.val_mensal_unit) || 0).toFixed(2);
+                document.getElementById("qtdAnuais").value = parseInt(unidadeAtual.qtd_anuais) || 3;
+                document.getElementById("valAnuais").value = valAnualOuPeriodicidade.toFixed(2);
+                document.getElementById("valChaves").value = (parseFloat(unidadeAtual.val_chaves_unica) || 0).toFixed(2);
+                document.getElementById("valFinanciamento").value = (parseFloat(unidadeAtual.val_financiamento) || 0).toFixed(2);
             }
 
             const empNome = unidadeAtual.empreendimento || "Empreendimento";
@@ -352,16 +379,6 @@
                 document.getElementById("hdrIncomeType").innerText = incType;
             }
 
-            recalculateAll();
-        }
-
-        function onAtoChange() {
-            usuarioEditandoFinanciamento = false;
-            recalculateAll();
-        }
-
-        function onFinanciamentoChange() {
-            usuarioEditandoFinanciamento = true;
             recalculateAll();
         }
 
@@ -407,9 +424,16 @@
             let percAto = (totAto / totalTabela) * 100;
             document.getElementById("badgeAto").innerText = `Total Ato: ${fmt(totAto)} (${percAto.toFixed(2)}%)`;
 
+            let totPeriodicidadePronto = 0;
             let totEntrada = 0, totMensais = 0, totAnuais = 0, totChaves = 0;
 
-            if (!ePronto) {
+            if (ePronto) {
+                totPeriodicidadePronto = parseFloat(document.getElementById("valPeriodicidade")?.value) || 0;
+                const badgePer = document.getElementById("badgePeriodicidade");
+                if (badgePer) {
+                    badgePer.innerText = `Periodicidade / Intermediária: ${fmt(totPeriodicidadePronto)}`;
+                }
+            } else {
                 // ENTRADA FACILITADA
                 const qtdEntrada = parseInt(document.getElementById("qtdEntrada").value) || 0;
                 const valEntradaRaw = parseFloat(document.getElementById("valEntrada").value) || 0;
@@ -444,30 +468,24 @@
                 document.getElementById("badgeChaves").innerText = `Chaves (1x): ${fmt(totChaves)}`;
             }
 
-            const somaEntradas = totAto + totEntrada + totMensais + totAnuais + totChaves;
+            const somaEntradas = ePronto 
+                ? (totAto + totPeriodicidadePronto) 
+                : (totAto + totEntrada + totMensais + totAnuais + totChaves);
 
-            let totFinanciamentoDigitado = parseFloat(document.getElementById("valFinanciamento").value) || 0;
-            if (ePronto && !usuarioEditandoFinanciamento) {
-                if (totFinanciamentoDigitado === 0) {
-                    totFinanciamentoDigitado = totalTabela - totAto;
-                    if (totFinanciamentoDigitado < 0) totFinanciamentoDigitado = 0;
-                    document.getElementById("valFinanciamento").value = totFinanciamentoDigitado.toFixed(2);
-                }
-            } else if (ePronto && usuarioEditandoFinanciamento) {
-                let novoAto = totalTabela - totFinanciamentoDigitado;
-                if (novoAto < 0) novoAto = 0;
-                document.getElementById("valAto").value = novoAto.toFixed(2);
-                totAto = novoAto;
-                percAto = (totAto / totalTabela) * 100;
-                document.getElementById("badgeAto").innerText = `Total Ato: ${fmt(totAto)} (${percAto.toFixed(2)}%)`;
-            }
+            // Leitura estrita do financiamento digitado ou vindo do banco
+            const totFinanciamentoDigitado = parseFloat(document.getElementById("valFinanciamento").value) || 0;
 
             const percFinan = (totFinanciamentoDigitado / totalTabela) * 100;
             document.getElementById("percFinanciamento").innerText = percFinan.toFixed(2) + "%";
 
-            // ALERTA DE PORCENTAGEM DE FINANCIAMENTO COM TARJAS DE ALTA VISIBILIDADE
+            // ALERTA DE FINANCIAMENTO COM TARJAS AJUSTADAS (TETO DE 70% BANCO VS FINANCIAMENTO DIRETO)
             const elAlertaFinan = document.getElementById("alertaTetoFinanciamento");
-            if (percFinan > 80.001) {
+            
+            if (isDireto) {
+                elAlertaFinan.className = "p-2.5 bg-purple-700 text-white rounded-lg text-xs font-black border border-purple-800 mt-1.5 shadow-md";
+                elAlertaFinan.innerHTML = "🤝 FINANCIAMENTO DIRETO: Operação realizada diretamente com a incorporadora/construtora (sem validação de teto bancário).";
+                elAlertaFinan.classList.remove("hidden");
+            } else if (percFinan > 80.001) {
                 elAlertaFinan.className = "p-2.5 bg-red-600 text-white rounded-lg text-xs font-black border border-red-700 mt-1.5 shadow-md";
                 elAlertaFinan.innerHTML = "🚨 ALERTA CRÍTICO: Financiamento acima de 80%. Operações acima do teto padrão exigem análise especial de crédito e possuem alto risco de reprovação bancária.";
                 elAlertaFinan.classList.remove("hidden");
@@ -479,7 +497,7 @@
                 elAlertaFinan.classList.add("hidden");
             }
 
-            const tetoPerc = parseFloat(document.getElementById("tetoFinanciamentoPerc").value) || 80;
+            const tetoPerc = parseFloat(document.getElementById("tetoFinanciamentoPerc").value) || 70;
             const valorMaxFinanciavel = totalTabela * (tetoPerc / 100);
             document.getElementById("txtValorMaxFinanciavel").innerText = fmt(valorMaxFinanciavel);
 
@@ -541,6 +559,7 @@
             texto += `• Metragem: ${unidadeAtual.m2} m²\n`;
             texto += `• Vagas: ${unidadeAtual.vagas > 0 ? unidadeAtual.vagas : 'Sem vaga'}\n`;
             texto += `• Status: ${ePronto ? 'PRONTO PARA MORAR' : 'EM CONSTRUÇÃO'}\n`;
+            if (isDireto) texto += `• Modalidade: FINANCIAMENTO DIRETO CONSTRUTORA\n`;
             texto += `------------------------------------\n`;
             texto += `💰 *Valor de Tabela:* ${fmt(preco)}`;
 
@@ -567,6 +586,8 @@
             const totFin = parseFloat(document.getElementById("valFinanciamento").value) || 0;
             const percFin = totalTabela > 0 ? (totFin / totalTabela) * 100 : 0;
 
+            let totPeriodicidadePronto = parseFloat(document.getElementById("valPeriodicidade")?.value) || 0;
+
             let qtdEntrada = parseInt(document.getElementById("qtdEntrada")?.value) || 0;
             let valEntradaRaw = parseFloat(document.getElementById("valEntrada")?.value) || 0;
             let modeEntrada = document.getElementById("modeEntrada")?.value;
@@ -590,8 +611,12 @@
             let totChaves = ePronto ? 0 : (modeChaves === 'PERC_TOT' ? (totalTabela * (valChavesRaw / 100)) : valChavesRaw);
 
             const totalProposta = ePronto 
-                ? (totAto + totFin) 
+                ? (totAto + totPeriodicidadePronto + totFin) 
                 : (totAto + totEntrada + totMensais + totAnuais + totChaves + totFin);
+
+            const rotuloFinanciamento = isDireto 
+                ? "Saldo a Financiar Direto com Construtora" 
+                : "Saldo Financiado / Quitação Bancária";
 
             let texto = `*SIMULAÇÃO DE FLUXO DE PAGAMENTO*\n`;
             texto += `🏢 *Empreendimento:* ${empNome} (Apto ${unidadeAtual.unidade})\n`;
@@ -605,7 +630,10 @@
 
             if (ePronto) {
                 texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
-                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
+                if (totPeriodicidadePronto > 0) {
+                    texto += `• Parcela Periódica / Intermediária: ${fmt(totPeriodicidadePronto)}\n`;
+                }
+                texto += `• ${rotuloFinanciamento}: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             } else {
                 texto += `• Entrada / Sinal (Ato): ${fmt(totAto)} ("${percAto.toFixed(2)}%")\n`;
                 if (totEntrada > 0) {
@@ -620,12 +648,16 @@
                 if (totChaves > 0) {
                     texto += `• Parcela Única de Chaves: ${fmt(totChaves)}\n`;
                 }
-                texto += `• Saldo Financiado / Quitação: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
+                texto += `• ${rotuloFinanciamento}: ${fmt(totFin)} ("${percFin.toFixed(2)}%")\n`;
             }
 
             texto += `------------------------------------\n`;
             texto += `*TOTAL DA PROPOSTA:* ${fmt(totalProposta)}\n`;
-            texto += `\n_Obs: Proposta sujeita a aprovação de crédito bancário._`;
+            if (!isDireto) {
+                texto += `\n_Obs: Proposta sujeita a aprovação de crédito bancário._`;
+            } else {
+                texto += `\n_Obs: Condições de financiamento direto sujeito a análise cadastral pela construtora._`;
+            }
 
             navigator.clipboard.writeText(texto);
             alert("Proposta comercial copiada com sucesso para o WhatsApp!");
