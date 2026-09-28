@@ -3,422 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestor Central de Estoque | SuperCalc Admin</title>
-    <link rel="icon" type="image/png" href="favicon supercalc energiaflix.png">
+    <title>Gestor de Estoque | SuperCalc</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
     <style>
-        .unit-btn {
+        .unit-card {
+            transition: all 0.15s ease;
+            cursor: pointer;
             user-select: none;
-            transition: all 0.15s ease-in-out;
         }
-        .unit-btn:hover {
-            transform: scale(1.05);
+        .unit-card:active { transform: scale(0.92); }
+        .disp { background-color: #dcfce7; color: #166534; border: 1px solid #22c55e; }
+        .promo { background-color: #dbeafe; color: #1e3a8a; border: 1px solid #3b82f6; }
+        .trava { background-color: #fee2e2; color: #991b1b; border: 1px solid #ef4444; text-decoration: line-through; }
+        
+        .btn-fab-save {
+            position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px;
+            border-radius: 50%; background: #10b981; color: white; font-size: 1.5rem;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid white; z-index: 50;
+            cursor: pointer; transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .btn-fab-save:active { transform: scale(0.9); }
+        .btn-fab-save.pendente { background: #f59e0b; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+<body class="bg-slate-900 text-slate-200 font-sans min-h-screen pb-24">
 
-    <!-- CABEÇALHO DO PAINEL GESTOR -->
-    <header class="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 class="text-xl font-black text-amber-400 tracking-tight flex items-center gap-2">
-                    🛡️ GESTOR CENTRAL DE ESTOQUE SUPERCALC
-                </h1>
-                <p class="text-xs text-slate-400 font-medium">Controle de Espelho de Vendas e Status em Tempo Real</p>
+    <header class="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-40 shadow-md">
+        <div class="max-w-6xl mx-auto space-y-3">
+            <h1 class="text-xl font-black text-amber-400">⚙️ Gestor de Estoque (Rascunho Local)</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <select id="selEmpreendimento" onchange="carregarEmpreendimento()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm font-bold outline-none focus:border-amber-400">
+                    <option value="">Carregando Empreendimentos...</option>
+                </select>
+                <div class="flex gap-2">
+                    <button onclick="definirModo('TRAVA')" id="btnModoTrava" class="flex-1 bg-red-900/50 text-red-400 border border-red-700 rounded-xl text-xs font-bold font-bold transition">🔴 Alternar Trava</button>
+                    <button onclick="definirModo('PROMO')" id="btnModoPromo" class="flex-1 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl text-xs font-bold transition">🔵 Alternar Promo</button>
+                </div>
             </div>
-            
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition shadow">
-                    ← Voltar à Prateleira
-                </a>
+            <div class="flex flex-wrap gap-2 pt-2">
+                <button onclick="abrirModalReset()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-xs font-bold transition shadow">🔄 Limpezas e Resets...</button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto p-3 md:p-6 space-y-4 flex-1 w-full">
-
-        <!-- PAINEL DE CONTROLE E SELEÇÃO DE EMPREENDIMENTO -->
-        <section class="bg-slate-800 p-4 md:p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- 1. Incorporadora -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">1. Incorporadora / Origem:</label>
-                    <select id="selIncorporadora" onchange="filtrarEmpreendimentosPorIncorporadora()" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-xs font-bold text-slate-100 outline-none focus:border-amber-400">
-                        <option value="TODAS">Todas as Incorporadoras</option>
-                    </select>
-                </div>
-
-                <!-- 2. Empreendimento -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">2. Empreendimento:</label>
-                    <select id="selEmpreendimento" onchange="carregarEstoqueEmpreendimento()" class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2.5 text-xs font-bold text-amber-400 outline-none focus:border-amber-400">
-                        <option value="">Carregando Empreendimentos...</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- FILTRO DA 4ª GAVETA (ENQUADRAMENTO / INCOME_TYPE) -->
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Filtrar Enquadramento (4ª Gaveta / Modalidade):</label>
-                <div class="flex flex-wrap gap-2" id="containerBotoesGaveta">
-                    <button onclick="setFiltroGaveta('TODAS', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 shadow">Todas as Unidades</button>
-                    <button onclick="setFiltroGaveta('HIS', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-purple-300 border border-slate-700 hover:bg-slate-700">HIS</button>
-                    <button onclick="setFiltroGaveta('HMP', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-orange-300 border border-slate-700 hover:bg-slate-700">HMP</button>
-                    <button onclick="setFiltroGaveta('NR', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-pink-300 border border-slate-700 hover:bg-slate-700">NR / Short Stay</button>
-                    <button onclick="setFiltroGaveta('R2V', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-blue-300 border border-slate-700 hover:bg-slate-700">R2V (Livre)</button>
-                    <button onclick="setFiltroGaveta('LOJA', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-yellow-300 border border-slate-700 hover:bg-slate-700">LOJA</button>
-                    <button onclick="setFiltroGaveta('LIVRE', this)" class="btn-gaveta px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-emerald-300 border border-slate-700 hover:bg-slate-700">Terceiros / Avulsos</button>
-                </div>
-            </div>
-
-            <!-- CONTADORES RESUMIDOS -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-center text-xs font-bold">
-                <div class="text-slate-300">Total: <span id="lblTotalMatriz" class="text-amber-400 text-sm">0</span></div>
-                <div class="text-emerald-400">🟢 Disponíveis: <span id="lblDispMatriz" class="text-sm">0</span></div>
-                <div class="text-blue-400">🔵 Promo: <span id="lblPromoMatriz" class="text-sm">0</span></div>
-                <div class="text-red-400">🔴 Trava / Indisp: <span id="lblIndispMatriz" class="text-sm">0</span></div>
-            </div>
-
-            <!-- ALTERNADOR DE MODO DE CLIQUE E BUSCA -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-700">
-                <button id="btnModoTrava" onclick="setModoClique('TRAVA')" class="w-full py-2 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition shadow flex items-center justify-center gap-1">
-                    🔴 Clique Alterna: Disp ⇄ Trava
-                </button>
-                <button id="btnModoPromo" onclick="setModoClique('PROMO')" class="w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1">
-                    🔵 Clique Alterna: Disp ⇄ Promo
-                </button>
-                <input type="text" id="txtBuscaUnidade" onkeyup="aplicarFiltrosMatriz()" placeholder="Buscar por número (Ex: 1714, 501)..." class="w-full bg-slate-900 border border-slate-600 rounded-xl p-2 text-xs font-medium text-slate-100 outline-none focus:border-amber-400">
-            </div>
-
-            <!-- AÇÕES EM LOTE -->
-            <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-700/50">
-                <button onclick="alterarStatusVisiveis('INDISPONIVEL')" class="bg-red-950/80 hover:bg-red-900 text-red-300 border border-red-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔒 Travar Visíveis</button>
-                <button onclick="alterarStatusVisiveis('DISPONIVEL')" class="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🔓 Liberar Visíveis</button>
-                <button onclick="alterarStatusVisiveis('PROMOCIONAL')" class="bg-blue-950/80 hover:bg-blue-900 text-blue-300 border border-blue-800 px-3 py-1.5 rounded-lg text-xs font-bold transition">🏷️ Promo Visíveis</button>
-            </div>
-        </section>
-
-        <!-- ESPELHO DE VENDAS / MATRIZ DE UNIDADES -->
-        <section class="bg-slate-800 p-4 md:p-6 rounded-2xl border border-slate-700 shadow-xl min-h-[300px]">
-            <div id="loadingMatriz" class="py-12 text-center text-slate-400 font-bold text-xs space-y-2">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-400"></div>
-                <p>Carregando empreendimentos do banco de dados...</p>
-            </div>
-
-            <div id="containerMatriz" class="hidden overflow-x-auto space-y-2">
-                <!-- Linhas dos andares geradas via JS -->
-            </div>
-        </section>
+    <main class="max-w-6xl mx-auto p-4">
+        <div id="loading" class="py-12 text-center text-slate-400 font-bold text-sm hidden">
+            Carregando estrutura...
+        </div>
+        <div id="matriz" class="bg-slate-100 p-4 rounded-xl overflow-x-auto shadow-inner min-h-[300px]">
+            <!-- Tabela injetada via JS -->
+            <p class="text-slate-500 text-center font-bold mt-10">Selecione um empreendimento acima para visualizar a matriz.</p>
+        </div>
     </main>
 
-    <!-- SCRIPT DE INTEGRAÇÃO COM O SUPABASE -->
+    <button id="btnSalvar" class="btn-fab-save" onclick="salvarAlteracoes()" title="Salvar e Publicar">💾</button>
+
+    <!-- Modal de Resets -->
+    <div id="modalReset" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-sm w-full space-y-3 shadow-2xl text-center">
+            <h3 class="text-lg font-black text-amber-400 mb-2">Opções de Limpeza</h3>
+            <button onclick="executarLimpeza('TRAVAS')" class="w-full bg-slate-800 hover:bg-slate-700 border border-red-900 text-red-400 font-bold py-2 rounded-lg transition text-sm">
+                Remover TODAS as Travas
+            </button>
+            <button onclick="executarLimpeza('PROMOS')" class="w-full bg-slate-800 hover:bg-slate-700 border border-blue-900 text-blue-400 font-bold py-2 rounded-lg transition text-sm">
+                Remover TODAS as Promoções
+            </button>
+            <button onclick="executarLimpeza('TUDO')" class="w-full bg-red-900 hover:bg-red-800 border border-red-700 text-white font-bold py-2 rounded-lg transition text-sm">
+                ⚠️ Tornar Tudo Disponível
+            </button>
+            <button onclick="fecharModal()" class="w-full bg-slate-700 text-white font-bold py-2 rounded-lg mt-2 text-sm">
+                Cancelar
+            </button>
+        </div>
+    </div>
+
     <script>
-        let empreendimentosDB = [];
-        let unidadesDB = [];
-        let modoClique = 'TRAVA'; // 'TRAVA' ou 'PROMO'
-        let filtroGavetaAtual = 'TODAS';
+        let unidadesGlobal = [];
+        let rascunhoStatus = {}; // { id_unidade: 'DISPONIVEL' | 'INDISPONIVEL' | 'PROMOCIONAL' }
+        let modoAtual = 'TRAVA';
+        let idEmpreendimentoAtual = null;
 
         window.onload = async () => {
-            await carregarEmpreendimentos();
+            await listarEmpreendimentos();
         };
 
-        async function carregarEmpreendimentos() {
-            try {
-                if (typeof _supabase === 'undefined') {
-                    throw new Error("Supabase não inicializado. Verifique supabase-config.js");
-                }
-
-                const { data, error } = await _supabase
-                    .from('developments')
-                    .select('*')
-                    .order('title', { ascending: true });
-
-                if (error) throw error;
-                empreendimentosDB = data || [];
-
-                popularIncorporadoras();
-                filtrarEmpreendimentosPorIncorporadora();
-            } catch (err) {
-                console.error("Erro ao carregar empreendimentos:", err);
-                document.getElementById('loadingMatriz').innerHTML = `<p class="text-red-400 font-bold">Erro ao conectar ao banco de dados: ${err.message}</p>`;
+        async function listarEmpreendimentos() {
+            const { data, error } = await _supabase.from('developments').select('id, title').order('title');
+            if (data) {
+                const sel = document.getElementById("selEmpreendimento");
+                sel.innerHTML = '<option value="">Selecione um Empreendimento...</option>' + 
+                    data.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
             }
         }
 
-        function popularIncorporadoras() {
-            const selectInc = document.getElementById('selIncorporadora');
-            const incs = [...new Set(empreendimentosDB.map(d => d.builder || d.developer_name || 'AAM Incorporadora'))].sort();
+        async function carregarEmpreendimento() {
+            idEmpreendimentoAtual = document.getElementById("selEmpreendimento").value;
+            const matriz = document.getElementById("matriz");
+            const loading = document.getElementById("loading");
+            
+            if(!idEmpreendimentoAtual) {
+                matriz.innerHTML = '<p class="text-slate-500 text-center font-bold mt-10">Selecione um empreendimento.</p>';
+                document.getElementById('btnSalvar').classList.remove('pendente');
+                return;
+            }
 
-            selectInc.innerHTML = '<option value="TODAS">Todas as Incorporadoras</option>' +
-                incs.map(i => `<option value="${i}">${i}</option>`).join('');
-        }
+            matriz.innerHTML = '';
+            loading.classList.remove("hidden");
+            rascunhoStatus = {}; // Limpa o rascunho ao trocar de prédio
 
-        function filtrarEmpreendimentosPorIncorporadora() {
-            const inc = document.getElementById('selIncorporadora').value;
-            const selectEmp = document.getElementById('selEmpreendimento');
+            const { data, error } = await _supabase
+                .from('units')
+                .select('id, unit_number, floor, status, typology')
+                .eq('development_id', idEmpreendimentoAtual)
+                .order('floor', { ascending: false });
 
-            const filtrados = empreendimentosDB.filter(d => {
-                const devInc = d.builder || d.developer_name || 'AAM Incorporadora';
-                return inc === 'TODAS' || devInc === inc;
-            });
+            loading.classList.add("hidden");
 
-            selectEmp.innerHTML = filtrados.map(d => `<option value="${d.id}">${d.title} (${d.builder || d.developer_name || 'AAM'})</option>`).join('');
-
-            if (filtrados.length > 0) {
-                selectEmp.value = filtrados[0].id;
-                carregarEstoqueEmpreendimento();
+            if (data && data.length > 0) {
+                unidadesGlobal = data;
+                // Popula o rascunho inicial com o que está no banco
+                data.forEach(u => rascunhoStatus[u.id] = u.status || 'DISPONIVEL');
+                renderizarMatriz();
             } else {
-                selectEmp.innerHTML = '<option value="">Nenhum empreendimento encontrado</option>';
-                desenharMatriz();
+                matriz.innerHTML = '<p class="text-slate-500 text-center font-bold mt-10">Nenhuma unidade encontrada.</p>';
             }
         }
 
-        async function carregarEstoqueEmpreendimento() {
-            const devId = document.getElementById('selEmpreendimento').value;
-            const loading = document.getElementById('loadingMatriz');
-            const container = document.getElementById('containerMatriz');
-
-            if (!devId) {
-                desenharMatriz();
-                return;
-            }
-
-            loading.classList.remove('hidden');
-            container.classList.add('hidden');
-
-            try {
-                const { data, error } = await _supabase
-                    .from('units')
-                    .select('*, developments(*)')
-                    .eq('development_id', devId)
-                    .order('floor', { ascending: false });
-
-                if (error) throw error;
-                unidadesDB = data || [];
-
-                desenharMatriz();
-            } catch (err) {
-                console.error("Erro ao buscar estoque das unidades:", err);
-                loading.innerHTML = `<p class="text-red-400 font-bold">Erro ao carregar unidades do empreendimento.</p>`;
-            }
-        }
-
-        function desenharMatriz() {
-            const loading = document.getElementById('loadingMatriz');
-            const container = document.getElementById('containerMatriz');
-
-            loading.classList.add('hidden');
-            container.classList.remove('hidden');
-
-            if (unidadesDB.length === 0) {
-                container.innerHTML = `<div class="py-12 text-center text-slate-500 font-bold text-xs">Nenhuma unidade cadastrada para este empreendimento no banco de dados.</div>`;
-                atualizarContadores([]);
-                return;
-            }
-
-            const andares = [...new Set(unidadesDB.map(u => parseInt(u.floor) || 0))].sort((a, b) => b - a);
-
-            let html = '';
-            andares.forEach(andar => {
-                const unidadesAndar = unidadesDB.filter(u => (parseInt(u.floor) || 0) === andar);
-                unidadesAndar.sort((a, b) => String(a.unit_number).localeCompare(String(b.unit_number), undefined, { numeric: true }));
-
-                html += `
-                    <div class="flex items-center gap-2 border-b border-slate-700/40 pb-1.5 tr-andar" data-andar="${andar}">
-                        <span class="w-16 text-xs text-amber-400 font-black flex-shrink-0">${andar}º Andar</span>
-                        <div class="flex flex-wrap gap-1.5 flex-1">
-                            ${unidadesAndar.map(u => `
-                                <button id="btn_unit_${u.id}"
-                                        onclick="clicarUnidade('${u.id}')"
-                                        ondblclick="simularUnidadeDirect('${u.id}')"
-                                        data-num="${String(u.unit_number).toLowerCase()}"
-                                        data-gaveta="${u.income_type || 'R2V'}"
-                                        data-status="${u.status || 'DISPONIVEL'}"
-                                        title="Clique duplo para Simular na SuperCalc"
-                                        class="unit-btn px-2.5 py-1.5 rounded-lg text-xs font-bold shadow ${getEstiloStatus(u.status)} flex flex-col items-center leading-tight">
-                                    <span>${u.unit_number}</span>
-                                    <span class="text-[9px] opacity-80 uppercase">${u.income_type || 'R2V'}</span>
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+        function renderizarMatriz() {
+            // Agrupar por andar
+            let andares = {};
+            unidadesGlobal.forEach(u => {
+                if(!andares[u.floor]) andares[u.floor] = [];
+                andares[u.floor].push(u);
             });
 
-            container.innerHTML = html;
-            aplicarFiltrosMatriz();
-        }
-
-        function getEstiloStatus(status) {
-            switch (status) {
-                case 'INDISPONIVEL':
-                case 'BLOQUEADO':
-                case 'VENDIDO':
-                case 'RESERVADO':
-                    return 'bg-red-600 hover:bg-red-500 text-white';
-                case 'PROMOCIONAL':
-                    return 'bg-blue-600 hover:bg-blue-500 text-white';
-                default:
-                    return 'bg-emerald-600 hover:bg-emerald-500 text-white';
-            }
-        }
-
-        function setFiltroGaveta(gaveta, btn) {
-            filtroGavetaAtual = gaveta;
-            document.querySelectorAll('.btn-gaveta').forEach(b => {
-                b.classList.remove('bg-amber-400', 'text-slate-950');
-                b.classList.add('bg-slate-900', 'text-slate-300');
+            // Ordenar prumadas dentro de cada andar
+            Object.keys(andares).forEach(a => {
+                andares[a].sort((a,b) => a.unit_number.localeCompare(b.unit_number, undefined, {numeric: true}));
             });
-            btn.classList.remove('bg-slate-900', 'text-slate-300');
-            btn.classList.add('bg-amber-400', 'text-slate-950');
 
-            aplicarFiltrosMatriz();
+            const andaresOrdenados = Object.keys(andares).map(Number).sort((a,b) => b - a);
+            
+            let html = '<table class="w-full border-collapse min-w-max"><tbody>';
+            
+            andaresOrdenados.forEach(andar => {
+                html += `<tr><td class="bg-slate-300 text-slate-800 font-bold p-2 text-xs text-center border-b border-white rounded-l-lg w-16">${andar}º</td>`;
+                
+                andares[andar].forEach(u => {
+                    const status = rascunhoStatus[u.id];
+                    let classeCor = 'disp';
+                    if (status === 'INDISPONIVEL') classeCor = 'trava';
+                    if (status === 'PROMOCIONAL') classeCor = 'promo';
+
+                    html += `<td class="p-1 border-b border-white">
+                                <div onclick="clicarUnidade('${u.id}')" class="unit-card ${classeCor} text-center p-1.5 rounded-md min-w-[45px]">
+                                    <div class="text-xs font-black">${u.unit_number}</div>
+                                </div>
+                             </td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+
+            document.getElementById("matriz").innerHTML = html;
         }
 
-        function setModoClique(modo) {
-            modoClique = modo;
-            const btnTrava = document.getElementById('btnModoTrava');
-            const btnPromo = document.getElementById('btnModoPromo');
+        function definirModo(modo) {
+            modoAtual = modo;
+            const btnTrava = document.getElementById("btnModoTrava");
+            const btnPromo = document.getElementById("btnModoPromo");
 
             if (modo === 'TRAVA') {
-                btnTrava.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition shadow flex items-center justify-center gap-1";
-                btnPromo.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1";
+                btnTrava.className = "flex-1 bg-red-900/50 text-red-400 border border-red-700 rounded-xl text-xs font-bold transition";
+                btnPromo.className = "flex-1 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl text-xs font-bold transition";
             } else {
-                btnPromo.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition shadow flex items-center justify-center gap-1";
-                btnTrava.className = "w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-700 hover:bg-slate-600 text-slate-300 transition flex items-center justify-center gap-1";
+                btnTrava.className = "flex-1 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl text-xs font-bold transition";
+                btnPromo.className = "flex-1 bg-blue-900/50 text-blue-400 border border-blue-700 rounded-xl text-xs font-bold transition";
             }
         }
 
-        function aplicarFiltrosMatriz() {
-            const busca = document.getElementById('txtBuscaUnidade').value.trim().toLowerCase();
-            let visiveis = [];
-
-            unidadesDB.forEach(u => {
-                const btn = document.getElementById(`btn_unit_${u.id}`);
-                if (!btn) return;
-
-                const bateGaveta = filtroGavetaAtual === 'TODAS' || 
-                                  (filtroGavetaAtual === 'LIVRE' ? (u.income_type === 'LIVRE' || u.income_type === 'AVULSO') : u.income_type === filtroGavetaAtual);
-                const bateBusca = !busca || String(u.unit_number).toLowerCase().includes(busca);
-
-                if (bateGaveta && bateBusca) {
-                    btn.classList.remove('hidden');
-                    visiveis.push(u);
-                } else {
-                    btn.classList.add('hidden');
-                }
-            });
-
-            atualizarContadores(visiveis);
+        function clicarUnidade(id) {
+            const statusAtual = rascunhoStatus[id];
+            
+            if (modoAtual === 'TRAVA') {
+                rascunhoStatus[id] = (statusAtual === 'INDISPONIVEL') ? 'DISPONIVEL' : 'INDISPONIVEL';
+            } else {
+                rascunhoStatus[id] = (statusAtual === 'PROMOCIONAL') ? 'DISPONIVEL' : 'PROMOCIONAL';
+            }
+            
+            document.getElementById('btnSalvar').classList.add('pendente');
+            renderizarMatriz();
         }
 
-        function atualizarContadores(lista) {
-            const total = lista.length;
-            const disp = lista.filter(u => u.status === 'DISPONIVEL' || !u.status).length;
-            const promo = lista.filter(u => u.status === 'PROMOCIONAL').length;
-            const indisp = lista.filter(u => u.status === 'INDISPONIVEL' || u.status === 'RESERVADO' || u.status === 'VENDIDO').length;
-
-            document.getElementById('lblTotalMatriz').innerText = total;
-            document.getElementById('lblDispMatriz').innerText = disp;
-            document.getElementById('lblPromoMatriz').innerText = promo;
-            document.getElementById('lblIndispMatriz').innerText = indisp;
+        function abrirModalReset() {
+            if(!idEmpreendimentoAtual) return alert("Selecione um empreendimento primeiro.");
+            document.getElementById('modalReset').classList.remove('hidden');
+        }
+        function fecharModal() {
+            document.getElementById('modalReset').classList.add('hidden');
         }
 
-        async function clicarUnidade(id) {
-            const unidade = unidadesDB.find(u => u.id === id);
-            if (!unidade) return;
-
-            let novoStatus = 'DISPONIVEL';
-            if (modoClique === 'TRAVA') {
-                novoStatus = unidade.status === 'INDISPONIVEL' ? 'DISPONIVEL' : 'INDISPONIVEL';
-            } else if (modoClique === 'PROMO') {
-                novoStatus = unidade.status === 'PROMOCIONAL' ? 'DISPONIVEL' : 'PROMOCIONAL';
+        function executarLimpeza(tipo) {
+            let contador = 0;
+            
+            if (tipo === 'TRAVAS' && confirm("Confirma a remoção de TODAS as travas (tornando-as disponíveis)?")) {
+                Object.keys(rascunhoStatus).forEach(id => {
+                    if(rascunhoStatus[id] === 'INDISPONIVEL') { rascunhoStatus[id] = 'DISPONIVEL'; contador++; }
+                });
+            } 
+            else if (tipo === 'PROMOS' && confirm("Confirma a remoção de TODAS as promoções (retornando ao preço normal)?")) {
+                Object.keys(rascunhoStatus).forEach(id => {
+                    if(rascunhoStatus[id] === 'PROMOCIONAL') { rascunhoStatus[id] = 'DISPONIVEL'; contador++; }
+                });
+            }
+            else if (tipo === 'TUDO' && confirm("ATENÇÃO: Deseja realmente ZERAR todos os status e deixar todo o prédio disponível?")) {
+                Object.keys(rascunhoStatus).forEach(id => {
+                    if(rascunhoStatus[id] !== 'DISPONIVEL') { rascunhoStatus[id] = 'DISPONIVEL'; contador++; }
+                });
             }
 
-            unidade.status = novoStatus;
-
-            const btn = document.getElementById(`btn_unit_${id}`);
-            if (btn) {
-                btn.className = `unit-btn px-2.5 py-1.5 rounded-lg text-xs font-bold shadow ${getEstiloStatus(novoStatus)} flex flex-col items-center leading-tight`;
+            if(contador > 0) {
+                document.getElementById('btnSalvar').classList.add('pendente');
+                renderizarMatriz();
             }
+            fecharModal();
+        }
+
+        async function salvarAlteracoes() {
+            if(!idEmpreendimentoAtual) return;
+            if(!confirm("Publicar as alterações atuais no banco de dados para todos os corretores?")) return;
+
+            const btn = document.getElementById('btnSalvar');
+            btn.innerHTML = '⏳';
+            btn.classList.remove('pendente');
 
             try {
-                const { error } = await _supabase
-                    .from('units')
-                    .update({ status: novoStatus })
-                    .eq('id', id);
+                // Prepara os dados para o Supabase (Upsert)
+                const updates = Object.keys(rascunhoStatus).map(id => ({
+                    id: id,
+                    status: rascunhoStatus[id]
+                }));
 
-                if (error) throw error;
-                aplicarFiltrosMatriz();
+                const { error } = await _supabase.from('units').upsert(updates);
+                
+                if(error) throw error;
+                
+                alert("✅ Estoque publicado com sucesso!");
             } catch (err) {
-                console.error("Erro ao atualizar status no banco:", err);
-                alert("Falha ao salvar a alteração no banco de dados.");
+                alert("❌ Erro ao salvar: " + err.message);
+                btn.classList.add('pendente');
             }
-        }
-
-        async function alterarStatusVisiveis(novoStatus) {
-            const busca = document.getElementById('txtBuscaUnidade').value.trim().toLowerCase();
-            const visiveis = unidadesDB.filter(u => {
-                const bateGaveta = filtroGavetaAtual === 'TODAS' || 
-                                  (filtroGavetaAtual === 'LIVRE' ? (u.income_type === 'LIVRE' || u.income_type === 'AVULSO') : u.income_type === filtroGavetaAtual);
-                const bateBusca = !busca || String(u.unit_number).toLowerCase().includes(busca);
-                return bateGaveta && bateBusca;
-            });
-
-            if (visiveis.length === 0) return;
-
-            if (!confirm(`Deseja alterar o status de ${visiveis.length} unidade(s) visível(is) para "${novoStatus}"?`)) {
-                return;
-            }
-
-            const ids = visiveis.map(u => u.id);
-            visiveis.forEach(u => u.status = novoStatus);
-
-            try {
-                const { error } = await _supabase
-                    .from('units')
-                    .update({ status: novoStatus })
-                    .in('id', ids);
-
-                if (error) throw error;
-                desenharMatriz();
-            } catch (err) {
-                console.error("Erro ao alterar em lote:", err);
-                alert("Erro ao aplicar alteração em lote no banco de dados.");
-            }
-        }
-
-        function simularUnidadeDirect(id) {
-            const u = unidadesDB.find(item => item.id === id);
-            if (!u) return;
-
-            const itemPayload = {
-                id: u.id,
-                empreendimento: u.developments?.title || 'Empreendimento',
-                construtora: u.developments?.builder || u.developments?.developer_name || 'AAM Incorporadora',
-                unidade: u.unit_number,
-                pavimento: u.floor,
-                tipologia: u.typology,
-                income_type: u.income_type || 'R2V',
-                m2: u.private_area_m2,
-                precoTabela: u.list_price,
-                preco: u.list_price,
-                val_ato: u.val_ato,
-                val_30_60_90: u.val_30_60_90,
-                qtd_mensais: u.qtd_mensais,
-                val_mensal_unit: u.val_mensal_unit,
-                qtd_anuais: u.qtd_anuais,
-                val_anual_unit: u.val_anual_unit,
-                val_periodicidade: u.val_periodicidade,
-                val_chaves_unica: u.val_chaves_unica,
-                val_financiamento: u.val_financiamento,
-                data_entrega: u.developments?.delivery_date || '2029-12'
-            };
-
-            localStorage.setItem("UNIDADE_SELECIONADA", JSON.stringify(itemPayload));
-            window.location.href = "supercalc.html";
+            btn.innerHTML = '💾';
         }
     </script>
 </body>
