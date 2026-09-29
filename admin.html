@@ -243,22 +243,37 @@
             btn.classList.remove('pendente');
 
             try {
-                // AQUI ESTÁ A CORREÇÃO EXATA QUE IMPEDE O ERRO "NOT NULL"
-                const updates = Object.keys(rascunhoStatus).map(id => {
-                    const unidadeOriginal = unidadesGlobal.find(u => u.id === id);
-                    return {
-                        id: id,
-                        unit_number: unidadeOriginal.unit_number, // <--- Esta linha resolve o erro
-                        development_id: idEmpreendimentoAtual,
-                        floor: unidadeOriginal.floor,
-                        typology: unidadeOriginal.typology,
-                        status: rascunhoStatus[id]
-                    };
+                // Seleciona APENAS as unidades que realmente mudaram no rascunho
+                const alteracoes = Object.keys(rascunhoStatus).filter(id => {
+                    const original = unidadesGlobal.find(u => u.id === id);
+                    return original && original.status !== rascunhoStatus[id];
                 });
 
-                const { error } = await _supabase.from('units').upsert(updates);
+                if (alteracoes.length === 0) {
+                    btn.innerHTML = '💾';
+                    return; // Nenhuma unidade foi alterada
+                }
+
+                // Dispara os comandos de UPDATE cirúrgicos (Atualiza SÓ a coluna 'status', evitando erros NOT NULL)
+                const promessas = alteracoes.map(id => {
+                    return _supabase
+                        .from('units')
+                        .update({ status: rascunhoStatus[id] })
+                        .eq('id', id);
+                });
+
+                // Aguarda todas as gravações serem concluídas no banco
+                const resultados = await Promise.all(promessas);
                 
-                if(error) throw error;
+                for (const res of resultados) {
+                    if (res.error) throw res.error;
+                }
+
+                // Atualiza a memória local para não salvar de novo sem necessidade
+                alteracoes.forEach(id => {
+                    const original = unidadesGlobal.find(u => u.id === id);
+                    if(original) original.status = rascunhoStatus[id];
+                });
                 
                 alert("✅ Estoque publicado com sucesso!");
             } catch (err) {
