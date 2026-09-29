@@ -8,126 +8,388 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-200 font-sans min-h-screen pb-12">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
-    <header class="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-md">
-        <div class="max-w-6xl mx-auto space-y-3">
-            <div class="flex justify-between items-center">
-                <h1 class="text-base font-black text-amber-400 uppercase tracking-wider">Prateleira de Imóveis</h1>
-                <span id="badgeContador" class="bg-amber-400 text-slate-900 text-xs font-black px-3 py-1 rounded">0 Imóveis</span>
+    <div class="max-w-7xl mx-auto space-y-6 p-4">
+        <!-- CABEÇALHO DO CATÁLOGO ORIGINAL RESTAURADO -->
+        <header class="bg-slate-900 text-white p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b-4 border-yellow-400">
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight">PRATELEIRA DE IMÓVEIS</h1>
+                <p class="text-xs text-yellow-400 font-bold uppercase tracking-wider">Painel Multimarcas • Catálogo & Inventário Privado</p>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-bold outline-none focus:border-amber-400">
-                    <option value="TODOS">Todos os Empreendimentos</option>
-                </select>
-                <select id="selOrdenacao" onchange="filtrarEstoque()" class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-bold outline-none focus:border-amber-400">
-                    <option value="andar_desc">Andar (Mais Alto)</option>
-                    <option value="preco_asc">Menor Preço</option>
-                    <option value="preco_desc">Maior Preço</option>
-                    <option value="m2_asc">Menor m²</option>
-                </select>
-                <input type="text" id="filtroTexto" onkeyup="filtrarEstoque()" placeholder="Buscar Apto..." class="bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs font-bold outline-none focus:border-amber-400 text-white placeholder-slate-500">
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2 text-xs font-bold">
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700" id="badgeCountGlobal">🏷️ 0 Globais</span>
+                    <span class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700" id="badgeCountPrivado">🔒 0 Privados</span>
+                </div>
+                <button onclick="abrirModalCadastro()" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition flex items-center gap-1 shadow-md">
+                    ➕ Cadastrar Imóvel Privado / Terceiros
+                </button>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <main class="max-w-6xl mx-auto p-4">
-        <div id="loading" class="py-12 text-center text-slate-400 text-xs font-bold">Buscando unidades na nuvem...</div>
-        <div id="listaImoveis" class="space-y-2 hidden"></div>
-    </main>
+        <!-- BARRA DE FILTROS COMBINADOS -->
+        <section class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Filtros Avançados de Busca</h2>
+                <span id="badgeContador" class="bg-slate-900 text-yellow-400 text-xs font-black px-3 py-1 rounded-lg">0 Imóveis</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Incorporadora / Origem</label>
+                    <select id="filtroConstrutora" onchange="atualizarEmpreendimentos(); filtrarEstoque();" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODAS">Todas as Construtoras</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Empreendimento / Edifício</label>
+                    <select id="filtroEmpreendimento" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODOS">Todos os Empreendimentos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Enquadramento / Tipo de Renda</label>
+                    <select id="filtroGaveta" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODAS">Todos os Enquadramentos</option>
+                        <option value="HIS">HIS (Interesse Social)</option>
+                        <option value="HMP">HMP (Mercado Popular)</option>
+                        <option value="NR">NR (Não Residencial)</option>
+                        <option value="R2V">R2V (Residencial Livre)</option>
+                        <option value="LIVRE">Avulso / Terceiros</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Status da Obra</label>
+                    <select id="filtroStatusObra" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODOS">Todos os Status</option>
+                        <option value="PRONTO">Pronto para Morar</option>
+                        <option value="OBRA">Em Construção</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Metragem</label>
+                    <select id="filtroM2" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="TODAS">Qualquer Metragem</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Tipologia / Dormitórios</label>
+                    <select id="filtroDorms" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="0">Qualquer Tipologia</option>
+                        <option value="1">1 Dorm / Studio</option>
+                        <option value="2">2+ Dormitórios</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Ordenação</label>
+                    <select id="selOrdenacao" onchange="filtrarEstoque()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none">
+                        <option value="andar_desc">Andar (Mais Alto)</option>
+                        <option value="preco_asc">Menor Preço Total</option>
+                        <option value="preco_desc">Maior Preço Total</option>
+                        <option value="m2_asc">Menor Preço por m²</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Busca Direta</label>
+                    <input type="text" id="filtroTexto" onkeyup="filtrarEstoque()" placeholder="Nº da Unidade..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none placeholder-slate-400">
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTADOS -->
+        <main>
+            <div id="loading" class="py-12 text-center text-slate-500 font-bold text-sm">
+                Sincronizando inventário com a nuvem...
+            </div>
+            
+            <div id="containerTabela" class="hidden overflow-x-auto bg-white rounded-2xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                            <th class="p-4 font-black">Empreendimento</th>
+                            <th class="p-4 text-center font-black">Unidade</th>
+                            <th class="p-4 text-center font-black">Andar</th>
+                            <th class="p-4 text-center font-black">Modalidade</th>
+                            <th class="p-4 text-center font-black">Área (m²)</th>
+                            <th class="p-4 text-right font-black">Valor Tabela</th>
+                            <th class="p-4 text-center font-black">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaImoveis" class="divide-y divide-slate-100 text-sm">
+                        <!-- Linhas injetadas via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE CADASTRO PRIVADO -->
+    <div id="modalCadastro" class="fixed inset-0 bg-slate-900/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h2 class="text-sm font-black text-slate-900 uppercase">Cadastrar Imóvel de Terceiros / Avulso</h2>
+                <button onclick="fecharModalCadastro()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+            </div>
+            <form id="formNovoImovel" onsubmit="salvarImovelPrivado(event)" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Construtora Original</label>
+                        <input type="text" id="addConstrutora" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Empreendimento / Edifício</label>
+                        <input type="text" id="addEmpreendimento" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Unidade</label>
+                        <input type="text" id="addUnidade" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Andar</label>
+                        <input type="number" id="addPavimento" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Área (m²)</label>
+                        <input type="number" step="0.01" id="addM2" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500 text-center">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Tipologia</label>
+                        <select id="addTipologia" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="Studio">Studio</option>
+                            <option value="1 Dorm">1 Dormitório</option>
+                            <option value="2 Dorms">2 Dormitórios</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Enquadramento</label>
+                        <select id="addEnquadramento" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="R2V">R2V</option>
+                            <option value="LIVRE">Livre / Avulso</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 font-bold mb-1">Vagas</label>
+                        <input type="number" id="addVagas" value="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500 text-center">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-600 font-bold mb-1">Valor Total (R$)</label>
+                    <input type="text" id="addPrecoTabela" required onkeyup="formataMoedaLocal(this)" placeholder="0,00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-purple-500 text-right font-bold text-slate-900 text-base">
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="fecharModalCadastro()" class="bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-lg">Cancelar</button>
+                    <button type="submit" class="bg-purple-700 hover:bg-purple-600 text-white font-bold px-5 py-2 rounded-lg">Salvar Imóvel Privado</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         let unidadesGlobais = [];
 
-        window.onload = async () => { await carregarDadosSupabase(); };
+        window.onload = async () => {
+            await carregarDadosSupabase();
+        };
 
         async function carregarDadosSupabase() {
             try {
-                // FILTRO RÍGIDO: Traz EXCLUSIVAMENTE o que for DISPONIVEL
+                // AQUI ESTÁ A CORREÇÃO PRINCIPAL: .eq('status', 'DISPONIVEL')
                 const { data, error } = await _supabase
                     .from('units')
                     .select('*, developments(*)')
-                    .eq('status', 'DISPONIVEL'); // Oculta qualquer unidade com status diferente de DISPONIVEL
+                    .eq('status', 'DISPONIVEL');
 
                 if (error) throw error;
 
                 if (data) {
-                    unidadesGlobais = data.map(u => ({
-                        id: u.id,
-                        empreendimento: u.developments?.title || "Empreendimento",
-                        unidade: String(u.unit_number || "---"),
-                        pavimento: parseInt(u.floor) || 1,
-                        tipologia: u.typology || "Studio",
-                        income_type: u.income_type || "R2V",
-                        m2: parseFloat(u.private_area_m2) || 0,
-                        precoTabela: parseFloat(u.list_price) || 0,
-                        is_ready: u.developments?.is_ready || false,
-                        val_ato: parseFloat(u.val_ato) || 0,
-                        qtd_mensais: parseInt(u.qtd_mensais) || 0,
-                        val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
-                        qtd_anuais: parseInt(u.qtd_anuais) || 0,
-                        val_anual_unit: parseFloat(u.val_anual_unit) || 0,
-                        val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
-                        val_financiamento: parseFloat(u.val_financiamento) || 0
-                    }));
+                    unidadesGlobais = data.map(u => {
+                        const areaM2 = parseFloat(u.private_area_m2) || 0;
+                        const precoVal = parseFloat(u.list_price) || 0;
+                        
+                        return {
+                            id: u.id,
+                            empreendimento: u.developments?.title || "Empreendimento",
+                            construtora: u.developments?.developer_name || "AAM Incorporadora",
+                            unidade: String(u.unit_number || "---"),
+                            pavimento: parseInt(u.floor) || 1,
+                            tipologia: u.typology || "Studio",
+                            income_type: u.income_type || "R2V",
+                            m2: areaM2,
+                            precoTabela: precoVal,
+                            precoM2: areaM2 > 0 ? (precoVal / areaM2) : 0,
+                            vagas: u.parking_spaces || 0,
+                            is_ready: u.developments?.is_ready || false,
+                            origem: 'GLOBAL',
+                            val_ato: parseFloat(u.val_ato) || 0,
+                            val_30_60_90: parseFloat(u.val_30_60_90) || 0,
+                            qtd_mensais: parseInt(u.qtd_mensais) || 0,
+                            val_mensal_unit: parseFloat(u.val_mensal_unit) || 0,
+                            qtd_anuais: parseInt(u.qtd_anuais) || 0,
+                            val_anual_unit: parseFloat(u.val_anual_unit) || 0,
+                            val_periodicidade: parseFloat(u.val_periodicidade) || 0,
+                            val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
+                            val_financiamento: parseFloat(u.val_financiamento) || 0
+                        };
+                    });
                 }
+
+                const privados = JSON.parse(localStorage.getItem("IMOVEIS_PRIVADOS") || "[]");
+                unidadesGlobais = [...unidadesGlobais, ...privados];
+
                 atualizarEmpreendimentos();
+                popularFiltroMetragem();
                 filtrarEstoque();
             } catch (err) {
-                document.getElementById('loading').innerHTML = `<p class="text-red-400">Erro ao carregar dados do banco.</p>`;
+                console.error(err);
+                document.getElementById('loading').innerHTML = `<p class="text-red-500">Erro ao carregar dados do banco.</p>`;
             }
         }
 
         function atualizarEmpreendimentos() {
+            const construtoraSel = document.getElementById("filtroConstrutora").value;
+            
+            const construtorasUnicas = [...new Set(unidadesGlobais.map(u => u.construtora))].sort();
+            const constrSelect = document.getElementById("filtroConstrutora");
+            const atualConstr = constrSelect.value;
+            constrSelect.innerHTML = '<option value="TODAS">Todas as Construtoras</option>' + 
+                construtorasUnicas.map(c => `<option value="${c}">${c}</option>`).join('');
+            constrSelect.value = atualConstr;
+
             const selectEmp = document.getElementById("filtroEmpreendimento");
-            const empreendimentosUnicos = [...new Set(unidadesGlobais.map(u => u.empreendimento))].sort();
+            const filtradosEmp = unidadesGlobais.filter(u => construtoraSel === "TODAS" || u.construtora === construtoraSel);
+            const empreendimentosUnicos = [...new Set(filtradosEmp.map(u => u.empreendimento))].sort();
+            
+            const atualEmp = selectEmp.value;
             selectEmp.innerHTML = '<option value="TODOS">Todos os Empreendimentos</option>' + 
                 empreendimentosUnicos.map(e => `<option value="${e}">${e}</option>`).join('');
+            selectEmp.value = atualEmp;
+        }
+
+        function popularFiltroMetragem() {
+            const metragens = [...new Set(unidadesGlobais.map(u => u.m2))]
+                .filter(m => m > 0)
+                .sort((a, b) => a - b);
+                
+            const selectM2 = document.getElementById("filtroM2");
+            selectM2.innerHTML = '<option value="TODAS">Qualquer Metragem</option>' + 
+                metragens.map(m => `<option value="${m}">${m.toFixed(2)} m²</option>`).join('');
         }
 
         function filtrarEstoque() {
+            const construtora = document.getElementById("filtroConstrutora").value;
             const empreendimento = document.getElementById("filtroEmpreendimento").value;
+            const gaveta = document.getElementById("filtroGaveta").value;
+            const statusObra = document.getElementById("filtroStatusObra").value;
+            const m2Filtro = document.getElementById("filtroM2").value;
+            const dorms = parseInt(document.getElementById("filtroDorms").value) || 0;
             const ordenacao = document.getElementById("selOrdenacao").value;
             const texto = document.getElementById("filtroTexto").value.toLowerCase().trim();
 
             const filtrados = unidadesGlobais.filter(u => {
+                const bateConstrutora = construtora === "TODAS" || u.construtora === construtora;
                 const bateEmpreendimento = empreendimento === "TODOS" || u.empreendimento === empreendimento;
+                const bateGaveta = gaveta === "TODAS" || (gaveta === "LIVRE" ? (u.income_type === 'LIVRE' || u.origem === 'PRIVADO') : u.income_type === gaveta);
+                const bateStatusObra = statusObra === "TODOS" || (statusObra === "PRONTO" ? u.is_ready : !u.is_ready);
+                const bateM2 = m2Filtro === "TODAS" || u.m2 === parseFloat(m2Filtro);
+                const bateDorms = dorms === 0 || (dorms === 1 ? (u.tipologia.toLowerCase().includes('studio') || u.tipologia.toLowerCase().includes('1')) : !u.tipologia.toLowerCase().includes('studio') && !u.tipologia.toLowerCase().includes('1 dorm'));
                 const bateTexto = !texto || u.unidade.toLowerCase().includes(texto) || u.empreendimento.toLowerCase().includes(texto);
-                return bateEmpreendimento && bateTexto;
+
+                return bateConstrutora && bateEmpreendimento && bateGaveta && bateStatusObra && bateM2 && bateDorms && bateTexto;
             });
 
             if (ordenacao === "andar_desc") filtrados.sort((a,b) => b.pavimento - a.pavimento);
             if (ordenacao === "preco_asc") filtrados.sort((a,b) => a.precoTabela - b.precoTabela);
             if (ordenacao === "preco_desc") filtrados.sort((a,b) => b.precoTabela - a.precoTabela);
-            if (ordenacao === "m2_asc") filtrados.sort((a,b) => a.m2 - b.m2);
+            if (ordenacao === "m2_asc") filtrados.sort((a,b) => a.precoM2 - b.precoM2);
 
+            const totaisGlobais = unidadesGlobais.filter(u => u.origem === 'GLOBAL').length;
+            const totaisPrivados = unidadesGlobais.filter(u => u.origem === 'PRIVADO').length;
+
+            document.getElementById("badgeCountGlobal").innerText = `🏷️ ${totaisGlobais} Globais`;
+            document.getElementById("badgeCountPrivado").innerText = `🔒 ${totaisPrivados} Privados`;
             document.getElementById("badgeContador").innerText = `${filtrados.length} Imóveis`;
+
             document.getElementById("loading").classList.add("hidden");
-            
-            const container = document.getElementById("listaImoveis");
+            const container = document.getElementById("containerTabela");
             container.classList.remove("hidden");
 
+            const tbody = document.getElementById("listaImoveis");
+
             if(filtrados.length === 0) {
-                container.innerHTML = `<div class="text-center p-8 text-slate-500 font-bold bg-slate-800 rounded-xl border border-slate-700">Nenhum imóvel disponível encontrado.</div>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-slate-500 font-bold bg-slate-50">Nenhum imóvel encontrado.</td></tr>`;
                 return;
             }
 
-            container.innerHTML = filtrados.map(u => `
-                <div class="bg-slate-800 rounded-xl p-3 border border-slate-700 shadow flex justify-between items-center">
-                    <div>
-                        <h3 class="text-sm font-black text-white">${u.empreendimento}</h3>
-                        <p class="text-xs text-slate-400">Apto <strong>${u.unidade}</strong> • ${u.m2} m² • ${u.pavimento}º Andar • ${u.tipologia}</p>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        <div class="text-right">
-                            <p class="text-[10px] text-slate-400 uppercase font-bold">Valor Tabela</p>
-                            <p class="text-sm font-black text-amber-400">R$ ${u.precoTabela.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
-                        </div>
-                        <button onclick="simular('${u.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition">Simular</button>
-                    </div>
-                </div>
-            `).join('');
+            tbody.innerHTML = filtrados.map(u => {
+                const tagPrivado = u.origem === 'PRIVADO' ? '<span class="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-bold ml-2">Privado</span>' : '';
+                const badgeStatus = u.is_ready ? '🏠 Pronto' : '🏗️ Em Obra';
+
+                return `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="p-4 font-bold text-slate-900">${u.empreendimento} ${tagPrivado}</td>
+                        <td class="p-4 text-center font-black text-slate-800">${u.unidade}</td>
+                        <td class="p-4 text-center text-slate-600 font-medium">${u.pavimento}º</td>
+                        <td class="p-4 text-center"><span class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">${u.income_type}</span></td>
+                        <td class="p-4 text-center text-slate-700">${u.m2.toFixed(2)}</td>
+                        <td class="p-4 text-right">
+                            <p class="font-black text-slate-900">R$ ${u.precoTabela.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+                            <p class="text-[10px] text-slate-500 font-bold">R$ ${u.precoM2.toLocaleString('pt-BR', {maximumFractionDigits:0})} / m²</p>
+                        </td>
+                        <td class="p-4 text-center">
+                            <button onclick="simular('${u.id}')" class="bg-slate-900 hover:bg-slate-800 text-yellow-400 font-black px-4 py-2 rounded-lg text-xs transition shadow-sm w-full">
+                                Simular
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function abrirModalCadastro() { document.getElementById("modalCadastro").classList.remove("hidden"); }
+        function fecharModalCadastro() { document.getElementById("modalCadastro").classList.add("hidden"); }
+
+        function formataMoedaLocal(i) {
+            let v = i.value.replace(/\D/g,'');
+            if(!v) { i.value = "0,00"; return; }
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            i.value = v;
+        }
+
+        function salvarImovelPrivado(e) {
+            e.preventDefault();
+            const precoStr = document.getElementById("addPrecoTabela").value.replace(/\./g, '').replace(',', '.');
+            
+            const novoImovel = {
+                id: "PRIV_" + Date.now(),
+                origem: "PRIVADO",
+                construtora: document.getElementById("addConstrutora").value.trim(),
+                empreendimento: document.getElementById("addEmpreendimento").value.trim(),
+                unidade: document.getElementById("addUnidade").value.trim(),
+                pavimento: parseInt(document.getElementById("addPavimento").value) || 0,
+                m2: parseFloat(document.getElementById("addM2").value) || 0,
+                tipologia: document.getElementById("addTipologia").value,
+                income_type: document.getElementById("addEnquadramento").value,
+                vagas: parseInt(document.getElementById("addVagas").value) || 0,
+                precoTabela: parseFloat(precoStr) || 0,
+                is_ready: true,
+                status: 'DISPONIVEL'
+            };
+
+            const existentes = JSON.parse(localStorage.getItem("IMOVEIS_PRIVADOS") || "[]");
+            existentes.unshift(novoImovel);
+            localStorage.setItem("IMOVEIS_PRIVADOS", JSON.stringify(existentes));
+
+            fecharModalCadastro();
+            document.getElementById("formNovoImovel").reset();
+            carregarDadosSupabase(); // Recarrega a tabela e junta com o Supabase
         }
 
         function simular(id) {
