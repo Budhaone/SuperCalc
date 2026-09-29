@@ -19,7 +19,7 @@
 
     <div class="max-w-7xl mx-auto space-y-4 p-4">
         
-        <!-- CABEÇALHO PRINCIPAL -->
+        <!-- CABEÇALHO PRINCIPAL E CONTADORES -->
         <header class="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-t-4 border-t-amber-400">
             <div>
                 <h1 class="text-xl md:text-2xl font-black text-amber-400 tracking-tight uppercase">PRATELEIRA DE IMÓVEIS</h1>
@@ -38,7 +38,7 @@
             </div>
         </header>
 
-        <!-- BARRA DE FILTROS AVANÇADOS COMPLETA -->
+        <!-- BARRA DE FILTROS AVANÇADOS COMPLETA (RESTAURADA) -->
         <section class="bg-slate-950 p-4 md:p-6 rounded-2xl shadow-lg border border-slate-800 space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div>
@@ -110,12 +110,12 @@
             </div>
             
             <div id="listaImoveis" class="space-y-3 hidden mt-4">
-                <!-- Cartões injetados via JavaScript baseados na imagem aprovada -->
+                <!-- Cartões injetados via JavaScript baseados na imagem do Dark Theme -->
             </div>
         </main>
     </div>
 
-    <!-- MODAL DE CADASTRO PRIVADO / TERCEIROS (RESTAURADO) -->
+    <!-- MODAL DE CADASTRO PRIVADO / TERCEIROS (RESTAURADO E INTACTO) -->
     <div id="modalCadastro" class="fixed inset-0 bg-black/90 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -189,22 +189,23 @@
 
         async function carregarDadosSupabase() {
             try {
-                // Configuração robusta do cliente para evitar "0 globais"
                 const supabaseClient = window._supabase || window.supabase;
-                if (!supabaseClient) throw new Error("Cliente Supabase não configurado no arquivo supabase-config.js");
+                if (!supabaseClient) throw new Error("Cliente Supabase não configurado no supabase-config.js");
 
-                // Filtra EXCLUSIVAMENTE o que for DISPONIVEL direto no banco
+                // BLINDAGEM ANTI-ERRO: select('*, developments(*)') garante que se uma coluna não existir, ele não quebra.
+                // FILTRO: eq('status', 'DISPONIVEL') resolve de vez a questão da unidade travada no admin.
                 const { data, error } = await supabaseClient
                     .from('units')
-                    .select('*, developments(title, developer_name, is_ready, delivery_date)')
+                    .select('*, developments(*)')
                     .eq('status', 'DISPONIVEL');
 
                 if (error) throw error;
 
                 if (data && data.length > 0) {
                     unidadesGlobais = data.map(u => {
-                        const construtoraNome = u.developments?.developer_name || u.builder || "AAM Incorporadora";
-                        const isTerceiros = construtoraNome.toLowerCase().includes('terceiros') || construtoraNome.toLowerCase().includes('avulso');
+                        // Garantia de fallback para evitar quebra caso variáveis de nome mudem
+                        const construtoraNome = u.developments?.developer_name || u.developments?.builder || "Incorporadora";
+                        const isTerceiros = construtoraNome.toLowerCase().includes('terceiros') || construtoraNome.toLowerCase().includes('avulso') || u.developments?.is_third_party;
                         const areaM2 = parseFloat(u.private_area_m2) || 0;
                         const precoVal = parseFloat(u.list_price) || 0;
                         
@@ -223,7 +224,7 @@
                             is_ready: u.is_ready !== undefined ? u.is_ready : (u.developments?.is_ready || false),
                             origem: isTerceiros ? 'PRIVADO' : 'GLOBAL',
                             
-                            // Mapeamento financeiro integral para o supercalc não quebrar
+                            // Mapeamento financeiro integral para o supercalc não quebrar a engenharia
                             val_ato: parseFloat(u.val_ato) || 0,
                             val_30_60_90: parseFloat(u.val_30_60_90) || 0,
                             qtd_mensais: parseInt(u.qtd_mensais) || 0,
@@ -232,7 +233,8 @@
                             val_anual_unit: parseFloat(u.val_anual_unit) || 0,
                             val_periodicidade: parseFloat(u.val_periodicidade) || 0,
                             val_chaves_unica: parseFloat(u.val_chaves_unica) || 0,
-                            val_financiamento: parseFloat(u.val_financiamento) || 0
+                            val_financiamento: parseFloat(u.val_financiamento) || 0,
+                            data_entrega: u.data_entrega || u.developments?.delivery_date || "2029-12"
                         };
                     });
                 }
@@ -324,15 +326,14 @@
                 return;
             }
 
-            // RENDERIZAÇÃO DOS CARTÕES IDÊNTICOS À IMAGEM APROVADA
+            // RENDERIZAÇÃO DOS CARTÕES TEMA ESCURO
             container.innerHTML = filtrados.map(u => {
-                const iconeStatus = u.is_ready ? '🏠' : '🏗️';
-                const textoStatus = u.is_ready ? 'Pronto' : 'Na Planta';
+                const tagPrivado = u.origem === 'PRIVADO' ? '<span class="text-[10px] bg-indigo-500 text-white px-2 py-0.5 rounded font-bold ml-2 shadow">Privado</span>' : '';
                 
                 return `
                     <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700/50 shadow-md flex justify-between items-center hover:bg-slate-800 transition duration-200">
                         <div class="flex-1">
-                            <h3 class="text-sm font-black text-white mb-0.5">${u.empreendimento}</h3>
+                            <h3 class="text-sm font-black text-white mb-0.5">${u.empreendimento} ${tagPrivado}</h3>
                             <p class="text-xs text-slate-400 leading-snug">
                                 Apto ${u.unidade} • ${u.m2.toFixed(2)} m² •<br>
                                 ${u.pavimento}º Andar • ${u.tipologia}
@@ -391,7 +392,7 @@
 
             fecharModalCadastro();
             document.getElementById("formNovoImovel").reset();
-            carregarDadosSupabase(); 
+            carregarDadosSupabase(); // Recarrega a tabela e junta com o Supabase
         }
 
         // Envia o pacote completo intacto para a calculadora
