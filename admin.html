@@ -65,7 +65,7 @@
 
     <main class="max-w-6xl mx-auto p-4 space-y-4">
         
-        <!-- BARRA DE CONTADORES ADICIONADA AQUI -->
+        <!-- BARRA DE CONTADORES -->
         <div id="barraContadores" class="hidden flex flex-wrap gap-2 md:gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800 shadow-md">
             <div class="flex-1 min-w-[100px] text-center bg-slate-900 py-2 rounded-lg border border-slate-700">
                 <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Total Matriz</p>
@@ -106,7 +106,7 @@
             <button onclick="executarLimpeza('TRAVAS')" class="w-full bg-slate-800 hover:bg-slate-700 border border-red-900 text-red-400 font-bold py-2.5 rounded-xl transition text-sm">Remover TODAS as Travas</button>
             <button onclick="executarLimpeza('PROMOS')" class="w-full bg-slate-800 hover:bg-slate-700 border border-blue-900 text-blue-400 font-bold py-2.5 rounded-xl transition text-sm">Remover TODAS as Promoções</button>
             <hr class="border-slate-800 my-2">
-            <button onclick="executarLimpeza('TUDO')" class="w-full bg-red-900/80 hover:bg-red-800 border border-red-700 text-white font-bold py-2.5 rounded-xl transition text-sm shadow">⚠️️ ZERAR (Tudo Disponível)</button>
+            <button onclick="executarLimpeza('TUDO')" class="w-full bg-red-900/80 hover:bg-red-800 border border-red-700 text-white font-bold py-2.5 rounded-xl transition text-sm shadow">⚠ ZERAR (Tudo Disponível)</button>
             <button onclick="fecharModal()" class="w-full bg-slate-700 text-slate-300 hover:text-white font-bold py-2.5 rounded-xl mt-3 text-sm transition">Cancelar</button>
         </div>
     </div>
@@ -117,16 +117,40 @@
         let modoAtual = 'TRAVA';
         let idEmpreendimentoAtual = null;
 
+        // FUNÇÃO ROBUSTA DE CAPTURA DO SUPABASE (A mesma do index.html)
+        function obterClienteSupabase() {
+            if (typeof _supabase !== 'undefined' && _supabase) return _supabase;
+            if (typeof window._supabase !== 'undefined' && window._supabase) return window._supabase;
+            if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) return window.supabaseClient;
+            if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
+            if (typeof window.supabase !== 'undefined' && window.supabase && typeof window.supabase.from === 'function') return window.supabase;
+            if (typeof supabase !== 'undefined' && supabase && typeof supabase.from === 'function') return supabase;
+            return null;
+        }
+
         window.onload = async () => { await listarEmpreendimentos(); };
 
         // 1. Carrega os empreendimentos do Supabase
         async function listarEmpreendimentos() {
-            const supabaseClient = window._supabase || window.supabase;
-            const { data } = await supabaseClient.from('developments').select('id, title').order('title');
-            if (data) {
-                const sel = document.getElementById("selEmpreendimento");
-                sel.innerHTML = '<option value="">Selecione um Empreendimento...</option>' + 
-                    data.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+            try {
+                const sb = obterClienteSupabase();
+                if (!sb) {
+                    document.getElementById("selEmpreendimento").innerHTML = '<option value="">Erro: Cliente Supabase não encontrado.</option>';
+                    return;
+                }
+
+                const { data, error } = await sb.from('developments').select('id, title').order('title');
+                
+                if (error) throw error;
+
+                if (data) {
+                    const sel = document.getElementById("selEmpreendimento");
+                    sel.innerHTML = '<option value="">Selecione um Empreendimento...</option>' + 
+                        data.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+                }
+            } catch (err) {
+                console.error("Erro ao listar empreendimentos:", err);
+                document.getElementById("selEmpreendimento").innerHTML = '<option value="">Falha de conexão com a nuvem.</option>';
             }
         }
 
@@ -149,25 +173,32 @@
             barraContadores.classList.add("hidden");
             rascunhoStatus = {}; 
 
-            const supabaseClient = window._supabase || window.supabase;
-            const { data, error } = await supabaseClient
-                .from('units')
-                .select('*')
-                .eq('development_id', idEmpreendimentoAtual)
-                .order('floor', { ascending: false });
+            try {
+                const sb = obterClienteSupabase();
+                const { data, error } = await sb
+                    .from('units')
+                    .select('*')
+                    .eq('development_id', idEmpreendimentoAtual)
+                    .order('floor', { ascending: false });
 
-            loading.classList.add("hidden");
+                loading.classList.add("hidden");
 
-            if (data && data.length > 0) {
-                unidadesGlobal = data;
-                data.forEach(u => rascunhoStatus[u.id] = u.status || 'DISPONIVEL');
-                barraContadores.classList.remove("hidden"); // Exibe a barra de contadores
-                
-                atualizarContadores();
-                renderizarMatriz();
-            } else {
-                matriz.innerHTML = '<p class="text-slate-500 text-center font-bold mt-10">Nenhuma unidade encontrada.</p>';
-                if(error) console.error(error);
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    unidadesGlobal = data;
+                    data.forEach(u => rascunhoStatus[u.id] = u.status || 'DISPONIVEL');
+                    barraContadores.classList.remove("hidden"); 
+                    
+                    atualizarContadores();
+                    renderizarMatriz();
+                } else {
+                    matriz.innerHTML = '<p class="text-slate-500 text-center font-bold mt-10">Nenhuma unidade encontrada.</p>';
+                }
+            } catch (err) {
+                loading.classList.add("hidden");
+                matriz.innerHTML = '<p class="text-red-500 text-center font-bold mt-10">Erro ao consultar o banco de dados.</p>';
+                console.error("Erro ao carregar matriz:", err);
             }
         }
 
@@ -298,7 +329,10 @@
             btn.classList.remove('pendente');
 
             try {
-                // Recupera as colunas originais junto com o novo status para contornar bloqueios NOT NULL
+                const sb = obterClienteSupabase();
+                if (!sb) throw new Error("Cliente Supabase inativo.");
+
+                // Recupera as colunas originais junto com o novo status
                 const updates = Object.keys(rascunhoStatus).map(id => {
                     const orig = unidadesGlobal.find(u => u.id === id);
                     return {
@@ -313,8 +347,7 @@
                     };
                 });
 
-                const supabaseClient = window._supabase || window.supabase;
-                const { error } = await supabaseClient.from('units').upsert(updates);
+                const { error } = await sb.from('units').upsert(updates);
                 if(error) throw error;
                 
                 alert("✅ Estoque atualizado com sucesso!");
