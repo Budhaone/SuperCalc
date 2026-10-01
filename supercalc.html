@@ -410,29 +410,39 @@
         }
 
         function balancearImovelPronto() {
-    if (!ePronto) return;
+            if (!ePronto) return;
 
-    const precoTabela = parseFloat(unidadeAtual.precoTabela || unidadeAtual.preco) || 0;
-    const valPeriodicidade = parseFloat(document.getElementById("valPeriodicidade")?.value) || 0;
-    const campoAtivo = document.activeElement ? document.activeElement.id : '';
+            const precoTabela = parseFloat(unidadeAtual.precoTabela || unidadeAtual.preco) || 0;
+            const valPeriodicidade = parseFloat(document.getElementById("valPeriodicidade")?.value) || 0;
+            const campoAtivo = document.activeElement ? document.activeElement.id : '';
 
-    let elAto = document.getElementById("valAto");
-    let elFinan = document.getElementById("valFinanciamento");
+            let elAto = document.getElementById("valAto");
+            let modeAto = document.getElementById("modeAto");
+            let elFinan = document.getElementById("valFinanciamento");
 
-    if (!elAto || !elFinan || precoTabela === 0) return;
+            if (!elAto || !modeAto || !elFinan || precoTabela === 0) return;
 
-    if (campoAtivo === "valAto" || campoAtivo === "percAto") {
-        let atoAtual = parseFloat(elAto.value) || 0;
-        let novoFinan = precoTabela - atoAtual - valPeriodicidade;
-        if (novoFinan < 0) novoFinan = 0;
-        elFinan.value = novoFinan.toFixed(2);
-    } else if (campoAtivo === "valFinanciamento" || campoAtivo === "percFinanciamento") {
-        let finanAtual = parseFloat(elFinan.value) || 0;
-        let novoAto = precoTabela - finanAtual - valPeriodicidade;
-        if (novoAto < 0) novoAto = 0;
-        elAto.value = novoAto.toFixed(2);
-    }
-}
+            if (campoAtivo === "valAto" || campoAtivo === "modeAto" || campoAtivo === "percAto") {
+                let valAtoRaw = parseFloat(elAto.value) || 0;
+                let atoEmReais = modeAto.value === 'PERC_TOT' ? (precoTabela * (valAtoRaw / 100)) : valAtoRaw;
+                
+                let novoFinan = precoTabela - atoEmReais - valPeriodicidade;
+                if (novoFinan < 0) novoFinan = 0;
+                elFinan.value = novoFinan.toFixed(2);
+            } else if (campoAtivo === "valFinanciamento" || campoAtivo === "percFinanciamento") {
+                let finanAtual = parseFloat(elFinan.value) || 0;
+                let novoAtoEmReais = precoTabela - finanAtual - valPeriodicidade;
+                if (novoAtoEmReais < 0) novoAtoEmReais = 0;
+                
+                if (modeAto.value === 'PERC_TOT') {
+                    let novoAtoPerc = (novoAtoEmReais / precoTabela) * 100;
+                    elAto.value = novoAtoPerc.toFixed(2);
+                } else {
+                    elAto.value = novoAtoEmReais.toFixed(2);
+                }
+            }
+        }
+
         function recalculateAll() {
             
             if (!unidadeAtual) return;
